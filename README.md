@@ -2,9 +2,7 @@
 
 RTSAI Introduction
 
-## 1. Installation
-
-------
+## 1. Pre-requisites
 
 ### 1.1 Python (version 3.12)
 
@@ -48,3 +46,26 @@ After following the instructions to install Python 3.12 using pyenv or pyenv-win
 
 This should  display Python 3.12.0 as the output. 
 
+To address the prerequisite of installing CMake for users, you can add the following information to the README.md file:
+
+------
+
+### 1.2 CMake
+
+CMake is a cross-platform build system that is required to compile and build the project. If you don't have CMake installed, follow the instructions below to install it:
+
+- **Windows**: Download the latest CMake installer from the [CMake website](https://cmake.org/download/) and run the installer. Make sure to add CMake to your system's PATH during the installation process.
+
+- **macOS**: Install CMake using Homebrew by running the following command in the terminal:
+  ```shell
+  brew install cmake
+  ```
+
+- **Linux**: Use your distribution's package manager to install CMake. For example, on Ubuntu or Debian, you can run the following command:
+  ````shell
+  sudo apt-get install cmake
+  ```
+
+After installing CMake, you should be able to use the `cmake` command in your command prompt or terminal.
+
+```
