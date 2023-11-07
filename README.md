@@ -64,15 +64,21 @@ To address the prerequisite of installing CMake for users, you can add the follo
 
 CMake is a cross-platform build system that is required to compile and build the project. If you don't have CMake installed, follow the instructions below to install it:
 
-- **Windows**: Download the latest CMake installer from the [CMake website](https://cmake.org/download/) and run the installer. Make sure to add CMake to your system's PATH during the installation process, by <u><i>choosing the "Add CMake to the system PATH for all users" option</i></u> in the CMake installer. 
+- **Windows**
 
-- **macOS**: Install CMake using Homebrew by running the following command in the terminal:
+Download the latest CMake installer from the [CMake website](https://cmake.org/download/) and run the installer. Make sure to add CMake to your system's PATH during the installation process, by _*choosing the "Add CMake to the system PATH for all users" option*_ in the CMake installer. 
+
+- **macOS**
+
+Install CMake using Homebrew by running the following command in the terminal:
 
 ```shell
 brew install cmake
 ```
 
-- **Linux**: Use your distribution's package manager to install CMake. For example, on Ubuntu or Debian, you can run the following command:
+- **Linux**
+
+Use your distribution's package manager to install CMake. For example, on Ubuntu or Debian, you can run the following command:
 
 ```shell
 sudo apt-get install cmake
