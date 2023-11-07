@@ -16,7 +16,7 @@ If you have an earlier version of Python installed and want to use Python 3.12, 
 
 1. Install `pyenv` by following the instructions provided in the [pyenv GitHub repository](https://github.com/pyenv/pyenv#installation).
 
-2. Once `pyenv` is installed, you can install Python 3.12 by running the following command in your terminal: 
+2. Once `pyenv` is installed, open a new terminal and run the following command: 
 
 ```pyenv install 3.12.0```
 
@@ -28,13 +28,13 @@ If you have an earlier version of Python installed and want to use Python 3.12, 
 
 #### Using pyenv-win (Windows)
 
-1. Install pyenv-win by following the instructions provided in the pyenv-win GitHub repository.
+1. Install pyenv-win by following the instructions provided in the [pyenv-win GitHub repository](https://github.com/pyenv-win/pyenv-win#installation).
 
-2. After installing pyenv-win, open a new command prompt and install Python 3.12 by running the following command in your Powershell:
+2. After installing pyenv-win, open a new command prompt and run the following command: 
 
 ```pyenv install 3.12.0```
 
-3. Set Python 3.12 as the global version by running the following in the Powershell:
+3. Set Python 3.12 as the global version by running the following in the command prompt:
 
 ```pyenv global 3.12.0```
 
@@ -44,7 +44,7 @@ After following the instructions to install Python 3.12 using pyenv or pyenv-win
 
 ```python --version```
 
-This should  display Python 3.12.0 as the output. 
+This should display Python 3.12.0 as the output. 
 
 To address the prerequisite of installing CMake for users, you can add the following information to the README.md file:
 
@@ -57,15 +57,18 @@ CMake is a cross-platform build system that is required to compile and build the
 - **Windows**: Download the latest CMake installer from the [CMake website](https://cmake.org/download/) and run the installer. Make sure to add CMake to your system's PATH during the installation process.
 
 - **macOS**: Install CMake using Homebrew by running the following command in the terminal:
-  ```shell
-  brew install cmake
-  ```
+
+```brew install cmake```
 
 - **Linux**: Use your distribution's package manager to install CMake. For example, on Ubuntu or Debian, you can run the following command:
-  ````shell
-  sudo apt-get install cmake
-  ```
+
+```sudo apt-get install cmake```
+
+To verify that CMake is installed and accessible in your command prompt or terminal, open a new command prompt or terminal window, and run the following command: 
+
+```cmake --version```
+
+This command will display the version information of CMake if it is successfully installed and accessible. 
 
 After installing CMake, you should be able to use the `cmake` command in your command prompt or terminal.
 
-```
