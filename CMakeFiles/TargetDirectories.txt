@@ -1,0 +1,3 @@
+/Applications/GITHUB PROJECTS/RTSAI/CMakeFiles/RTSAI.dir
+/Applications/GITHUB PROJECTS/RTSAI/CMakeFiles/edit_cache.dir
+/Applications/GITHUB PROJECTS/RTSAI/CMakeFiles/rebuild_cache.dir

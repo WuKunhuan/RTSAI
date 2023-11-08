@@ -66,7 +66,9 @@ CMake is a cross-platform build system that is required to compile and build the
 
 - **Windows**
 
-Download the latest CMake installer from the [CMake website](https://cmake.org/download/) and run the installer. Make sure to add CMake to your system's PATH during the installation process, by <ins><i>choosing the "Add CMake to the system PATH for all users" option</i></ins> in the CMake installer. 
+Download the latest CMake installer from the [CMake website](https://cmake.org/download/) and run the installer. The binary distribution is recommended as it provides an easier installation process. 
+
+Make sure to add CMake to your system's PATH during the installation process, by <ins><i>choosing the "Add CMake to the system PATH for all users" option</i></ins> in the CMake installer. 
 
 - **macOS**
 
