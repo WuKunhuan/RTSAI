@@ -1,6 +1,6 @@
 
 # clear the screen
-if(UNIX)
+if(UNIX) 
     execute_process(COMMAND clear)
 elseif(WIN32)
     execute_process(COMMAND cmd /c cls)
@@ -12,18 +12,6 @@ endif()
 
 cmake_minimum_required(VERSION 3.20)
 project(RTSAI)
-
-# Remove previous cache
-file(GLOB_RECURSE REMOVED_FILES
-    ${CMAKE_BINARY_DIR}/Makefile
-    ${CMAKE_BINARY_DIR}/cmake_install.cmake
-    ${CMAKE_BINARY_DIR}/CMakeCache.txt
-)
-foreach(FILE ${REMOVED_FILES})
-    file(REMOVE ${FILE})
-endforeach()
-# file(REMOVE_RECURSE ${CMAKE_BINARY_DIR}/CMakeFiles/)
-message(STATUS "Cleaning cmake build files")
 
 ## 1.2 Check Python version >= 3.12
 
@@ -52,9 +40,21 @@ else()
 
 endif()
 
-# Executable Target
-add_executable(RTSAI src/RTSAI_Core.py)
+set (SRC_FOLDER "src")
 
-# Set the appropriate Python interpreter as the target
+## 1.3 Set output directory location
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+
+
+## X. Build target RTSAI
+
+file(GLOB_RECURSE RTSAI_SOURCES
+    ${SRC_FOLDER}/RTSAI_Core.py
+)
+add_executable(RTSAI ${RTSAI_SOURCES})
 set_target_properties(RTSAI PROPERTIES LINKER_LANGUAGE Python3)
+
+
 
