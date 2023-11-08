@@ -1,11 +1,10 @@
 
-# 1. make the target
+# make the targets
 
-# Discard the CMake option by this time
-# cmake .
+cmake .
 
 clear
-make --quiet install
+make all
 
 # exit_status=$?
 # if [ $exit_status -eq 0 ]; then
@@ -15,6 +14,7 @@ make --quiet install
 # fi
 
 # remove temporary files
-rm -rf CMakeCache.txt
-rm -rf cmake_install.cmake
+rm CMakeCache.txt
+rm Makefile
+rm cmake_install.cmake
 rm -rf CMakeFiles

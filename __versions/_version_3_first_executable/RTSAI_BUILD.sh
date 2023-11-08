@@ -5,7 +5,7 @@
 # cmake .
 
 clear
-make --quiet install
+make --quiet
 
 # exit_status=$?
 # if [ $exit_status -eq 0 ]; then
