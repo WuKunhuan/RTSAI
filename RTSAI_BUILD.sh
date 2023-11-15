@@ -18,3 +18,4 @@ make --quiet install
 rm -rf CMakeCache.txt
 rm -rf cmake_install.cmake
 rm -rf CMakeFiles
+rm -rf src/codes/__pycache__

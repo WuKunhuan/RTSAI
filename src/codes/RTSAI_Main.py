@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 
 from RTSAI_Create import create_env
 
