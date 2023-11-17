@@ -1,0 +1,7 @@
+Usage: RTSAI env list
+
+Description:
+The `list` command allows you to view all existing RTSAI environments.
+
+Example:
+RTSAI env list
