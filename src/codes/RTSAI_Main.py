@@ -1,5 +1,7 @@
 
-from RTSAI_Create import create_env
+import sys
+
+from RTSAI_env import create_env
 
 # Define the list of commands and their descriptions
 COMMANDS = {
@@ -19,22 +21,11 @@ def handle_command(args):
     else:
         print("Error: Invalid command! Enter 'man RTSAI' for the usage.")
 
-def show_manual():
-    print("RTSAI Commands Manual:")
-    for command, info in COMMANDS.items():
-        print(f"\n{command.capitalize()}:")
-        print(f"  Description: {info['description']}")
-        print(f"  Usage: {info['usage']}")
-
 def main():
     # Check if the user entered 'RTSAI' without any additional commands
     if len(sys.argv) == 1:
         print("Welcome to the world of RTSAI!")
         return 0
-
-    # Handle the user commands
-    if sys.argv[1] == 'man' and len(sys.argv) == 3 and sys.argv[2] == 'RTSAI':
-        show_manual()
     else:
         handle_command(sys.argv[1:])
 
