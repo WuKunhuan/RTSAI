@@ -43,6 +43,7 @@ RTSAI: $(PY_FILE)
 	@sudo chmod +rwx $(RTSAI_DATA_DIR); 
 	@sudo chmod +rwx $(RTSAI_ENV_DIR); 
 	@rm -rf $(DIST_DIR)
+	@rm -rf build
 	@rm -f RTSAI_Main.spec
 	@sudo cp $(SRC_MAN_DIR)/RTSAI.1 $(RTSAI_MAN_DIR)/RTSAI.1
 	@echo "RTSAI manuals added to $(RTSAI_MAN_DIR)!"
