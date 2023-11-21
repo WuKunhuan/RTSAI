@@ -1,8 +1,12 @@
 
 1. Build the whole package
+build RTSAI
 
+2. Create environment
+RTSAI create <env_name>
 
-2. 
+3. View all environments
+RTSAI env list
 
 
 

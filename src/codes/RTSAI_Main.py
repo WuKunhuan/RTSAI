@@ -11,7 +11,6 @@ def get_usage(command):
         with open(usage_file, 'r') as f:
             return f.read()
     except Exception: raise Exception
-    return "Usage information not available."
 
 def handle_command(args):
     if args[0] == 'create':
