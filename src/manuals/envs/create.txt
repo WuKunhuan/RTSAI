@@ -1,3 +1,5 @@
+
+-----> RTSAI Manual <-----
 Usage: RTSAI env create <env_name>
 
 Description:
@@ -5,3 +7,4 @@ The `create` command allows you to create a new RTSAI environment. Provide a uni
 
 Example:
 RTSAI env create my_environment
+--------------------------

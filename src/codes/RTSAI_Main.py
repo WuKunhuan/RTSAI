@@ -1,37 +1,16 @@
 import sys
 import os
+
 from RTSAI_env import create_env, list_envs
+from RTSAI_chat import create_chat, list_chats
 
 from constants import DEFAULT_ENVIRONMENT
 from constants import RED, RESET
 
-# 1. Global Variables
+# 1. Global Variables and Functions
 
+from functions import get_manual, index_safe, convert_to_red
 CURRENT_ENV = DEFAULT_ENVIRONMENT
-
-
-
-# 2. Functions
-
-## This function gets the manual of the RTSAI command
-## reads the manual from specific location f"/Users/{user}/opt/RTSAI/man"
-user = os.getenv('USER')
-def get_manual(command):
-    usage_file = f"/Users/{user}/opt/RTSAI/man/{command}.txt"
-    try:
-        with open(usage_file, 'r') as f: return f.read()
-    except Exception: raise Exception
-
-## This function indexes a list safely
-def index_safe(l, id): 
-    if (len(l) <= id): return None
-    return (l[id])
-
-## This function converts some text to red
-def convert_to_red(text):
-    return f"{RED}{text}{RESET}"
-
-
 
 # 3. The Main function
 
@@ -66,30 +45,30 @@ def main():
         ## List all environments
         if (index_safe(sys.argv, 2) == 'list'): 
             if (len(sys.argv) == 3): list_envs()
-            else: print(get_manual('env/list')); return
+            else: print(get_manual('envs/list')); return
 
         ## Create a new environment
         if (index_safe(sys.argv, 2) == 'create'): 
             if (len(sys.argv) == 4): create_env(sys.argv[3])
-            else: print(get_manual('env/create')); return
+            else: print(get_manual('envs/create')); return
 
         ## Activate an environment
         if (index_safe(sys.argv, 2) == 'activate'): 
-            if (len(sys.argv) != 4): print(get_manual('env/activate')); return
-            if (os.path.expanduser(f'~/opt/RTSAI/env/{index_safe(sys.argv, 3)}')): 
+            if (len(sys.argv) != 4): print(get_manual('envs/activate')); return
+            if (os.path.expanduser(f'~/opt/RTSAI/envs/{index_safe(sys.argv, 3)}')): 
                 CURRENT_ENV = index_safe(sys.argv, 3)
                 print (f"RTSAI environment {index_safe(sys.argv, 3)} activated! ")
             else: print (f"{convert_to_red('Error')}: RTSAI environment {index_safe(sys.argv, 3)} does not exist! "); return  
 
         ## Deactivate an environment
         if (index_safe(sys.argv, 2) == 'deactivate'): 
-            if (len(sys.argv) != 3): print(get_manual('env/deactivate')); return
+            if (len(sys.argv) != 3): print(get_manual('envs/deactivate')); return
             CURRENT_ENV = 'default'
 
         ## Delete a environment
         if (index_safe(sys.argv, 2) == 'delete'): 
             if (len(sys.argv) == 4 and sys.argv[3] != 'default'): create_env(sys.argv[3])
-            else: print(get_manual('env/create')); return
+            else: print(get_manual('envs/create')); return
     
 
 
@@ -102,13 +81,14 @@ def main():
 
         ## List all existing chats
         if (index_safe(sys.argv, 2) == 'list'): 
-            pass
+            if (len(sys.argv) == 3): list_chats()
+            else: print(get_manual('chats/list')); return
 
         ## Delete a chat
         elif (index_safe(sys.argv, 2) == 'delete'): 
             pass
 
-
+        ## Create a new chat
         else: 
 
             ## --context : previous context provided

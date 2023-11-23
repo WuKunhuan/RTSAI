@@ -13,9 +13,9 @@ GRAPH_DIR := src/graphs
 
 RTSAI_EXEC_DIR := /usr/local/bin/RTSAI
 RTSAI_DIR := /Users/$(USER)/opt/RTSAI
-RTSAI_ENV_DIR := $(RTSAI_DIR)/env
+RTSAI_ENV_DIR := $(RTSAI_DIR)/envs
 RTSAI_GRAPH_DIR := $(RTSAI_DIR)/graphs
-RTSAI_MAN_DIR := $(RTSAI_DIR)/man
+RTSAI_MAN_DIR := $(RTSAI_DIR)/manuals
 
 # 2. Build the target
 
@@ -67,11 +67,11 @@ RTSAI: $(SRC_PY_FILE)
 
 ##	2.5 Clean up and copy the manual
 	@rm -rf dist build
-	@(rm -f RTSAI.spec 2> error.log) || (echo "FAILED! "; cat error.log; rm error.log; exit 1)
-	@sudo cp $(SRC_MAN_DIR)/RTSAI.1 /usr/local/share/man/man1/RTSAI.1 2> error.log || (echo "FAILED! "; cat error.log; rm error.log; exit 1)
+	@rm -f RTSAI.spec
+	@sudo cp $(SRC_MAN_DIR)/RTSAI.1 /usr/local/share/man/man1/RTSAI.1 2> error.log && rm error.log || (echo "FAILED! "; cat error.log; rm error.log; exit 1)
 	@sudo rm -rf $(RTSAI_MAN_DIR)
 	@sudo mkdir -p $(RTSAI_MAN_DIR)
-	@sudo cp -R $(SRC_MAN_DIR)/* $(RTSAI_MAN_DIR) 2> error.log || (echo "FAILED! "; cat error.log; rm error.log; exit 1)
+	@sudo cp -R $(SRC_MAN_DIR)/* $(RTSAI_MAN_DIR) 2> error.log && rm error.log || (echo "FAILED! "; cat error.log; rm error.log; exit 1)
 	@echo "SUCCESSFUL! "
 	@echo "RTSAI installation SUCCESSFUL! \nEnter \"man RTSAI\" for the usage. \n"
 
@@ -89,6 +89,7 @@ RTSAI_uninstall:
 	@echo "RTSAI binary deleted from $(RTSAI_EXEC_DIR): SUCCESSFUL! " 
 	@sudo rm -f /usr/local/share/man/man1/RTSAI.1
 	@sudo rm -rf $(RTSAI_MAN_DIR)
-	@echo "RTSAI environment deleted from $(RTSAI_DIR): SUCCESSFUL!"
+	@echo "RTSAI environment deleted from $(RTSAI_DIR): SUCCESSFUL! "
+	@echo "Thanks for using RTSAI! "
 
 # .PHONY: RTSAI clean
