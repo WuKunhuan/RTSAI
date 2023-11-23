@@ -37,8 +37,8 @@ def list_chats():
 
     ## Display all chats under the current environment
     print(f"\nChats for the {CURRENT_ENV} environment: ")
-    chats = [name for name in os.listdir(f"{ENV_PATH}/envs/{CURRENT_ENV}/chats") if os.path.isdir(os.path.join(f"{ENV_PATH}/envs/{CURRENT_ENV}", name))]
-    if not chats: print("(None)\n"); 
+    chats = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/chats", "__chat_*")
+    if not chats: print("(None)"); 
     for chat in chats: 
         print(f"-   {chat}")
     print()
@@ -47,21 +47,22 @@ def list_chats():
 def list_chat_graphs(chat_name): 
 
     ## Verify that the chat exists
-    all_chats = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/chats", "\'*\'")
-    if (chat_name not in all_chats): 
+    all_chats = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/chats", "__chat_*")
+    all_chats = [chat[len("__chat_"):] for chat in all_chats]
+    if (("__chat_" + chat_name) not in all_chats): 
         print_error(f"chat name {chat_name} does not exist in the environment {CURRENT_ENV}! all chats: {all_chats}"); return
                 
     ## Display all knowledge graphs of the chat
     print(f"\nKnowledge Graphs for the chat {chat_name} in the environment {CURRENT_ENV}: ")
     all_chat_graphs_env = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/chats/{chat_name}", "\'*\'")
     print(f"\nShared within the {CURRENT_ENV} environment: ")
-    if not all_chat_graphs_env: print("(None)\n"); 
+    if not all_chat_graphs_env: print("(None)"); 
     for graph in all_chat_graphs_env: 
         print(f"-   {graph}")
     print()
     all_chat_graphs_chat = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/chats/{chat_name}", "\'*\'")
     print(f"\nOnly for the {chat_name} chat: ")
-    if not all_chat_graphs_chat: print("(None)\n"); 
+    if not all_chat_graphs_chat: print("(None)"); 
     for graph in all_chat_graphs_chat: 
         print(f"-   {graph}")
     print()

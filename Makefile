@@ -35,7 +35,7 @@ RTSAI: $(SRC_PY_FILE)
 	@(pip install --quiet kgtk 2> error.log; pip show typing > /dev/null 2>&1 && pip uninstall -y typing > /dev/null 2>&1 || true; echo "SUCCESSFUL! "; rm error.log) || (echo "FAILED! "; cat error.log; rm error.log; exit 1)
 
 ##	2.2 Compile the executable
-	@echo "\nCompiling the executable RTSAI (it make take a while) ... \\c"
+	@echo "\nCompiling the executable RTSAI (it may take a while) ... \\c"
 	@rm -rf dist build
 	@(pyinstaller --onedir $(SRC_PY_FILE) --name RTSAI > /dev/null 2>&1 && echo "SUCCESSFUL! ") || (echo "FAILED! "; exit 1)
 

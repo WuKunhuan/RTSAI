@@ -38,7 +38,7 @@ def list_envs():
     ## Display all environments
     print(f"\nRTSAI environments: ")
     envs = [name for name in os.listdir(f"{ENV_PATH}/envs") if os.path.isdir(os.path.join(f"{ENV_PATH}/envs", name))]
-    if not envs: print("(None)\n"); 
+    if not envs: print("(None)"); 
     for env in envs: 
         if (env == CURRENT_ENV): print(f"-   {env} (*)")
         else: print(f"-   {env}")

@@ -151,10 +151,10 @@ def main():
                 available_graphs_chat = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/chats/{chat_name}", "__graph_*")
                 invalid_graphs = []
                 for graph in selected_graphs: 
-                    if ((graph not in available_graphs_env) and (graph not in available_graphs_chat)): 
+                    if ((("__graph_" + graph) not in available_graphs_env) and (graph not in available_graphs_chat)): 
                         invalid_graphs.append(graph)
                 if (invalid_graphs): 
-                    print_error(f"graphs {invalid_graphs} selected not valid! \nall valid graphs for the {CURRENT_ENV} environment (shared): {available_graphs_env}\nall valid graphs for the {chat_name} chat: {available_graphs_chat}"); return
+                    print_error(f"graphs {invalid_graphs} selected not valid! \nall valid graphs for the {CURRENT_ENV} environment (shared): {[graph[len('__graph_'):] for graph in available_graphs_env]}\nall valid graphs for the {chat_name} chat: {[graph[len('__graph_'):] for graph in available_graphs_chat]}"); return
 
 
             ## specify this option to let the graphs able to be updated
