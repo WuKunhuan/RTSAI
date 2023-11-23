@@ -2,10 +2,13 @@ import sys
 import os
 
 from RTSAI_env import create_env, list_envs
-from RTSAI_chat import create_chat, list_chats
+from RTSAI_chat import create_chat, list_chats, list_chat_graphs, chat
 
+from constants import ENV_PATH
 from constants import DEFAULT_ENV, CURRENT_ENV
 from constants import RED, RESET
+
+from functions import print_error, find_name_regex
 
 # 1. Global Variables and Functions
 
@@ -80,37 +83,87 @@ def main():
 
         ## List all existing chats
         if (index_safe(sys.argv, 2) == 'list'): 
-            if (len(sys.argv) == 3): list_chats()
+            if (len(sys.argv) == 3): 
+                list_chats()
+            elif (len(sys.argv) == 5 and sys.argv[3] == "--graph"): 
+                list_chat_graphs(sys.argv[4])
             else: print(get_manual('chats/list')); return
 
         ## Delete a chat
         elif (index_safe(sys.argv, 2) == 'delete'): 
-            pass
+            if (len(sys.argv) != 4): 
+                print(get_manual('chats/delete')); return
+            chat_name = sys.argv[3]
+            all_chats = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/chats", "\'*\'")
+            if (chat_name not in all_chats): 
+                print_error(f"chat name {chat_name} does not exist in the environment {CURRENT_ENV}! all chats: {all_chats}"); return
+            confirm = input(f"Confirm to delete chat {chat_name} from all chats: {all_chats}, in the environment {CURRENT_ENV}? (y/n): ")
+            if confirm.lower() != 'y':
+                print("RTSAI chat deletion ended by the user [confirm: FALSE]. ")
+                return False
+            print (f"Deleting the chat {chat_name} (password may required) ... ", end = "")
+            if (not os.system(f"sudo rm -rf {ENV_PATH}/envs/{CURRENT_ENV}/chats/{chat_name}")): 
+                print (f"SUCCESS! ")
+            else: print (f"FAILED. ")
 
-        ## Create a new chat
+        ## Start new chat
         else: 
 
             ## --context : previous context provided
             ## --graph : specific knowledge graph(s) provided
+            ## --learn : whether the agent can modify pernament memory
 
-            ## A name must be provided for the chat, cannot contain special characters, 
-            ## it will be modified by the 
+            chat_name = None
+            selected_graphs = []
+            study_option = False
 
-            ## only one context can be specified. 
-            ## taken from the previous stored chat. 
-            if ('--context' in sys.argv): 
-                pass
+            ## only one previous can be specified to load. 
+            if ('--load' in sys.argv): 
+                chat_index = sys.argv.index('--load')
+                if (len(sys.argv) == chat_index + 1): 
+                    print(get_manual('chats/default')); return
+                chat_name = sys.argv[chat_index + 1]
+                # need to ensure the chat is under all chats
+                all_chats = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/chats", "\'*\'")
+                if (chat_name not in all_chats): 
+                    print_error(f"chat name {chat_name} does not exist in the environment {CURRENT_ENV}! all chats: {all_chats}"); return
+                elif (len(sys.argv) > (chat_index + 2)) and sys.argv[chat_index + 2][0] != '-': 
+                    print_error(f"only one chat is allowed to be loaded! (here at lest two: {sys.argv[chat_index + 1:chat_index + 3]})"); return
+            else: 
+                if (len(sys.argv) == 2): # argument: RTSAI chat
+                    print(get_manual('chats/default')); return
+                else: 
+                    chat_name = sys.argv[2]
+                    if (not create_chat(chat_name)): return
+
 
             ## one or more graphs can be specified; 
             ## regular expression selector will be supported
             if ('--graph' in sys.argv): 
-                pass
+                graph_index = sys.argv.index('--graph')
+                for i in range (graph_index, len(sys.argv)): 
+                    if (sys.argv[i][0] == '-'): break
+                    else: selected_graphs.append(sys.argv[i])
+                if (not selected_graphs): 
+                    print_error(f"--graph option with no graph selected! "); return
+                ## Find all graphs for the environment, and the chat itself
+                available_graphs_env = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/graphs", "__graph_*")
+                available_graphs_chat = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/chats/{chat_name}", "__graph_*")
+                invalid_graphs = []
+                for graph in selected_graphs: 
+                    if ((graph not in available_graphs_env) and (graph not in available_graphs_chat)): 
+                        invalid_graphs.append(graph)
+                if (invalid_graphs): 
+                    print_error(f"graphs {invalid_graphs} selected not valid! \nall valid graphs for the {CURRENT_ENV} environment (shared): {available_graphs_env}\nall valid graphs for the {chat_name} chat: {available_graphs_chat}"); return
+
 
             ## specify this option to let the graphs able to be updated
             ## the change is pernament, deemed to be the knowledge acquired by the agent
             ## learn, may create new graphs, may merge graphs, etc. aiming to improve the topology
             if ('--learn' in sys.argv): 
-                pass
+                study_option = True
+            
+            chat(chat_name, selected_graphs, study_option)
 
 
 

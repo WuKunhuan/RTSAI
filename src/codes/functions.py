@@ -1,4 +1,5 @@
 
+import subprocess
 from constants import RED, RESET
 
 ## This function gets the manual of the RTSAI command
@@ -18,3 +19,20 @@ def index_safe(l, id):
 ## This function converts some text to red
 def convert_to_red(text):
     return f"{RED}{text}{RESET}"
+
+## This function prints error message
+def print_error(error_message): 
+    print(f"{convert_to_red('Error')}: {error_message}")
+
+## This function returns all names, in a location, match the regular expression
+def find_name_regex(location, regex): 
+    command = ["find", location, "-name", regex]
+
+    ## Execute the command and capture the output
+    output = subprocess.check_output(command).decode("utf-8")
+
+    ## Split the output into individual lines
+    lines = output.strip().split("\n")
+
+    ## Store the lines in a Python array
+    return([line.strip() for line in lines])
