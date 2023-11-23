@@ -38,6 +38,7 @@ def convert_to_red(text):
 ## The main function handles RTSAI commands
 def main():
 
+    global CURRENT_ENV
 
     # 3.0 Perform installation check
 
@@ -49,8 +50,9 @@ def main():
     # 3.1 Handle the command : RTSAI
     ## This command display a Hello World message
     if (index_safe(sys.argv, 0) == 'RTSAI'): 
-        if (len(index_safe(sys.argv, 0)) == 1): 
-            print("Welcome to the world of RTSAI!")
+        if (len(sys.argv) == 1): 
+            print("Welcome to the world of RTSAI!"); 
+            return 0; 
     else: return 0
 
 
@@ -75,7 +77,6 @@ def main():
         if (index_safe(sys.argv, 2) == 'activate'): 
             if (len(sys.argv) != 4): print(get_manual('env/activate')); return
             if (os.path.expanduser(f'~/opt/RTSAI/env/{index_safe(sys.argv, 3)}')): 
-                global CURRENT_ENV
                 CURRENT_ENV = index_safe(sys.argv, 3)
                 print (f"RTSAI environment {index_safe(sys.argv, 3)} activated! ")
             else: print (f"{convert_to_red('Error')}: RTSAI environment {index_safe(sys.argv, 3)} does not exist! "); return  
@@ -83,7 +84,6 @@ def main():
         ## Deactivate an environment
         if (index_safe(sys.argv, 2) == 'deactivate'): 
             if (len(sys.argv) != 3): print(get_manual('env/deactivate')); return
-            global CURRENT_ENV
             CURRENT_ENV = 'default'
 
         ## Delete a environment
@@ -132,6 +132,8 @@ def main():
             ## learn, may create new graphs, may merge graphs, etc. aiming to improve the topology
             if ('--learn' in sys.argv): 
                 pass
+
+
 
     # 3.4 Handle the knowledge graph command : RTSAI graph
 
@@ -201,6 +203,8 @@ def main():
             ## must specify a graph to visualize
             ## this function will be implemented via tkinter, if time allows
             pass
+
+
 
 
     else:
