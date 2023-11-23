@@ -1,0 +1,7 @@
+Usage: RTSAI env activate <env_name>
+
+Description:
+The `create` command allows you to activate an existing RTSAI environment. 
+
+Example:
+RTSAI env activate my_environment

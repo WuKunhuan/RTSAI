@@ -3,6 +3,7 @@ import re
 import getpass
 import subprocess
 
+## This function creates a RTSAI environment
 def create_env(env_name):
     # Validate the environment name
     if not re.match(r'^[a-zA-Z0-9_]+$', env_name):
