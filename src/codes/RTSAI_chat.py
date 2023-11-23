@@ -3,7 +3,7 @@ import os
 
 from constants import ENV_PATH
 from functions import convert_to_red
-from RTSAI_Main import CURRENT_ENV
+from constants import CURRENT_ENV
 
 ## This function creates an RTSAI chat for the current environment
 def create_chat(chat_name): 
@@ -43,7 +43,7 @@ def list_chats():
     ## Display all chats under the current environment
     print(f"\nRTSAI chats for the {CURRENT_ENV} environment: ")
     chats = [name for name in os.listdir(f"{env_dir}/chats") if os.path.isdir(os.path.join(env_dir, name))]
-    if not chats: print("(None)"); return
+    if not chats: print("(None)\n"); return
     for chat in chats: 
         print(f"-   {chat}")
     print()

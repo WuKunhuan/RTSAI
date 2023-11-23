@@ -4,13 +4,12 @@ import os
 from RTSAI_env import create_env, list_envs
 from RTSAI_chat import create_chat, list_chats
 
-from constants import DEFAULT_ENVIRONMENT
+from constants import DEFAULT_ENV, CURRENT_ENV
 from constants import RED, RESET
 
 # 1. Global Variables and Functions
 
 from functions import get_manual, index_safe, convert_to_red
-CURRENT_ENV = DEFAULT_ENVIRONMENT
 
 # 3. The Main function
 

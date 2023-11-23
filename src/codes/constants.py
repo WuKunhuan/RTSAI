@@ -16,8 +16,9 @@ ENV_PATH = f"/Users/{SYSTEM_USER}/opt/RTSAI"
 
 # 2. RTSAI: Environment Settings
 
-## The default user environment
-DEFAULT_ENVIRONMENT = "default"
+## The default and current user environment
+DEFAULT_ENV = "default"
+CURRENT_ENV = DEFAULT_ENV
 
 # Others
 

@@ -3,7 +3,7 @@ import os, re
 
 from constants import ENV_PATH
 from functions import convert_to_red
-from RTSAI_Main import CURRENT_ENV
+from constants import CURRENT_ENV
 
 ## This function creates an RTSAI environment
 def create_env(env_name):
@@ -43,7 +43,7 @@ def list_envs():
     ## Display all environments
     print(f"\nRTSAI environments: ")
     envs = [name for name in os.listdir(env_dir) if os.path.isdir(os.path.join(env_dir, name))]
-    if not envs: print("(None)"); return
+    if not envs: print("(None)\n"); return
     for env in envs: 
         if (env == CURRENT_ENV): print(f"-   {env} (*)")
         else: print(f"-   {env}")
