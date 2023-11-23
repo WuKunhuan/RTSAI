@@ -2,10 +2,12 @@ import sys
 import os
 from RTSAI_env import create_env, list_envs
 
+from constants import DEFAULT_ENVIRONMENT
+from constants import RED, RESET
+
 # 1. Global Variables
-CURRENT_ENV = "default"
-RED = "\033[91m"
-RESET = "\033[0m"
+
+CURRENT_ENV = DEFAULT_ENVIRONMENT
 
 
 
@@ -36,6 +38,12 @@ def convert_to_red(text):
 ## The main function handles RTSAI commands
 def main():
 
+
+    # 3.0 Perform installation check
+
+    ## Verify if the binary exists
+    ## Verify if the default environment exists
+    ## Verify if the graph and 
 
 
     # 3.1 Handle the command : RTSAI
@@ -77,6 +85,11 @@ def main():
             if (len(sys.argv) != 3): print(get_manual('env/deactivate')); return
             global CURRENT_ENV
             CURRENT_ENV = 'default'
+
+        ## Delete a environment
+        if (index_safe(sys.argv, 2) == 'delete'): 
+            if (len(sys.argv) == 4 and sys.argv[3] != 'default'): create_env(sys.argv[3])
+            else: print(get_manual('env/create')); return
     
 
 

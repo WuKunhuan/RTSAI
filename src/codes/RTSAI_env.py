@@ -1,7 +1,5 @@
-import os
-import re
-import getpass
-import subprocess
+import os, re, subprocess
+from constants import SYSTEM_USER
 
 ## This function creates a RTSAI environment
 def create_env(env_name):
@@ -21,7 +19,7 @@ def create_env(env_name):
             return
 
     # Create the environment directory with elevated privileges
-    user = getpass.getuser()
+    user = SYSTEM_USER
     subprocess.run(['sudo', 'mkdir', '-p', env_dir])
     subprocess.run(['sudo', 'chown', '-R', user, env_dir])
     subprocess.run(['sudo', 'chmod', '-R', '755', env_dir])

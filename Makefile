@@ -7,41 +7,43 @@ PYTHON := python3
 
 # 1.2 Directories location settings
 SRC_CODE_DIR := src/codes
+SRC_PY_FILE := $(SRC_CODE_DIR)/RTSAI_Main.py
 SRC_MAN_DIR := src/manuals
-PY_FILE := $(SRC_CODE_DIR)/RTSAI_Main.py  # define the source python file
-BIN_DIR := bin
 GRAPH_DIR := src/graphs
 
 RTSAI_EXEC_DIR := /usr/local/bin/RTSAI
 RTSAI_DIR := /Users/$(USER)/opt/RTSAI
-RTSAI_GRAPH_DIR := $(RTSAI_DIR)/graphs
 RTSAI_ENV_DIR := $(RTSAI_DIR)/env
+RTSAI_GRAPH_DIR := $(RTSAI_DIR)/graphs
 RTSAI_MAN_DIR := $(RTSAI_DIR)/man
 
 # 2. Build the target
 
-# Build and install target
-# one directory mode
-RTSAI: $(PY_FILE)
+##	Build and install target, one directory mode
+RTSAI: $(SRC_PY_FILE)
 	@pip install pyinstaller
 	@clear
 	@rm -rf dist
 	@echo "Compiling the executable RTSAI ... (it make take a while)"
-	@pyinstaller --onedir $(PY_FILE) --name RTSAI > /dev/null 2>&1
+	@pyinstaller --onedir $(SRC_PY_FILE) --name RTSAI > /dev/null 2>&1
 	@echo "Standalone executable created in dist/RTSAI_Main directory."
 	@echo "Installing RTSAI ... (password may be required to modify /usr/local)"
 	@sudo rm -rf $(RTSAI_EXEC_DIR)
 	@sudo mv dist/RTSAI $(RTSAI_EXEC_DIR)
 
 ##  For Mac system: export the path to ~/.bash_profile
-#	export PATH="/usr/local/bin/RTSAI:$${PATH}"
+##	export PATH="/usr/local/bin/RTSAI:$${PATH}"
 	@grep -qxF 'export PATH="/usr/local/bin/RTSAI:$${PATH}"' ~/.bash_profile || echo '#Setting PATH for RTSAI\nexport PATH="/usr/local/bin/RTSAI:$${PATH}"' >> ~/.bash_profile
 	@echo "RTSAI binary added to $(RTSAI_EXEC_DIR)!"
 
+## Create default environment in the fresh installation
+## Create the chats and graphs folders under the environment
 	@if [ ! -d $(RTSAI_DIR) ]; then \
 		sudo mkdir -p $(RTSAI_DIR); \
 		sudo cp -r $(GRAPH_DIR) $(RTSAI_GRAPH_DIR); \
 		sudo mkdir -p $(RTSAI_ENV_DIR)/default; \
+		sudo mkdir -p $(RTSAI_ENV_DIR)/default/chats; \
+		sudo mkdir -p $(RTSAI_ENV_DIR)/default/graphs; \
 		echo "RTSAI environment created at $(RTSAI_DIR)!"; \
 	else \
 		sudo chmod +x $(RTSAI_DIR); \
