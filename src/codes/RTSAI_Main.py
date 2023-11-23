@@ -7,6 +7,7 @@ from RTSAI_chat import create_chat, list_chats, list_chat_graphs, chat
 from constants import ENV_PATH
 from constants import DEFAULT_ENV, CURRENT_ENV
 from constants import RED, RESET
+from constants import CHAT_NAME_KEY, GRAPH_NAME_KEY
 
 from functions import print_error, find_name_regex
 
@@ -128,7 +129,7 @@ def main():
                 if (chat_name not in all_chats): 
                     print_error(f"chat name {chat_name} does not exist in the environment {CURRENT_ENV}! all chats: {all_chats}"); return
                 elif (len(sys.argv) > (chat_index + 2)) and sys.argv[chat_index + 2][0] != '-': 
-                    print_error(f"only one chat is allowed to be loaded! (here at lest two: {sys.argv[chat_index + 1:chat_index + 3]})"); return
+                    print_error(f"only can load one chat! (here at lest two: {sys.argv[chat_index + 1:chat_index + 3]})"); return
             else: 
                 if (len(sys.argv) == 2): # argument: RTSAI chat
                     print(get_manual('chats/default')); return
@@ -147,14 +148,14 @@ def main():
                 if (not selected_graphs): 
                     print_error(f"--graph option with no graph selected! "); return
                 ## Find all graphs for the environment, and the chat itself
-                available_graphs_env = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/graphs", "__graph_*")
-                available_graphs_chat = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/chats/{chat_name}", "__graph_*")
+                available_graphs_env = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/graphs", f"{GRAPH_NAME_KEY}*")
+                available_graphs_chat = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/chats/{chat_name}", f"{GRAPH_NAME_KEY}*")
                 invalid_graphs = []
                 for graph in selected_graphs: 
-                    if ((("__graph_" + graph) not in available_graphs_env) and (graph not in available_graphs_chat)): 
+                    if (((GRAPH_NAME_KEY + graph) not in available_graphs_env) and (graph not in available_graphs_chat)): 
                         invalid_graphs.append(graph)
                 if (invalid_graphs): 
-                    print_error(f"graphs {invalid_graphs} selected not valid! \nall valid graphs for the {CURRENT_ENV} environment (shared): {[graph[len('__graph_'):] for graph in available_graphs_env]}\nall valid graphs for the {chat_name} chat: {[graph[len('__graph_'):] for graph in available_graphs_chat]}"); return
+                    print_error(f"graphs {invalid_graphs} selected not valid! \nall valid graphs for the {CURRENT_ENV} environment (shared): {[graph[len(GRAPH_NAME_KEY):] for graph in available_graphs_env]}\nall valid graphs for the {chat_name} chat: {[graph[len(GRAPH_NAME_KEY):] for graph in available_graphs_chat]}"); return
 
 
             ## specify this option to let the graphs able to be updated

@@ -20,6 +20,12 @@ ENV_PATH = f"/Users/{SYSTEM_USER}/opt/RTSAI"
 DEFAULT_ENV = "default"
 CURRENT_ENV = DEFAULT_ENV
 
+# 3. RTSAI: Custom Settings
+
+# Name keys (in the beginning of files)
+CHAT_NAME_KEY = "@chat_"
+GRAPH_NAME_KEY = "@graph_"
+
 # Others
 
 RED = "\033[91m"

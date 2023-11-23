@@ -2,8 +2,10 @@
 import os, re
 
 from constants import ENV_PATH
-from functions import convert_to_red, find_name_regex, print_error
 from constants import CURRENT_ENV
+from constants import CHAT_NAME_KEY, GRAPH_NAME_KEY
+
+from functions import convert_to_red, find_name_regex, print_error
 
 ## This function creates an RTSAI chat for the current environment
 def create_chat(chat_name): 
@@ -37,7 +39,7 @@ def list_chats():
 
     ## Display all chats under the current environment
     print(f"\nChats for the {CURRENT_ENV} environment: ")
-    chats = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/chats", "__chat_*")
+    chats = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/chats", f"{CHAT_NAME_KEY}*")
     if not chats: print("(None)"); 
     for chat in chats: 
         print(f"-   {chat}")
@@ -47,9 +49,9 @@ def list_chats():
 def list_chat_graphs(chat_name): 
 
     ## Verify that the chat exists
-    all_chats = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/chats", "__chat_*")
-    all_chats = [chat[len("__chat_"):] for chat in all_chats]
-    if (("__chat_" + chat_name) not in all_chats): 
+    all_chats = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/chats", f"{CHAT_NAME_KEY}*")
+    all_chats = [chat[len(CHAT_NAME_KEY):] for chat in all_chats]
+    if ((CHAT_NAME_KEY + chat_name) not in all_chats): 
         print_error(f"chat name {chat_name} does not exist in the environment {CURRENT_ENV}! all chats: {all_chats}"); return
                 
     ## Display all knowledge graphs of the chat
