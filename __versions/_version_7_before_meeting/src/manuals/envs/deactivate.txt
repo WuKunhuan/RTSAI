@@ -1,0 +1,10 @@
+
+-----> RTSAI Manual <-----
+Usage: RTSAI env deactivate
+
+Description:
+The `deactivate` command allows you to deactivate the current RTSAI environment. In the end, the environment will be switched back to "default". 
+
+Example:
+RTSAI env deactivate
+--------------------------

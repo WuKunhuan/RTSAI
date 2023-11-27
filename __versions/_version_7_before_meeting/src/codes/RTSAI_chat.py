@@ -35,10 +35,6 @@ def create_chat(chat_name):
         print (f"\nCreating RTSAI chat \'{chat_name}\' for the {CURRENT_ENV} environment, at {chat_dir} (password may required) ... ")
         os.system(f"sudo mkdir -p {chat_dir}")
         os.system(f"sudo chmod -R 755 {chat_dir}")
-
-        # Create the default chat context knowledge graph
-        os.system(f"sudo touch {chat_dir}/{GRAPH_NAME_KEY}@context")
-
         print(f"SUCCESSFUL! ")
         return True
 
@@ -86,18 +82,7 @@ def list_chat_graphs(chat_name):
     print()
 
 ## This function initializes a chat window
-## The user can press ctrl+c to end the chat
 def chat(chat_name, selected_graphs, study_option): 
-
-    os.system ("clear")
-    print (f'''\nWelcome to RTSAI chat! 
-           
-Environment: {CURRENT_ENV}
-Chat Name: {chat_name}
-''')
-    
-    while ("chat_continue"): 
-
-        print (f"\n[{chat_name}] RTSAI: ")
-
+    print ("chat started ...")
+    print ("chat ended ...")
     pass

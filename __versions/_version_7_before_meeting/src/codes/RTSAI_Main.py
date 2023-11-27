@@ -59,9 +59,8 @@ def main():
         if (index_safe(sys.argv, 2) == 'activate'): 
             if (len(sys.argv) != 4): print(get_manual('envs/activate')); return
             if (os.path.expanduser(f'~/opt/RTSAI/envs/{index_safe(sys.argv, 3)}')): 
-                global CURRENT_ENV
                 CURRENT_ENV = index_safe(sys.argv, 3)
-                print (f"RTSAI environment {CURRENT_ENV} activated! ")
+                print (f"RTSAI environment {index_safe(sys.argv, 3)} activated! ")
             else: print (f"{convert_to_red('Error')}: RTSAI environment {index_safe(sys.argv, 3)} does not exist! "); return  
 
         ## Deactivate an environment
@@ -152,7 +151,7 @@ def main():
                     else: selected_graphs.append(sys.argv[i])
                 if (not selected_graphs): 
                     print_error(f"--graph option with no graph selected! "); return
-                ## Find all graphs for the environment and the chat itself. The file should be in .tsv format. 
+                ## Find all graphs for the environment, and the chat itself
                 available_graphs_env = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/graphs", f"{GRAPH_NAME_KEY}*")
                 available_graphs_env = [chat[len(f"{ENV_PATH}/envs/{CURRENT_ENV}/graphs/{GRAPH_NAME_KEY}"):] for chat in available_graphs_env]
                 available_graphs_chat = find_name_regex(f"{ENV_PATH}/envs/{CURRENT_ENV}/chats/{chat_name}", f"{GRAPH_NAME_KEY}*")
