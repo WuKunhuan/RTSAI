@@ -33,6 +33,9 @@ RTSAI: $(SRC_PY_FILE)
 ##	install kgtk. The typing library is removed since it is not compatible with pyinstaller
 	@echo "installing kgtk: \\c"
 	@(pip install --quiet kgtk 2> error.log; pip show typing > /dev/null 2>&1 && pip uninstall -y typing > /dev/null 2>&1 || true; echo "SUCCESSFUL! "; rm error.log) || (echo "FAILED! "; cat error.log; rm error.log; exit 1)
+##	install pandas
+	@echo "installing pandas: \\c"
+	@(pip install --quiet pandas 2> error.log; echo "SUCCESSFUL! "; rm error.log) || (echo "FAILED! "; cat error.log; rm error.log; exit 1)
 
 ##	2.2 Compile the executable
 	@echo "\nCompiling the executable RTSAI (it may take a while) ... \\c"
@@ -45,7 +48,7 @@ RTSAI: $(SRC_PY_FILE)
 	@(sudo mv dist/RTSAI $(RTSAI_EXEC_DIR) 2> error.log; echo "SUCCESSFUL! ") || (echo "FAILED! "; cat error.log; rm error.log; exit 1)
 ##  For Mac system: export the path to ~/.bash_profile
 ##	export PATH="/usr/local/bin/RTSAI:$${PATH}"
-	@grep -qxF 'export PATH="/usr/local/bin/RTSAI:$${PATH}"' ~/.bash_profile || echo '#Setting PATH for RTSAI\nexport PATH="/usr/local/bin/RTSAI:$${PATH}"' >> ~/.bash_profile
+	@grep -qxF 'export PATH="/usr/local/bin/RTSAI:$${PATH}"' ~/.bash_profile || echo '# Setting PATH for RTSAI\nexport PATH="/usr/local/bin/RTSAI:$${PATH}"' >> ~/.bash_profile
 
 ##	2.4 Create the environment
 ## Create default environment in the fresh installation

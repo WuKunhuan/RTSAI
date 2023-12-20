@@ -26,8 +26,19 @@ CURRENT_ENV = DEFAULT_ENV
 CHAT_NAME_KEY = "@chat_"
 GRAPH_NAME_KEY = "@graph_"
 
-# Others
+
+
+# 4. User Settings
+
+USER_NAME = "User"
+
+
+
+# 5. Others
 
 RED = "\033[91m"
 RESET = "\033[0m"
 DEBUG_MODE = 1
+
+
+

@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "en-pos": "^1.0.16"
+  }
+}

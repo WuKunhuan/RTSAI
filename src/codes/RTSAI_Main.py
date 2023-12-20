@@ -109,7 +109,7 @@ def main():
                 print (f"SUCCESS! ")
             else: print (f"FAILED. ")
 
-        ## Start new chat
+        ## Start a new chat
         else: 
 
             ## --context : previous context provided
@@ -135,6 +135,15 @@ def main():
                     print_error(f"only can load one chat! (here at lest two: {sys.argv[chat_index + 1:chat_index + 3]})"); return
             else: 
                 if (len(sys.argv) == 2): # argument: RTSAI chat
+                    # future: may start the current chat
+                    # create the default chat, if there is no one
+                    
+
+
+
+
+
+
                     print(get_manual('chats/default')); return
                 else: 
                     chat_name = sys.argv[2]

@@ -1,9 +1,12 @@
 
 import os, re
 
+from RTSAI_nlp import sentence_preprocessing
+
 from constants import ENV_PATH
 from constants import CURRENT_ENV
 from constants import CHAT_NAME_KEY, GRAPH_NAME_KEY
+from constants import USER_NAME
 from constants import DEBUG_MODE
 
 from functions import convert_to_red, find_name_regex, print_error
@@ -37,6 +40,7 @@ def create_chat(chat_name):
         os.system(f"sudo chmod -R 755 {chat_dir}")
 
         # Create the default chat context knowledge graph
+        # The pandas library is used to create the graph
         os.system(f"sudo touch {chat_dir}/{GRAPH_NAME_KEY}@context")
 
         print(f"SUCCESSFUL! ")
@@ -98,6 +102,13 @@ Chat Name: {chat_name}
     
     while ("chat_continue"): 
 
-        print (f"\n[{chat_name}] RTSAI: ")
+        RTSAI_response = ""
+
+        # Pre-processing stage
+
+        
+
+        print (f"\n[{chat_name}] RTSAI: {RTSAI_response}")
+        user_input = input(f"\n[{chat_name}] {USER_NAME}: ")
 
     pass
