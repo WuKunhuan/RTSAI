@@ -1,7 +1,0 @@
-Usage: RTSAI create <env_name>
-
-Description:
-The `create` command allows you to create a new RTSAI environment. Provide a unique name for the environment as the `<env_name>` argument.
-
-Example:
-RTSAI create my_environment
