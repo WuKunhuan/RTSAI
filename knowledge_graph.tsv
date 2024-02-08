@@ -1,0 +1,6 @@
+entity_1	relationship	entity_2
+HKU	is_a	University
+HKU	have|entity:count=10	Faculty
+HKU	have|entity=Faculty:name	Engineering
+HKU	have|entity=Faculty:name	Science
+
