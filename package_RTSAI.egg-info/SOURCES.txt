@@ -1,4 +1,7 @@
 setup.py
+/Applications/GitHub Projects/package_RTSAI/RTSAI/assets/knowledge_graphs/HKU_Intuitive/named_entity.tsv
+/Applications/GitHub Projects/package_RTSAI/RTSAI/assets/knowledge_graphs/HKU_Intuitive/prototype.tsv
+/Applications/GitHub Projects/package_RTSAI/RTSAI/assets/knowledge_graphs/HKU_Intuitive/relationship.tsv
 RTSAI/__init__.py
 RTSAI/config.py
 RTSAI/main.py

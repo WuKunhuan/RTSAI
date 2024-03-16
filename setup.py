@@ -1,6 +1,6 @@
 
-import setuptools
-from RTSAI.config import PACKAGE_NAME, PACKAGE_VERSION
+import os, setuptools
+from RTSAI.config import PACKAGE_NAME, PACKAGE_VERSION, DATA_PATH
 
 setuptools.setup (
     name = PACKAGE_NAME, 
@@ -23,5 +23,8 @@ setuptools.setup (
     install_requires = [
         "kgtk-wukunhuan", 
         "appdirs", 
-    ], 
+        "pyautogui", 
+        "pillow", 
+        "pytest-shutil", 
+    ]
 )

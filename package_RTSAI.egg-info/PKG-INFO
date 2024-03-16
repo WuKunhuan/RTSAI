@@ -10,5 +10,7 @@ Requires-Python: >=3.12.0
 Description-Content-Type: text/x-rst
 Requires-Dist: kgtk-wukunhuan
 Requires-Dist: appdirs
+Requires-Dist: pyautogui
+Requires-Dist: pillow
 
 The recreated RTSAI package with pip install. 
