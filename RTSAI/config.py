@@ -17,11 +17,10 @@ environment_names = os.listdir(os.path.join(DATA_PATH, "environments"))
 if (not environment_names): 
     os.makedirs(os.path.join(DATA_PATH, "environments", "default"))
     environment_names = os.listdir(os.path.join(DATA_PATH, "environments"))
-environment_names.sort (key = lambda name: name.lower())
-if ("default" in environment_names): 
-    DEFAULT_ENV = "default"
-else: DEFAULT_ENV = environment_names[0]
-CURRENT_ENV = DEFAULT_ENV
+    CURRENT_ENV = "default"
+else: 
+    environment_names.sort (key = lambda name: name.lower())
+    CURRENT_ENV = environment_names[0]
 
 PRE_INSTALLED_KG_PATH = os.path.join(os.path.dirname(__file__), 'assets', 'knowledge_graphs')
 PRE_INSTALLED_KG = ["HKU_Intuitive"]
