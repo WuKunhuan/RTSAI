@@ -50,25 +50,28 @@ def setup():
             dst_dir = os.path.join(knowledge_graphs_path, graph_name)
             shutil.copytree(src_dir, dst_dir)
 
-def show_popup_message(message, title = "Message"):
+def show_popup_message(message, title = "Message", parent_item = None):
     import tkinter
-    tkinter.messagebox.showinfo(title, message)
+    tkinter.messagebox.showinfo(title, message, parent = parent_item)
 
-def new_name_check(name, path = DATA_PATH, showinfo = "print", keyword = "", max_length = 30): 
+def new_name_check(name, path = DATA_PATH, showinfo = "print", keyword = "", max_length = 30, parent_item = None): 
+    '''
+    Check whether creating a file/folder with the name under the path is valid
+    '''
     if os.path.exists(os.path.join(path, name)): 
         if (showinfo == "print"): print(f"{keyword} Name '{name}' already exists.")
-        else: show_popup_message(f"{keyword} '{name}' already exists.")
+        else: show_popup_message(f"{keyword} '{name}' already exists.", parent_item = parent_item)
     elif re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', name): 
         if (len(name) <= max_length): return 0
         else: 
             if (showinfo == "print"): print(f"{keyword} Name '{name}' too long (max. 30 characters).")
-            else: show_popup_message(f"{keyword} '{name}' too long (max. 30 characters).")
+            else: show_popup_message(f"{keyword} '{name}' too long (max. 30 characters).", parent_item = parent_item)
     else: 
         if (showinfo == "print"): print(f"Invalid {keyword} Name '{name}'. Please follow the rules for Python identifiers.")
-        else: show_popup_message(f"Invalid {keyword} Name '{name}'. Please follow the rules for Python identifiers.")
+        else: show_popup_message(f"Invalid {keyword} Name '{name}'. Please follow the rules for Python identifiers.", parent_item = parent_item)
     return 1
 
-def create_environment(environment_name, previous_environment_name = None, showinfo = "print"):
+def create_environment(environment_name, previous_environment_name = None, showinfo = "print", parent_item = None):
     '''
     Create a new environment folder with the given name. 
     Before this function, necessary name checking should be performed. 
@@ -78,10 +81,11 @@ def create_environment(environment_name, previous_environment_name = None, showi
         if previous_environment_name and os.path.exists(os.path.join(DATA_PATH, "environments", previous_environment_name)):
             previous_environment_path = os.path.join(DATA_PATH, "environments", previous_environment_name)
             os.rename(previous_environment_path, environment_path)
-        else: os.makedirs(environment_path)
+            return 0
+        else: os.makedirs(environment_path); return 0
     except: return 1
 
-def copy_environment(existing_environment_name, copied_environment_name, showinfo = "print"):
+def copy_environment(existing_environment_name, copied_environment_name, showinfo = "print", parent_item = None):
     '''
     Copy an existing environment to create a new environment. 
     Before this function, necessary name checking should be performed. 
@@ -90,7 +94,7 @@ def copy_environment(existing_environment_name, copied_environment_name, showinf
         environment_path = os.path.join(DATA_PATH, "environments")
         if not os.path.exists(os.path.join(environment_path, existing_environment_name)): 
             if (showinfo == "print"): print(f"Environment '{existing_environment_name}' does not exist.")
-            else: show_popup_message(f"Environment '{existing_environment_name}' does not exist.")
+            else: show_popup_message(f"Environment '{existing_environment_name}' does not exist.", parent = parent_item)
             return 1
         print (os.path.join(environment_path, existing_environment_name))
         print (os.path.join(environment_path, copied_environment_name))
@@ -98,7 +102,7 @@ def copy_environment(existing_environment_name, copied_environment_name, showinf
         return 0
     except: return 1
 
-def create_knowledge_graph(graph_name, previous_graph_name = None, showinfo = "print"):
+def create_knowledge_graph(graph_name, previous_graph_name = None, showinfo = "print", parent_item = None):
     '''
     Create or rename a Knowledge Graph. 
     Before this function, necessary name checking should be performed. 
@@ -112,7 +116,7 @@ def create_knowledge_graph(graph_name, previous_graph_name = None, showinfo = "p
                 return 0
             else: 
                 if (showinfo == "print"): print(f"Knowledge Graph '{previous_graph_name}' does not exist.")
-                else: show_popup_message(f"Knowledge Graph '{previous_graph_name}' does not exist.")
+                else: show_popup_message(f"Knowledge Graph '{previous_graph_name}' does not exist.", parent = parent_item)
                 return 1
         else: 
             template_path = os.path.join(ASSETS_PATH, "templates", "template_knowledge_graph")
@@ -120,7 +124,7 @@ def create_knowledge_graph(graph_name, previous_graph_name = None, showinfo = "p
             return 0
     except: return 1
 
-def copy_knowledge_graph(existing_graph_name, copied_graph_name, environment_name = None, showinfo = "print"): 
+def copy_knowledge_graph(existing_graph_name, copied_graph_name, environment_name = None, showinfo = "print", parent_item = None): 
     '''
     Copy an Knowledge Graph. 
     Before this function, necessary name checking should be performed. 
@@ -129,19 +133,19 @@ def copy_knowledge_graph(existing_graph_name, copied_graph_name, environment_nam
     else: graph_path = os.path.join(DATA_PATH, "knowledge_graphs")
     if not os.path.exists(os.path.join(graph_path, existing_graph_name)):
         if (showinfo == "print"): print(f"Knowledge Graph '{existing_graph_name}' does not exist{" inside Environment '" + environment_name + "'" if environment_name else ""}.")
-        else: show_popup_message(f"Knowledge Graph '{existing_graph_name}' does not exist{" inside Environment '" + environment_name + "'" if environment_name else ""}.")
+        else: show_popup_message(f"Knowledge Graph '{existing_graph_name}' does not exist{" inside Environment '" + environment_name + "'" if environment_name else ""}.", parent = parent_item)
         return 1
     elif os.path.exists(os.path.join(graph_path, copied_graph_name)):
         if (showinfo == "print"): print(f"Knowledge Graph '{copied_graph_name}' already exists{" inside Environment '" + environment_name + "'" if environment_name else ""}.")
-        else: show_popup_message(f"Knowledge Graph '{copied_graph_name}' already exists{" inside Environment '" + environment_name + "'" if environment_name else ""}.")
+        else: show_popup_message(f"Knowledge Graph '{copied_graph_name}' already exists{" inside Environment '" + environment_name + "'" if environment_name else ""}.", parent = parent_item)
         return 1
-    elif (new_name_check(copied_graph_name, graph_path, showinfo = showinfo) == 0): 
+    elif (new_name_check(copied_graph_name, graph_path, showinfo = showinfo, parent_item = parent_item) == 0): 
         print  (os.path.join(graph_path, existing_graph_name))
         print  (os.path.join(graph_path, copied_graph_name))
         shutil.copytree(os.path.join(graph_path, existing_graph_name), os.path.join(graph_path, copied_graph_name))
         return 0
 
-def environment_add_knowledge_graphs(environment_name, graph_names, showinfo = "print"): 
+def environment_add_knowledge_graphs(environment_name, graph_names, showinfo = "print", parent_item = None): 
     '''
     Add Knowledge Graphs to the specified environment. 
     Before this function, necessary name checking should be performed. 
@@ -153,14 +157,14 @@ def environment_add_knowledge_graphs(environment_name, graph_names, showinfo = "
             graph_dst_path = os.path.join(DATA_PATH, "environments", environment_name)
             if not os.path.exists(graph_src_path): 
                 if (showinfo == "print"): print(f"Knowledge Graph '{graph_name}' does not exist."); continue
-                else: show_popup_message(f"Knowledge Graph '{graph_name}' does not exist."); continue
-            if (new_name_check(graph_name, graph_dst_path, showinfo, "Knowledge Graph") == 0): 
+                else: show_popup_message(f"Knowledge Graph '{graph_name}' does not exist.", parent = parent_item); continue
+            if (new_name_check(graph_name, graph_dst_path, showinfo, "Knowledge Graph", parent_item = parent_item) == 0): 
                 shutil.copytree(os.path.join(graph_src_path, graph_name), os.path.join(graph_dst_path, graph_name))
                 imported_knowledge_graphs.append(graph_name)
         return imported_knowledge_graphs
     except: return imported_knowledge_graphs
 
-def environment_rename_knowledge_graph(environment_name, graph_name, previous_graph_name, showinfo = "print"): 
+def environment_rename_knowledge_graph(environment_name, graph_name, previous_graph_name, showinfo = "print", parent_item = None): 
     '''
     Rename a Knowledge Graph inside an environment. 
     Before this function, necessary name checking should be performed. 
@@ -169,9 +173,9 @@ def environment_rename_knowledge_graph(environment_name, graph_name, previous_gr
         graph_path = os.path.join(DATA_PATH, "environments", environment_name)
         if not os.path.exists(os.path.join(graph_path, previous_graph_name)): 
             if (showinfo == "print"): print(f"Knowledge Graph '{graph_name}' does not exist in the Environment '{environment_name}'."); 
-            else: show_popup_message(f"Knowledge Graph '{graph_name}' does not exist in the Environment '{environment_name}'."); 
+            else: show_popup_message(f"Knowledge Graph '{graph_name}' does not exist in the Environment '{environment_name}'.", parent = parent_item); 
             return 1
-        elif (new_name_check(graph_name, graph_path, showinfo, "Knowledge Graph") == 0): 
+        elif (new_name_check(graph_name, graph_path, showinfo, "Knowledge Graph", parent_item = parent_item) == 0): 
             shutil.move(os.path.join(graph_path, previous_graph_name), os.path.join(graph_path, graph_name))
             return 0
     except: return 1
@@ -363,13 +367,13 @@ def main():
                         '''
                         Create a new Environment
                         '''
-                        environment_name = simpledialog.askstring("Create Environment", "Enter the name of the environment: ", parent = self.toggle_item_modify)
+                        environment_name = simpledialog.askstring("Create Environment", "Enter the name of the environment: ", parent = self)
                         if environment_name:
                             environment_path = os.path.join(DATA_PATH, "environments")
-                            if (new_name_check(environment_name, environment_path, showinfo="messagebox", keyword="Environment") == 0): 
+                            if (new_name_check(environment_name, environment_path, showinfo="messagebox", keyword="Environment", parent_item = self) == 0): 
                                 create_environment(environment_name)
                                 config.toggle_list_created = False; create_toggle_list()
-                                show_popup_message(f"Environment '{environment_name}' successfully created.")
+                                show_popup_message(f"Environment '{environment_name}' successfully created.", parent_item = self)
                     
                     def import_environment(): 
                         '''
@@ -392,45 +396,45 @@ def main():
                         '''
                         Rename the Environment
                         '''
-                        environment_name_new = simpledialog.askstring("Rename Environment", f"Enter the new name of the Environment '{environment_name}': ", parent = self.toggle_item_modify)
+                        environment_name_new = simpledialog.askstring("Rename Environment", f"Enter the new name of the Environment '{environment_name}': ", parent = self)
                         if environment_name_new:
                             environment_path = os.path.join(DATA_PATH, "environments")
-                            if (new_name_check(environment_name_new, environment_path, showinfo="messagebox", keyword="Environment") == 0): 
-                                if (create_environment(environment_name_new, environment_name, showinfo="messagebox")): 
+                            if (new_name_check(environment_name_new, environment_path, showinfo="messagebox", keyword="Environment", parent_item = self) == 0): 
+                                if (create_environment(environment_name_new, environment_name, showinfo="messagebox") == 0): 
                                     if (environment_name == config.CURRENT_ENV): 
                                         config.CURRENT_ENV = environment_name_new
                                     config.toggle_list_created = False; create_toggle_list()
-                                    show_popup_message(f"Environment '{environment_name}' successfully renamed to '{environment_name_new}'.")
-                                else: show_popup_message(f"Environment '{environment_name}' rename FAILED.")
+                                    show_popup_message(f"Environment '{environment_name}' successfully renamed to '{environment_name_new}'.", parent_item = self.toggle_item_modify)
+                                else: show_popup_message(f"Environment '{environment_name}' rename FAILED.", parent_item = self.toggle_item_modify)
 
                     def delete_environment(): 
                         '''
                         Delete the Environment
                         '''
                         if environment_name == config.CURRENT_ENV:
-                            messagebox.showwarning("Cannot Delete", "Cannot delete the Current Environment.")
+                            messagebox.showwarning("Cannot Delete", "Cannot delete the Current Environment.", parent = self)
                         else:
-                            confirm = messagebox.askyesno("Confirm Environment Deletion", f"Are you sure you want to delete the Environment '{environment_name}'?")
+                            confirm = messagebox.askyesno("Confirm Environment Deletion", f"Are you sure you want to delete the Environment '{environment_name}'?", parent = self)
                             if confirm:
                                 environment_path = os.path.join(DATA_PATH, "environments")
                                 try:
                                     shutil.rmtree(os.path.join(environment_path, environment_name))
                                     config.toggle_list_created = False; create_toggle_list()
-                                    show_popup_message(f"Environment '{environment_name}' successfully deleted.")
+                                    show_popup_message(f"Environment '{environment_name}' successfully deleted.", parent_item = self)
                                 except OSError:
-                                    messagebox.showerror("Environment Deletion Failed", f"Environment '{environment_name}' deletion FAILED.")
+                                    messagebox.showerror("Environment Deletion Failed", f"Environment '{environment_name}' deletion FAILED.", parent = self)
 
-                    def copy_environment(): 
+                    def copy_environment_menu(): 
                         '''
                         Copy the Environment
                         '''
-                        environment_name_new = simpledialog.askstring("Copy Environment", f"Enter the copy name of the Environment '{environment_name}': ", parent = self.toggle_item_modify)
+                        environment_name_new = simpledialog.askstring("Copy Environment", f"Enter the copy name of the Environment '{environment_name}': ", parent = self)
                         if environment_name_new:
                             environment_path = os.path.join(DATA_PATH, "environments")
-                            if (new_name_check(environment_name_new, environment_path, showinfo="messagebox", keyword="Environment") == 0): 
+                            if (new_name_check(environment_name_new, environment_path, showinfo="messagebox", keyword="Environment", parent_item = self) == 0): 
                                 copy_environment(environment_name, environment_name_new, showinfo="messagebox")
                                 config.toggle_list_created = False; create_toggle_list()
-                                show_popup_message(f"Environment '{environment_name}' successfully copied as '{environment_name_new}'.")
+                                show_popup_message(f"Environment '{environment_name}' successfully copied as '{environment_name_new}'.", parent_item = self)
 
                     def set_as_current_environment(): 
                         '''
@@ -438,7 +442,7 @@ def main():
                         '''
                         config.CURRENT_ENV = environment_name
                         config.toggle_list_created = False; create_toggle_list()
-                        show_popup_message(f"Environment '{environment_name}' successfully set as the current Environment.")
+                        show_popup_message(f"Environment '{environment_name}' successfully set as the Current Environment.", parent_item = self)
 
                     def add_knowledge_graphs(): 
                         '''
@@ -511,10 +515,10 @@ def main():
                     modify_menu_list = tkinter.Menu(self.toggle_item_modify, tearoff=0)
                     modify_menu_list.add_command(label="Rename the Environment", command = rename_environment)
                     modify_menu_list.add_command(label="Delete the Environment", command = delete_environment)
-                    modify_menu_list.add_command(label="Copy the Environment", command = copy_environment)
+                    modify_menu_list.add_command(label="Copy the Environment", command = copy_environment_menu)
                     modify_menu_list.add_command(label="Set as the current", command = set_as_current_environment)
                     modify_menu_list.add_command(label="Add Knowledge Graphs", command = add_knowledge_graphs)
-                    modify_menu_list.add_command(label="Export the Environment", command = export_environment)
+                    modify_menu_list.add_command(label="Export the Environment (to be completed)", command = export_environment)
                     modify_menu_list.post(event.x_root, event.y_root)
 
                 elif (self.toggle_info[1].startswith("environments") and self.toggle_info[1].count('/') == 2): 
@@ -526,48 +530,48 @@ def main():
                         '''
                         Rename the Knowledge Graph inside an environment
                         '''
-                        knowledge_graph_name_new = simpledialog.askstring("Rename Knowledge Graph", f"Enter the new name of the Knowledge Graph '{knowledge_graph_name}': ", parent = self.toggle_item_modify)
+                        knowledge_graph_name_new = simpledialog.askstring("Rename Knowledge Graph", f"Enter the new name of the Knowledge Graph '{knowledge_graph_name}': ", parent = self)
                         if knowledge_graph_name_new:
-                            if (environment_rename_knowledge_graph(environment_name, knowledge_graph_name_new, knowledge_graph_name, showinfo = "messagebox") == 0): 
+                            if (environment_rename_knowledge_graph(environment_name, knowledge_graph_name_new, knowledge_graph_name, showinfo = "messagebox", parent_item = self) == 0): 
                                 config.toggle_list_created = False; create_toggle_list()
-                                show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully renamed to '{knowledge_graph_name_new}' inside Environment '{environment_name}'.")
+                                show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully renamed to '{knowledge_graph_name_new}' inside Environment '{environment_name}'.", parent_item = self)
 
                     def delete_knowledge_graph(): 
                         '''
                         Delete the Knowledge Graph inside an environment
                         '''
-                        confirm = messagebox.askyesno("Confirm Knowledge Graph Deletion", f"Are you sure you want to delete the Knowledge Graph '{knowledge_graph_name}'?")
+                        confirm = messagebox.askyesno("Confirm Knowledge Graph Deletion", f"Are you sure you want to delete the Knowledge Graph '{knowledge_graph_name}'?", parent = self)
                         if confirm:
                             knowledge_graph_path = os.path.join(DATA_PATH, "environments", environment_name, knowledge_graph_name)
                             try:
                                 shutil.rmtree(knowledge_graph_path)
                                 config.toggle_list_created = False; create_toggle_list()
-                                show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' inside Environment {environment_name} successfully deleted.")
+                                show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' inside Environment {environment_name} successfully deleted.", parent_item = self)
                             except OSError:
-                                messagebox.showerror("Knowledge Graph Deletion Failed", f"Knowledge Graph '{knowledge_graph_name}' inside Environment '{environment_name}' deletion FAILED.")
+                                messagebox.showerror("Knowledge Graph Deletion Failed", f"Knowledge Graph '{knowledge_graph_name}' inside Environment '{environment_name}' deletion FAILED.", parent = self)
 
                     def copy_knowledge_graph_menu(): 
                         '''
                         Copy the Knowledge Graph inside an environment
                         '''
-                        knowledge_graph_name_new = simpledialog.askstring("Rename Knowledge Graph", f"Enter the copy name of the Knowledge Graph '{knowledge_graph_name}': ", parent = self.toggle_item_modify)
+                        knowledge_graph_name_new = simpledialog.askstring("Rename Knowledge Graph", f"Enter the copy name of the Knowledge Graph '{knowledge_graph_name}': ", parent = self)
                         if knowledge_graph_name_new:
                             knowledge_graph_path = os.path.join(DATA_PATH, "environments", environment_name)
-                            if (new_name_check(knowledge_graph_name_new, knowledge_graph_path, showinfo="messagebox", keyword="Knowledge Graph") == 0): 
-                                if (copy_knowledge_graph(knowledge_graph_name, knowledge_graph_name_new, environment_name, showinfo="messagebox") == 0): 
+                            if (new_name_check(knowledge_graph_name_new, knowledge_graph_path, showinfo="messagebox", keyword="Knowledge Graph", parent_item = self) == 0): 
+                                if (copy_knowledge_graph(knowledge_graph_name, knowledge_graph_name_new, environment_name, showinfo="messagebox", parent_item = self) == 0): 
                                     config.toggle_list_created = False; create_toggle_list()
-                                    show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully copied as '{knowledge_graph_name_new}'.")
-                                else: show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' copy FAILED.")
+                                    show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully copied as '{knowledge_graph_name_new}'.", parent_item = self)
+                                else: show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' copy FAILED.", parent_item = self)
 
                     def save_to_knowledge_graph(): 
                         '''
                         Save the Knowledge Graph to the Knowledge Graph folder
                         '''
                         knowledge_graph_export_path = os.path.join(DATA_PATH, "knowledge_graphs")
-                        if (new_name_check(knowledge_graph_name, knowledge_graph_export_path, showinfo="messagebox", keyword="Knowledge Graph") == 0): 
+                        if (new_name_check(knowledge_graph_name, knowledge_graph_export_path, showinfo="messagebox", keyword="Knowledge Graph", parent_item = self) == 0): 
                             shutil.copytree(os.path.join(DATA_PATH, "environments", environment_name, knowledge_graph_name), os.path.join(knowledge_graph_export_path, knowledge_graph_name))
                             config.toggle_list_created = False; create_toggle_list()
-                            show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully saved to the Knowledge Graph folder.")
+                            show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully saved to the Knowledge Graph folder.", parent_item = self)
 
                     modify_menu_list = tkinter.Menu(self.toggle_item_modify, tearoff=0)
                     modify_menu_list.add_command(label="Rename the Knowledge Graph", command = rename_knowledge_graph)
@@ -582,16 +586,22 @@ def main():
                         '''
                         Create a knowledge graph from the menu. 
                         '''
-                        graph_name = simpledialog.askstring("Create Knowledge Graph", "Enter the name of the Knowledge Graph: ", parent = self.toggle_item_modify)
+                        graph_name = simpledialog.askstring("Create Knowledge Graph", "Enter the name of the Knowledge Graph: ", parent = self)
                         if graph_name:
                             graph_path = os.path.join(DATA_PATH, "knowledge_graphs")
-                            if (new_name_check(graph_name, graph_path, showinfo="messagebox", keyword="Knowledge Graph") == 0): 
+                            if (new_name_check(graph_name, graph_path, showinfo="messagebox", keyword="Knowledge Graph", parent_item = self) == 0): 
                                 create_knowledge_graph(graph_name)
                                 config.toggle_list_created = False; create_toggle_list()
-                                show_popup_message(f"Knowledge Graph '{graph_name}' successfully created.")
+                                show_popup_message(f"Knowledge Graph '{graph_name}' successfully created.", parent_item = self)
+                    
+                    def import_knowledge_graph(): 
+                        '''
+                        '''
+                        pass
 
                     modify_menu_list = tkinter.Menu(self.toggle_item_modify, tearoff=0)
                     modify_menu_list.add_command(label="Create a Knowledge Graph", command = create_knowledge_graph_menu)
+                    modify_menu_list.add_command(label="Import a Knowledge Graph (to be completed)", command = import_knowledge_graph)
                     modify_menu_list.post(event.x_root, event.y_root)
                 
                 elif (self.toggle_info[1].startswith("knowledge_graphs") and self.toggle_info[1].count('/') == 1): 
@@ -604,40 +614,40 @@ def main():
                         '''
                         Rename the Knowledge Graph
                         '''
-                        knowledge_graph_name_new = simpledialog.askstring("Rename Knowledge Graph", f"Enter the new name of the Knowledge Graph '{knowledge_graph_name}': ", parent = self.toggle_item_modify)
+                        knowledge_graph_name_new = simpledialog.askstring("Rename Knowledge Graph", f"Enter the new name of the Knowledge Graph '{knowledge_graph_name}': ", parent = self)
                         if knowledge_graph_name_new:
                             knowledge_graph_path = os.path.join(DATA_PATH, "knowledge_graphs")
-                            if (new_name_check(knowledge_graph_name_new, knowledge_graph_path, showinfo="messagebox", keyword="Knowledge Graph") == 0): 
+                            if (new_name_check(knowledge_graph_name_new, knowledge_graph_path, showinfo="messagebox", keyword="Knowledge Graph", parent_item = self) == 0): 
                                 if (create_knowledge_graph(knowledge_graph_name_new, knowledge_graph_name, showinfo="messagebox") == 0): 
                                     config.toggle_list_created = False; create_toggle_list()
-                                    show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully renamed to '{knowledge_graph_name_new}'.")
-                            else: show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' rename FAILED.")
+                                    show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully renamed to '{knowledge_graph_name_new}'.", parent_item = self)
+                            else: show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' rename FAILED.", parent_item = self)
 
                     def delete_knowledge_graph(): 
                         '''
                         Delete the Knowledge Graph
                         '''
-                        confirm = messagebox.askyesno("Confirm Knowledge Graph Deletion", f"Are you sure you want to delete the Knowledge Graph '{knowledge_graph_name}'?")
+                        confirm = messagebox.askyesno("Confirm Knowledge Graph Deletion", f"Are you sure you want to delete the Knowledge Graph '{knowledge_graph_name}'?", parent = self)
                         if confirm:
                             knowledge_graph_path = os.path.join(DATA_PATH, "knowledge_graphs")
                             try:
                                 shutil.rmtree(os.path.join(knowledge_graph_path, knowledge_graph_name))
                                 config.toggle_list_created = False; create_toggle_list()
-                                show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully deleted.")
+                                show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully deleted.", parent_item = self)
                             except OSError:
-                                messagebox.showerror("Knowledge Graph Deletion Failed", f"Knowledge Graph '{knowledge_graph_name}' deletion FAILED.")
+                                messagebox.showerror("Knowledge Graph Deletion Failed", f"Knowledge Graph '{knowledge_graph_name}' deletion FAILED.", parent = self)
 
                     def copy_knowledge_graph_menu(): 
                         '''
                         Copy the Knowledge Graph
                         '''
-                        knowledge_graph_name_new = simpledialog.askstring("Copy Knowledge Graph", f"Enter the copy name of the Knowledge Graph '{knowledge_graph_name}': ", parent = self.toggle_item_modify)
+                        knowledge_graph_name_new = simpledialog.askstring("Copy Knowledge Graph", f"Enter the copy name of the Knowledge Graph '{knowledge_graph_name}': ", parent = self)
                         if knowledge_graph_name_new:
                             knowledge_graph_path = os.path.join(DATA_PATH, "knowledge_graphs")
-                            if (new_name_check(knowledge_graph_name_new, knowledge_graph_path, showinfo="messagebox", keyword="Knowledge Graph") == 0): 
-                                copy_knowledge_graph(knowledge_graph_name, knowledge_graph_name_new, showinfo="messagebox")
+                            if (new_name_check(knowledge_graph_name_new, knowledge_graph_path, showinfo="messagebox", keyword="Knowledge Graph", parent_item = self) == 0): 
+                                copy_knowledge_graph(knowledge_graph_name, knowledge_graph_name_new, showinfo="messagebox", parent_item = self)
                                 config.toggle_list_created = False; create_toggle_list()
-                                show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully copied as '{knowledge_graph_name_new}'.")
+                                show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully copied as '{knowledge_graph_name_new}'.", parent_item = self)
 
                     def export_knowledge_graph(): 
                         '''
