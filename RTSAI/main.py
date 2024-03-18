@@ -203,22 +203,122 @@ def main():
         from tkinter import simpledialog, Scrollbar, Listbox, messagebox
         from PIL import Image, ImageTk
 
-        '''
-        Convert color tuples to rgb
-        '''
         def color_tuple_to_rgb(color_tuple): 
+            '''
+            Convert color tuples to rgb string
+            '''
             return ("#%02x%02x%02x" % color_tuple)
 
-        '''
-        Create the left panel in the window
-        '''
-        def create_left_panel():
+        def create_left_panel(window):
+            '''
+            Create the left panel in the window
+            '''
 
-            def configure_canvas_arrow(event):
+            class Left_Sidebar_Icon(tk.Canvas):
+                '''
+                The left sidebar icon entity
+                '''
+                def __init__(self):
+                    super().__init__(master = config.left_panel_sidebar, width=config.left_panel_sidebar_width, height=config.left_panel_sidebar_width, 
+                                     bg=color_tuple_to_rgb(config.left_panel_color), highlightthickness=0)
+                    self.hovered = False
+                    self.items_in_panel = []
+                    self.bind("<Enter>", self.on_enter)
+                    self.bind("<Leave>", self.on_leave)
+                    self.pack(side = "top")
+
+                def on_enter(self, event): 
+                    self.hovered = True
+                    for item in self.items_in_panel: 
+                        self.itemconfigure(item, fill=color_tuple_to_rgb(config.VSCode_highlight_color))
+
+                def on_leave(self, event):
+                    self.hovered = False
+                    for item in self.items_in_panel: 
+                        self.itemconfigure(item, fill=color_tuple_to_rgb(config.VSCode_font_grey_color))
+
+            def draw_sidebar_chat(parent_panel): 
+                '''
+                Draw the chat logo
+                '''
+                canvas_width = parent_panel.winfo_width()
+                canvas_height = parent_panel.winfo_height()
+                parent_panel.delete("item_1_rectangle")
+                parent_panel.delete("item_2_triangle")
+                def round_rectangle_points(x1, y1, x2, y2, radius): 
+                    return([
+                        x1+radius, y1, x1+radius, y1, x2-radius, y1, x2-radius, y1,
+                        x2, y1, x2, y1+radius, x2, y1+radius, x2, y2-radius,
+                        x2, y2-radius, x2, y2, x2-radius, y2, x2-radius, y2,
+                        x1+radius, y2, x1+radius, y2, x1, y2, x1, y2-radius,
+                        x1, y2-radius, x1, y1+radius, x1, y1+radius, x1, y1
+                    ])
+                item_1_rectangle_coords = round_rectangle_points(0.2 * canvas_width, 0.2 * canvas_height, 0.8 * canvas_width, 0.6 * canvas_height, 0.2 * canvas_height)
+                item_2_triangle_coords = [
+                    canvas_width * 0.35, canvas_height * 0.6,
+                    canvas_width * 0.3, canvas_height * 0.75,
+                    canvas_width * 0.5, canvas_height * 0.6, 
+                ]
+                parent_panel.create_polygon(item_1_rectangle_coords, fill = color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_1_rectangle", smooth=True, outline = "")
+                parent_panel.create_polygon(item_2_triangle_coords, fill = color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_2_triangle", outline = "")
+                parent_panel.items_in_panel = ["item_1_rectangle", "item_2_triangle"]
+
+            def render_chat_window(master): 
+                pass
+
+            def draw_sidebar_crawl(parent_panel): 
+                '''
+                Draw the web crawl logo
+                '''
+                canvas_width = parent_panel.winfo_width()
+                canvas_height = parent_panel.winfo_height()
+                parent_panel.delete("item_1_spider_body")
+                parent_panel.delete("item_8_spider_head")
+                parent_panel.delete("item_2_spider_leg_1")
+                parent_panel.delete("item_3_spider_leg_2")
+                parent_panel.delete("item_4_spider_leg_3")
+                parent_panel.delete("item_5_spider_leg_4")
+                parent_panel.delete("item_6_spider_leg_5")
+                parent_panel.delete("item_7_spider_leg_6")
+
+                def spider_leg_points(x, y, x_first_joint, y_first_joint, thickness):
+                    return [
+                        x, y - thickness / 2, 
+                        x, y + thickness / 2, 
+                        x_first_joint, y_first_joint + thickness / 2, 
+                        2 * x_first_joint - x, 3 * y_first_joint - 2 * y + thickness / 2, 
+                        2 * x_first_joint - x, 3 * y_first_joint - 2 * y - thickness / 2, 
+                        x_first_joint, y_first_joint - thickness / 2, 
+                    ]
+                
+                parent_panel.create_oval(0.3 * canvas_width, 0.3 * canvas_height, 0.7 * canvas_width, 0.7 * canvas_height, fill=color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_1_spider_body", outline = "")
+                parent_panel.create_oval(0.4 * canvas_width, 0.2 * canvas_height, 0.6 * canvas_width, 0.4 * canvas_height, fill=color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_8_spider_head", outline = "")
+                parent_panel.create_polygon(spider_leg_points(0.35 * canvas_width, 0.4 * canvas_height, 0.27 * canvas_width, 0.35 * canvas_height, 0.07 * canvas_height), fill=color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_2_spider_leg_1", outline = "")
+                parent_panel.create_polygon(spider_leg_points(0.35 * canvas_width, 0.5 * canvas_height, 0.27 * canvas_width, 0.5 * canvas_height, 0.06 * canvas_height), fill=color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_3_spider_leg_2", outline = "")
+                parent_panel.create_polygon(spider_leg_points(0.35 * canvas_width, 0.6 * canvas_height, 0.27 * canvas_width, 0.65 * canvas_height, 0.07 * canvas_height), fill=color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_4_spider_leg_3", outline = "")
+                parent_panel.create_polygon(spider_leg_points(0.65 * canvas_width, 0.4 * canvas_height, 0.73 * canvas_width, 0.35 * canvas_height, 0.07 * canvas_height), fill=color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_5_spider_leg_4", outline = "")
+                parent_panel.create_polygon(spider_leg_points(0.65 * canvas_width, 0.5 * canvas_height, 0.73 * canvas_width, 0.5 * canvas_height, 0.06 * canvas_height), fill=color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_6_spider_leg_5", outline = "")
+                parent_panel.create_polygon(spider_leg_points(0.65 * canvas_width, 0.6 * canvas_height, 0.73 * canvas_width, 0.65 * canvas_height, 0.07 * canvas_height), fill=color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_7_spider_leg_6", outline = "")
+                parent_panel.items_in_panel = ["item_1_spider_body", "item_8_spider_head", "item_2_spider_leg_1", "item_3_spider_leg_2", "item_4_spider_leg_3", "item_5_spider_leg_4", "item_6_spider_leg_5", "item_7_spider_leg_6"]
+
+            def render_crawl_window(master): 
+                pass
+
+            def create_left_sidebar(): 
+                '''
+                Fill in the sidebar of the left panel
+                '''
+                config.left_panel_sidebar_chat = Left_Sidebar_Icon()
+                config.left_panel_sidebar_chat.bind("<Configure>", lambda event: draw_sidebar_chat(config.left_panel_sidebar_chat))
+                config.left_panel_sidebar_chat.bind("<Button-1>", render_chat_window)
+                config.left_panel_sidebar_crawl = Left_Sidebar_Icon()
+                config.left_panel_sidebar_crawl.bind("<Configure>", lambda event: draw_sidebar_crawl(config.left_panel_sidebar_crawl))
+                config.left_panel_sidebar_crawl.bind("<Button-1>", render_crawl_window)
+
+            def draw_left_panel_arrow(event):
                 canvas_width = config.left_panel_change_arrow.winfo_width()
                 canvas_height = config.left_panel_change_arrow.winfo_height()
                 config.left_panel_change_arrow.delete("arrow")
-                config.left_panel_change_arrow.config(width=canvas_width, height=canvas_height)
                 arrow_coords = [
                     canvas_width * 0.9, canvas_height * 0.5,
                     canvas_width * 0.5, canvas_height * 0,
@@ -226,7 +326,7 @@ def main():
                     canvas_width * 0.1, canvas_height * 0.25,
                     canvas_width * 0.1, canvas_height * 0.75,
                     canvas_width * 0.5, canvas_height * 0.75,
-                    canvas_width * 0.5, canvas_height * 1
+                    canvas_width * 0.5, canvas_height * 1, 
                 ]
                 config.left_panel_change_arrow.create_polygon(arrow_coords, fill=color_tuple_to_rgb(config.default_grey_color), tags="arrow")
 
@@ -237,10 +337,10 @@ def main():
                 config.left_panel_width = int(config.left_panel_relwidth * config.window_width)
                 config.left_panel.configure(width=config.left_panel_width)
 
-            def arrow_hover(event):
+            def hover_left_panel_arrow(event):
                 config.left_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.VSCode_highlight_color))
 
-            def arrow_leave(event):
+            def leave_left_panel_arrow(event):
                 config.left_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.default_grey_color))
 
             '''
@@ -252,32 +352,27 @@ def main():
             config.left_panel_sidebar.pack(side="left", fill='y')
             config.left_panel_main = tk.Frame(config.left_panel, bg=color_tuple_to_rgb(config.left_panel_color))
             config.left_panel_main.pack(side="left", fill='both')
+
             config.left_panel_change_arrow = tk.Canvas(config.left_panel, width=config.size_increase_arrow_width, height=config.size_increase_arrow_height, bg=color_tuple_to_rgb(config.left_panel_color), highlightthickness=0, relief='ridge')
-            config.left_panel_change_arrow.bind("<Enter>", arrow_hover)
-            config.left_panel_change_arrow.bind("<Leave>", arrow_leave)
-            config.left_panel_change_arrow.bind("<Configure>", configure_canvas_arrow)
+            config.left_panel_change_arrow.bind("<Enter>", hover_left_panel_arrow)
+            config.left_panel_change_arrow.bind("<Leave>", leave_left_panel_arrow)
+            config.left_panel_change_arrow.bind("<Configure>", draw_left_panel_arrow)
             config.left_panel_change_arrow.bind("<Button-1>", resize_left_panel)
+
             config.toggle_list_states = dict()
+            config.toggle_list_created = False
+            create_toggle_list()
+            create_left_sidebar()
 
-        '''
-        Create the right panel in the window
-        '''
-        def create_right_panel(): 
+        def create_right_panel(window): 
+            '''
+            Create the right panel in the window
+            '''
 
-            def show_tabbar(): 
-                config.right_panel_tabbar = tk.Frame(config.right_panel, height=config.right_panel_tabbar_height, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
-                config.right_panel_tabbar.pack(side='top', fill='x')
-            
-            def hide_tabbar(): 
-                if config.right_panel_tabbar:
-                    config.right_panel_tabbar.pack_forget()
-                    config.right_panel_tabbar = None
-
-            def configure_canvas_arrow(event):
+            def draw_right_panel_arrow(event):
                 canvas_width = config.right_panel_change_arrow.winfo_width()
                 canvas_height = config.right_panel_change_arrow.winfo_height()
                 config.right_panel_change_arrow.delete("arrow")
-                config.right_panel_change_arrow.config(width=canvas_width, height=canvas_height)
                 arrow_coords = [
                     canvas_width * 0.1, canvas_height * 0.5,
                     canvas_width * 0.5, canvas_height * 0,
@@ -310,8 +405,9 @@ def main():
 
             '''
             Show the tab bar when the editor is active. 
+            TO BE COMPLETED
             '''
-            show_tabbar()
+            # show_tabbar()
 
             config.right_panel_main = tk.Frame(config.right_panel, bg=color_tuple_to_rgb(config.right_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
             config.right_panel_main.pack(side='top', fill='both', expand=True)
@@ -319,403 +415,393 @@ def main():
             config.right_panel_change_arrow = tk.Canvas(config.right_panel, width=config.size_increase_arrow_width, height=config.size_increase_arrow_height, bg=color_tuple_to_rgb(config.right_panel_color), highlightthickness=0, relief='ridge')
             config.right_panel_change_arrow.bind("<Enter>", arrow_hover)
             config.right_panel_change_arrow.bind("<Leave>", arrow_leave)
-            config.right_panel_change_arrow.bind("<Configure>", configure_canvas_arrow)
+            config.right_panel_change_arrow.bind("<Configure>", draw_right_panel_arrow)
             config.right_panel_change_arrow.bind("<Button-1>", resize_right_panel)
 
-        '''
-        Toggle Item class objects in the left panel main
-        '''
-        class Toggle_Item(tk.Frame): 
-
-            def configure_canvas_modify(self, event): 
-                '''
-                Generates the modify sign. 
-                '''
-                canvas_width = config.toggle_create_new_modify_width
-                canvas_height = config.toggle_create_new_modify_height
-                self.toggle_item_modify.delete("modify")
-                self.toggle_item_modify.config(width=canvas_width, height=canvas_height)
-                modify_coords = [
-                    canvas_width * 0.8, canvas_height * 1, 
-                    canvas_width * 1, canvas_height * 1, 
-                    canvas_width * 1, canvas_height * 0, 
-                    canvas_width * 0.8, canvas_height * 0, 
-                ]
-                self.toggle_item_modify.create_polygon(modify_coords, fill=color_tuple_to_rgb(config.default_grey_color), tags="modify")
-
-            def modify_hover(self, event): 
-                self.toggle_item_modify.itemconfigure("modify", fill=color_tuple_to_rgb(config.VSCode_highlight_color))
-
-            def modify_leave(self, event): 
-                if (self.menu_open): self.toggle_item_modify.itemconfigure("modify", fill=color_tuple_to_rgb(config.VSCode_highlight_color))
-                else: self.toggle_item_modify.itemconfigure("modify", fill=color_tuple_to_rgb(config.default_grey_color))
-
-            def modify_menu(self, event): 
-                '''
-                Display the menu when right clicking the toggle item. 
-                '''
-
-                self.menu_open = True
-                self.toggle_item_modify.itemconfigure("modify", fill=color_tuple_to_rgb(config.VSCode_highlight_color))
-
-                if (self.toggle_info[1] == "environments"): 
-                    '''
-                    Environment toggle item
-                    '''
-
-                    def create_environment_menu(): 
-                        '''
-                        Create a new Environment
-                        '''
-                        environment_name = simpledialog.askstring("Create Environment", "Enter the name of the environment: ", parent = self)
-                        if environment_name:
-                            environment_path = os.path.join(DATA_PATH, "environments")
-                            if (new_name_check(environment_name, environment_path, showinfo="messagebox", keyword="Environment", parent_item = self) == 0): 
-                                create_environment(environment_name)
-                                config.toggle_list_created = False; create_toggle_list()
-                                show_popup_message(f"Environment '{environment_name}' successfully created.", parent_item = self)
-                    
-                    def import_environment(): 
-                        '''
-                        Import a new Environment
-                        '''
-                        pass
-
-                    modify_menu_list = tkinter.Menu(self.toggle_item_modify, tearoff=0)
-                    modify_menu_list.add_command(label="Create an Environment", command = create_environment_menu)
-                    modify_menu_list.add_command(label="Import an Environment (to be completed)", command = import_environment)
-                    modify_menu_list.post(event.x_root, event.y_root)
-
-                elif (self.toggle_info[1].startswith("environments") and self.toggle_info[1].count('/') == 1): 
-                    '''
-                    Environment's Knowledge Graph toggle item
-                    '''
-                    environment_name = self.toggle_info[1].split('/')[1]
-
-                    def rename_environment(): 
-                        '''
-                        Rename the Environment
-                        '''
-                        environment_name_new = simpledialog.askstring("Rename Environment", f"Enter the new name of the Environment '{environment_name}': ", parent = self)
-                        if environment_name_new:
-                            environment_path = os.path.join(DATA_PATH, "environments")
-                            if (new_name_check(environment_name_new, environment_path, showinfo="messagebox", keyword="Environment", parent_item = self) == 0): 
-                                if (create_environment(environment_name_new, environment_name, showinfo="messagebox") == 0): 
-                                    if (environment_name == config.CURRENT_ENV): 
-                                        config.CURRENT_ENV = environment_name_new
-                                    config.toggle_list_created = False; create_toggle_list()
-                                    show_popup_message(f"Environment '{environment_name}' successfully renamed to '{environment_name_new}'.", parent_item = self.toggle_item_modify)
-                                else: show_popup_message(f"Environment '{environment_name}' rename FAILED.", parent_item = self.toggle_item_modify)
-
-                    def delete_environment(): 
-                        '''
-                        Delete the Environment
-                        '''
-                        if environment_name == config.CURRENT_ENV:
-                            messagebox.showwarning("Cannot Delete", "Cannot delete the Current Environment.", parent = self)
-                        else:
-                            confirm = messagebox.askyesno("Confirm Environment Deletion", f"Are you sure you want to delete the Environment '{environment_name}'?", parent = self)
-                            if confirm:
-                                environment_path = os.path.join(DATA_PATH, "environments")
-                                try:
-                                    shutil.rmtree(os.path.join(environment_path, environment_name))
-                                    config.toggle_list_created = False; create_toggle_list()
-                                    show_popup_message(f"Environment '{environment_name}' successfully deleted.", parent_item = self)
-                                except OSError:
-                                    messagebox.showerror("Environment Deletion Failed", f"Environment '{environment_name}' deletion FAILED.", parent = self)
-
-                    def copy_environment_menu(): 
-                        '''
-                        Copy the Environment
-                        '''
-                        environment_name_new = simpledialog.askstring("Copy Environment", f"Enter the copy name of the Environment '{environment_name}': ", parent = self)
-                        if environment_name_new:
-                            environment_path = os.path.join(DATA_PATH, "environments")
-                            if (new_name_check(environment_name_new, environment_path, showinfo="messagebox", keyword="Environment", parent_item = self) == 0): 
-                                copy_environment(environment_name, environment_name_new, showinfo="messagebox")
-                                config.toggle_list_created = False; create_toggle_list()
-                                show_popup_message(f"Environment '{environment_name}' successfully copied as '{environment_name_new}'.", parent_item = self)
-
-                    def set_as_current_environment(): 
-                        '''
-                        Set the Environment as the Current Environment
-                        '''
-                        config.CURRENT_ENV = environment_name
-                        config.toggle_list_created = False; create_toggle_list()
-                        show_popup_message(f"Environment '{environment_name}' successfully set as the Current Environment.", parent_item = self)
-
-                    def add_knowledge_graphs(): 
-                        '''
-                        Add Knowledge Graphs to the Environment
-                        '''
-                        select_knowledge_graph_window = tk.Toplevel(self)
-                        select_knowledge_graph_window.title(f"Select Knowledge Graphs for the Environment '{environment_name}'")
-                        select_knowledge_graph_window.resizable(width = False, height = False)
-                        knowledge_graph_names = os.listdir(os.path.join(DATA_PATH, "knowledge_graphs")) 
-                        knowledge_graph_names.sort (key = lambda name: name.lower())
-                        knowledge_graph_names_current = os.listdir(os.path.join(DATA_PATH, self.toggle_info[1])) 
-                        knowledge_graph_names = [name for name in knowledge_graph_names if name not in knowledge_graph_names_current]
-                        knowledge_graph_list = None
-
-                        if (knowledge_graph_names): select_knowledge_graph_prompt = tk.Label(select_knowledge_graph_window, text = f"Select all Knowledge Graphs to be added from the below list. ", font = (config.standard_font_family, int(config.standard_font_size * 1.2)), padx = 10, pady = 10)
-                        else: select_knowledge_graph_prompt = tk.Label(select_knowledge_graph_window, text = f"No Knowledge Graphs are available! ", font = (config.standard_font_family, int(config.standard_font_size * 1.2)), padx = 10, pady = 10)
-                        select_knowledge_graph_prompt.pack(side = "top", anchor = "n")
-                        if (knowledge_graph_names): 
-                            select_knowledge_graph_frame = tk.Frame(select_knowledge_graph_window, bg = color_tuple_to_rgb(config.left_panel_color))
-                            select_knowledge_graph_frame.pack(side = "top", anchor = "n", fill = "both", padx = 10, pady = 0)
-                            knowledge_graph_list = Listbox(select_knowledge_graph_frame, selectmode = "multiple", 
-                                                        bg = color_tuple_to_rgb(config.left_panel_color), 
-                                                        fg = color_tuple_to_rgb(config.VSCode_font_grey_color), 
-                                                        selectbackground = color_tuple_to_rgb(config.VSCode_highlight_color), 
-                                                        selectforeground = color_tuple_to_rgb(config.left_panel_color), 
-                                                        font = (config.standard_font_family, config.standard_font_size), 
-                                                        height = len(knowledge_graph_names), activestyle='none')
-                            for knowledge_graph_name in knowledge_graph_names: knowledge_graph_list.insert("end", f"{knowledge_graph_name}")
-                            if (len(knowledge_graph_names) > 12): 
-                                select_knowledge_graph_frame_scrollbar = Scrollbar(select_knowledge_graph_frame)
-                                select_knowledge_graph_frame_scrollbar.pack(side = "right", fill = "y")
-                                select_knowledge_graph_frame_scrollbar.config(command = knowledge_graph_list.yview, yscrollcommand = select_knowledge_graph_frame_scrollbar.set) 
-                                select_knowledge_graph_window.geometry(f'600x300+{max(event.x_root-300, 0)}+{max(event.y_root-150, 0)}')
-                            else: 
-                                select_knowledge_graph_window.geometry(f'600x{84+18*len(knowledge_graph_names)}+{max(event.x_root-300, 0)}+{max(int(event.y_root-(84+18*len(knowledge_graph_names))/2), 0)}')
-                            knowledge_graph_list.pack(fill='x', expand=True)
-                        '''
-                        Cancel and OK buttons
-                        '''
-                        button_frame = tkinter.Frame (select_knowledge_graph_window)
-                        button_frame.pack (side = 'top', fill = 'x', expand = True)
-                        def select_knowledge_graph_cancel(event): 
-                            select_knowledge_graph_window.destroy()
-                            select_knowledge_graph_window.update()
-                        def select_knowledge_graph_OK(event): 
-                            selected_items = [knowledge_graph_names[item] for item in knowledge_graph_list.curselection()]
-                            success_items = environment_add_knowledge_graphs(environment_name, selected_items)
-                            select_knowledge_graph_window.destroy()
-                            select_knowledge_graph_window.update()
-                            config.toggle_list_created = False; create_toggle_list()
-                            show_popup_message (f"Knowledge Graphs {', '.join([f"'{item}'" for item in success_items])} successfully added to the Environment '{environment_name}'.")
-                        if (knowledge_graph_names): 
-                            Cancel_button = tkinter.Button(button_frame, text = "Cancel")
-                            Cancel_button.pack (side = 'left', padx = 100)
-                            Cancel_button.bind("<Button-1>", lambda event: select_knowledge_graph_cancel (event))
-                            OK_button = tkinter.Button(button_frame, text = "OK")
-                            OK_button.pack (side = 'right', padx = 100)
-                            OK_button.bind("<Button-1>", lambda event: select_knowledge_graph_OK (event))
-                        else: 
-                            Cancel_button = tkinter.Button(button_frame, text = "Cancel")
-                            Cancel_button.pack (side = 'top')
-                            Cancel_button.bind("<Button-1>", lambda event: select_knowledge_graph_cancel (event))
-
-                    def export_environment(): 
-                        '''
-                        Export the whole environment as a Zip file
-                        '''
-                        pass
-
-                    modify_menu_list = tkinter.Menu(self.toggle_item_modify, tearoff=0)
-                    modify_menu_list.add_command(label="Rename the Environment", command = rename_environment)
-                    modify_menu_list.add_command(label="Delete the Environment", command = delete_environment)
-                    modify_menu_list.add_command(label="Copy the Environment", command = copy_environment_menu)
-                    modify_menu_list.add_command(label="Set as the current", command = set_as_current_environment)
-                    modify_menu_list.add_command(label="Add Knowledge Graphs", command = add_knowledge_graphs)
-                    modify_menu_list.add_command(label="Export the Environment (to be completed)", command = export_environment)
-                    modify_menu_list.post(event.x_root, event.y_root)
-
-                elif (self.toggle_info[1].startswith("environments") and self.toggle_info[1].count('/') == 2): 
-
-                    environment_name = self.toggle_info[1].split('/')[1]
-                    knowledge_graph_name = self.toggle_info[1].split('/')[2]
-
-                    def rename_knowledge_graph(): 
-                        '''
-                        Rename the Knowledge Graph inside an environment
-                        '''
-                        knowledge_graph_name_new = simpledialog.askstring("Rename Knowledge Graph", f"Enter the new name of the Knowledge Graph '{knowledge_graph_name}': ", parent = self)
-                        if knowledge_graph_name_new:
-                            if (environment_rename_knowledge_graph(environment_name, knowledge_graph_name_new, knowledge_graph_name, showinfo = "messagebox", parent_item = self) == 0): 
-                                config.toggle_list_created = False; create_toggle_list()
-                                show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully renamed to '{knowledge_graph_name_new}' inside Environment '{environment_name}'.", parent_item = self)
-
-                    def delete_knowledge_graph(): 
-                        '''
-                        Delete the Knowledge Graph inside an environment
-                        '''
-                        confirm = messagebox.askyesno("Confirm Knowledge Graph Deletion", f"Are you sure you want to delete the Knowledge Graph '{knowledge_graph_name}'?", parent = self)
-                        if confirm:
-                            knowledge_graph_path = os.path.join(DATA_PATH, "environments", environment_name, knowledge_graph_name)
-                            try:
-                                shutil.rmtree(knowledge_graph_path)
-                                config.toggle_list_created = False; create_toggle_list()
-                                show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' inside Environment {environment_name} successfully deleted.", parent_item = self)
-                            except OSError:
-                                messagebox.showerror("Knowledge Graph Deletion Failed", f"Knowledge Graph '{knowledge_graph_name}' inside Environment '{environment_name}' deletion FAILED.", parent = self)
-
-                    def copy_knowledge_graph_menu(): 
-                        '''
-                        Copy the Knowledge Graph inside an environment
-                        '''
-                        knowledge_graph_name_new = simpledialog.askstring("Rename Knowledge Graph", f"Enter the copy name of the Knowledge Graph '{knowledge_graph_name}': ", parent = self)
-                        if knowledge_graph_name_new:
-                            knowledge_graph_path = os.path.join(DATA_PATH, "environments", environment_name)
-                            if (new_name_check(knowledge_graph_name_new, knowledge_graph_path, showinfo="messagebox", keyword="Knowledge Graph", parent_item = self) == 0): 
-                                if (copy_knowledge_graph(knowledge_graph_name, knowledge_graph_name_new, environment_name, showinfo="messagebox", parent_item = self) == 0): 
-                                    config.toggle_list_created = False; create_toggle_list()
-                                    show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully copied as '{knowledge_graph_name_new}'.", parent_item = self)
-                                else: show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' copy FAILED.", parent_item = self)
-
-                    def save_to_knowledge_graph(): 
-                        '''
-                        Save the Knowledge Graph to the Knowledge Graph folder
-                        '''
-                        knowledge_graph_export_path = os.path.join(DATA_PATH, "knowledge_graphs")
-                        if (new_name_check(knowledge_graph_name, knowledge_graph_export_path, showinfo="messagebox", keyword="Knowledge Graph", parent_item = self) == 0): 
-                            shutil.copytree(os.path.join(DATA_PATH, "environments", environment_name, knowledge_graph_name), os.path.join(knowledge_graph_export_path, knowledge_graph_name))
-                            config.toggle_list_created = False; create_toggle_list()
-                            show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully saved to the Knowledge Graph folder.", parent_item = self)
-
-                    modify_menu_list = tkinter.Menu(self.toggle_item_modify, tearoff=0)
-                    modify_menu_list.add_command(label="Rename the Knowledge Graph", command = rename_knowledge_graph)
-                    modify_menu_list.add_command(label="Delete the Knowledge Graph", command = delete_knowledge_graph)
-                    modify_menu_list.add_command(label="Copy the Knowledge Graph", command = copy_knowledge_graph_menu)
-                    modify_menu_list.add_command(label="Save the Knowledge Graph", command = save_to_knowledge_graph)
-                    modify_menu_list.post(event.x_root, event.y_root)
-
-                elif (self.toggle_info[1] == "knowledge_graphs"): 
-
-                    def create_knowledge_graph_menu(): 
-                        '''
-                        Create a knowledge graph from the menu. 
-                        '''
-                        graph_name = simpledialog.askstring("Create Knowledge Graph", "Enter the name of the Knowledge Graph: ", parent = self)
-                        if graph_name:
-                            graph_path = os.path.join(DATA_PATH, "knowledge_graphs")
-                            if (new_name_check(graph_name, graph_path, showinfo="messagebox", keyword="Knowledge Graph", parent_item = self) == 0): 
-                                create_knowledge_graph(graph_name)
-                                config.toggle_list_created = False; create_toggle_list()
-                                show_popup_message(f"Knowledge Graph '{graph_name}' successfully created.", parent_item = self)
-                    
-                    def import_knowledge_graph(): 
-                        '''
-                        '''
-                        pass
-
-                    modify_menu_list = tkinter.Menu(self.toggle_item_modify, tearoff=0)
-                    modify_menu_list.add_command(label="Create a Knowledge Graph", command = create_knowledge_graph_menu)
-                    modify_menu_list.add_command(label="Import a Knowledge Graph (to be completed)", command = import_knowledge_graph)
-                    modify_menu_list.post(event.x_root, event.y_root)
-                
-                elif (self.toggle_info[1].startswith("knowledge_graphs") and self.toggle_info[1].count('/') == 1): 
-                    '''
-                    Single Knowledge Graph toggle item
-                    '''
-                    knowledge_graph_name = self.toggle_info[1].split('/')[1]
-
-                    def rename_knowledge_graph(): 
-                        '''
-                        Rename the Knowledge Graph
-                        '''
-                        knowledge_graph_name_new = simpledialog.askstring("Rename Knowledge Graph", f"Enter the new name of the Knowledge Graph '{knowledge_graph_name}': ", parent = self)
-                        if knowledge_graph_name_new:
-                            knowledge_graph_path = os.path.join(DATA_PATH, "knowledge_graphs")
-                            if (new_name_check(knowledge_graph_name_new, knowledge_graph_path, showinfo="messagebox", keyword="Knowledge Graph", parent_item = self) == 0): 
-                                if (create_knowledge_graph(knowledge_graph_name_new, knowledge_graph_name, showinfo="messagebox") == 0): 
-                                    config.toggle_list_created = False; create_toggle_list()
-                                    show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully renamed to '{knowledge_graph_name_new}'.", parent_item = self)
-                            else: show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' rename FAILED.", parent_item = self)
-
-                    def delete_knowledge_graph(): 
-                        '''
-                        Delete the Knowledge Graph
-                        '''
-                        confirm = messagebox.askyesno("Confirm Knowledge Graph Deletion", f"Are you sure you want to delete the Knowledge Graph '{knowledge_graph_name}'?", parent = self)
-                        if confirm:
-                            knowledge_graph_path = os.path.join(DATA_PATH, "knowledge_graphs")
-                            try:
-                                shutil.rmtree(os.path.join(knowledge_graph_path, knowledge_graph_name))
-                                config.toggle_list_created = False; create_toggle_list()
-                                show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully deleted.", parent_item = self)
-                            except OSError:
-                                messagebox.showerror("Knowledge Graph Deletion Failed", f"Knowledge Graph '{knowledge_graph_name}' deletion FAILED.", parent = self)
-
-                    def copy_knowledge_graph_menu(): 
-                        '''
-                        Copy the Knowledge Graph
-                        '''
-                        knowledge_graph_name_new = simpledialog.askstring("Copy Knowledge Graph", f"Enter the copy name of the Knowledge Graph '{knowledge_graph_name}': ", parent = self)
-                        if knowledge_graph_name_new:
-                            knowledge_graph_path = os.path.join(DATA_PATH, "knowledge_graphs")
-                            if (new_name_check(knowledge_graph_name_new, knowledge_graph_path, showinfo="messagebox", keyword="Knowledge Graph", parent_item = self) == 0): 
-                                copy_knowledge_graph(knowledge_graph_name, knowledge_graph_name_new, showinfo="messagebox", parent_item = self)
-                                config.toggle_list_created = False; create_toggle_list()
-                                show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully copied as '{knowledge_graph_name_new}'.", parent_item = self)
-
-                    def export_knowledge_graph(): 
-                        '''
-                        Export the Knowledge Graph as a zip file
-                        '''
-                        pass
-
-                    modify_menu_list = tkinter.Menu(self.toggle_item_modify, tearoff=0)
-                    modify_menu_list.add_command(label="Rename the Knowledge Graph", command = rename_knowledge_graph)
-                    modify_menu_list.add_command(label="Delete the Knowledge Graph", command = delete_knowledge_graph)
-                    modify_menu_list.add_command(label="Copy the Knowledge Graph", command = copy_knowledge_graph_menu)
-                    modify_menu_list.add_command(label="Export the Knowledge Grpah (to be completed)", command = export_knowledge_graph)
-                    modify_menu_list.post(event.x_root, event.y_root)
-                
-                self.menu_open = False
-                self.toggle_item_modify.itemconfigure("modify", fill=color_tuple_to_rgb(config.default_grey_color))
-
-            '''
-            Click the item and change the focus
-            '''
-            def click_toggle_item(self, event): 
-
-                config.toggle_selected = self.toggle_info[1]
-                self.toggle_info[2][0] = not self.toggle_info[2][0]
-                if (debug == 1): print (f"Change focus to {config.toggle_selected}")
-                config.toggle_list_created = False; create_toggle_list()
-
-            def __init__(self, master, toggle_display_name, toggle_info, bold=False):
-
-                super().__init__(master, bg=color_tuple_to_rgb(config.left_panel_color))
-                self.pack_propagate(False)
-                self.toggle_info = toggle_info
-                self.menu_open = False
-                self.label = tk.Label(self, text=toggle_display_name, font=(config.standard_font_family, config.standard_font_size, "bold" if bold else "normal"), anchor = "w", 
-                                      fg=color_tuple_to_rgb(config.VSCode_font_grey_color), bg=color_tuple_to_rgb(config.left_panel_color), 
-                                      relief="flat", borderwidth=0)
-                if (self.toggle_info[1].startswith("knowledge_graphs") or (self.toggle_info[1].startswith("environments"))): 
-                    self.toggle_item_modify = tk.Canvas(self, width=config.toggle_create_new_modify_width, height=config.toggle_create_new_modify_height, 
-                                                bg=color_tuple_to_rgb(config.left_panel_color), highlightthickness=0, relief='ridge')
-                    self.toggle_item_modify.pack (side = 'right', padx = 0, pady = 0)
-                    self.toggle_item_modify.bind('<Configure>', self.configure_canvas_modify)
-                    self.toggle_item_modify.bind("<Enter>", self.modify_hover)
-                    self.toggle_item_modify.bind("<Leave>", self.modify_leave)
-                    self.toggle_item_modify.bind("<Button-1>", self.modify_menu)
-
-                self.label.pack (side = "top", fill = "x")
-                if (config.toggle_selected == self.toggle_info[1]): 
-                    self.configure(bg=color_tuple_to_rgb(config.clicked_grey_color))
-                    self.label.configure(bg=color_tuple_to_rgb(config.clicked_grey_color))
-                    if (self.toggle_info[1].startswith("knowledge_graphs") or self.toggle_info[1].startswith("environments")): 
-                        self.toggle_item_modify.configure(bg=color_tuple_to_rgb(config.clicked_grey_color))
-
-                self.configure(height=config.toggle_item_height, width=config.left_panel_width - config.left_panel_sidebar_width)
-                self.bind("<Button-1>", self.click_toggle_item)
-                self.label.bind("<Button-1>", self.click_toggle_item)
-
-                '''
-                WARNING Some platforms may use Button-3 instead
-                '''
-                if (True): 
-                    self.bind("<Button-2>", self.modify_menu)
-                    self.label.bind("<Button-2>", self.modify_menu)
-                    self.toggle_item_modify.bind("<Button-2>", self.modify_menu)
-        
         def create_toggle_list_recursive(master, toggle_level, toggle_info): 
             '''
             Creates the toggle list (for Environments, or Knowledge Graphs)
             '''
+            class Toggle_Item(tk.Frame): 
+                '''
+                Toggle Item class objects in the left panel main
+                '''
+
+                def configure_canvas_modify(self, event): 
+                    '''
+                    Generates the modify sign. 
+                    '''
+                    canvas_width = config.toggle_modify_width
+                    canvas_height = config.toggle_modify_height
+                    self.toggle_item_modify.delete("modify")
+                    self.toggle_item_modify.config(width=canvas_width, height=canvas_height)
+                    self.toggle_item_modify.create_oval(canvas_width * 0.25, canvas_height * 0.25, canvas_height * 0.75, canvas_height * 0.75, fill=color_tuple_to_rgb(config.default_grey_color), tags="modify", outline = color_tuple_to_rgb(config.left_panel_color))
+
+                def modify_menu(self, event, key_pressed = None): 
+                    '''
+                    Display the menu when right clicking the toggle item. 
+                    '''
+                    if (key_pressed == "<BackSpace>" and ((self.toggle_info[1] != config.toggle_selected) or ('/' not in self.toggle_info[1]))): return
+
+                    self.menu_open = True
+                    if (self.toggle_info[1] == "environments"): 
+                        '''
+                        Environment toggle item
+                        '''
+                        def create_environment_menu(): 
+                            '''
+                            Create a new Environment
+                            '''
+                            environment_name = simpledialog.askstring("Create Environment", "Enter the name of the environment: ", parent = self)
+                            if environment_name:
+                                environment_path = os.path.join(DATA_PATH, "environments")
+                                if (new_name_check(environment_name, environment_path, showinfo="messagebox", keyword="Environment", parent_item = self) == 0): 
+                                    create_environment(environment_name)
+                                    config.toggle_list_created = False; create_toggle_list()
+                                    show_popup_message(f"Environment '{environment_name}' successfully created.", parent_item = self)
+                        
+                        def import_environment(): 
+                            '''
+                            Import a new Environment
+                            '''
+                            pass
+
+                        modify_menu_list = tkinter.Menu(self.toggle_item_modify, tearoff=0)
+                        modify_menu_list.add_command(label="Create an Environment", command = create_environment_menu)
+                        modify_menu_list.add_command(label="Import an Environment (to be completed)", command = import_environment)
+                        modify_menu_list.post(event.x_root, event.y_root)
+
+                    elif (self.toggle_info[1].startswith("environments") and self.toggle_info[1].count('/') == 1): 
+                        '''
+                        Environment's Knowledge Graph toggle item
+                        '''
+                        environment_name = self.toggle_info[1].split('/')[1]
+
+                        def rename_environment(): 
+                            '''
+                            Rename the Environment
+                            '''
+                            environment_name_new = simpledialog.askstring("Rename Environment", f"Enter the new name of the Environment '{environment_name}': ", parent = self)
+                            if environment_name_new:
+                                environment_path = os.path.join(DATA_PATH, "environments")
+                                if (new_name_check(environment_name_new, environment_path, showinfo="messagebox", keyword="Environment", parent_item = self) == 0): 
+                                    if (create_environment(environment_name_new, environment_name, showinfo="messagebox") == 0): 
+                                        if (environment_name == config.CURRENT_ENV): 
+                                            config.CURRENT_ENV = environment_name_new
+                                        config.toggle_list_created = False; create_toggle_list()
+                                        show_popup_message(f"Environment '{environment_name}' successfully renamed to '{environment_name_new}'.", parent_item = self.toggle_item_modify)
+                                    else: show_popup_message(f"Environment '{environment_name}' rename FAILED.", parent_item = self.toggle_item_modify)
+
+                        def delete_environment(): 
+                            '''
+                            Delete the Environment
+                            '''
+                            if environment_name == config.CURRENT_ENV:
+                                messagebox.showwarning("Cannot Delete", "Cannot delete the Current Environment.", parent = self)
+                            else:
+                                confirm = messagebox.askyesno("Confirm Environment Deletion", f"Are you sure you want to delete the Environment '{environment_name}'?", parent = self)
+                                if confirm:
+                                    environment_path = os.path.join(DATA_PATH, "environments")
+                                    try:
+                                        shutil.rmtree(os.path.join(environment_path, environment_name))
+                                        config.toggle_list_created = False; create_toggle_list()
+                                        show_popup_message(f"Environment '{environment_name}' successfully deleted.", parent_item = self)
+                                    except OSError:
+                                        messagebox.showerror("Environment Deletion Failed", f"Environment '{environment_name}' deletion FAILED.", parent = self)
+
+                        def copy_environment_menu(): 
+                            '''
+                            Copy the Environment
+                            '''
+                            environment_name_new = simpledialog.askstring("Copy Environment", f"Enter the copy name of the Environment '{environment_name}': ", parent = self)
+                            if environment_name_new:
+                                environment_path = os.path.join(DATA_PATH, "environments")
+                                if (new_name_check(environment_name_new, environment_path, showinfo="messagebox", keyword="Environment", parent_item = self) == 0): 
+                                    copy_environment(environment_name, environment_name_new, showinfo="messagebox")
+                                    config.toggle_list_created = False; create_toggle_list()
+                                    show_popup_message(f"Environment '{environment_name}' successfully copied as '{environment_name_new}'.", parent_item = self)
+
+                        def set_as_current_environment(): 
+                            '''
+                            Set the Environment as the Current Environment
+                            '''
+                            config.CURRENT_ENV = environment_name
+                            config.toggle_list_created = False; create_toggle_list()
+                            show_popup_message(f"Environment '{environment_name}' successfully set as the Current Environment.", parent_item = self)
+
+                        def add_knowledge_graphs(): 
+                            '''
+                            Add Knowledge Graphs to the Environment
+                            '''
+                            select_knowledge_graph_window = tk.Toplevel(self)
+                            select_knowledge_graph_window.title(f"Select Knowledge Graphs for the Environment '{environment_name}'")
+                            select_knowledge_graph_window.resizable(width = False, height = False)
+                            knowledge_graph_names = os.listdir(os.path.join(DATA_PATH, "knowledge_graphs")) 
+                            knowledge_graph_names.sort (key = lambda name: name.lower())
+                            knowledge_graph_names_current = os.listdir(os.path.join(DATA_PATH, self.toggle_info[1])) 
+                            knowledge_graph_names = [name for name in knowledge_graph_names if name not in knowledge_graph_names_current]
+                            knowledge_graph_list = None
+
+                            if (knowledge_graph_names): select_knowledge_graph_prompt = tk.Label(select_knowledge_graph_window, text = f"Select all Knowledge Graphs to be added from the below list. ", font = (config.standard_font_family, int(config.standard_font_size * 1.2)), padx = 10, pady = 10)
+                            else: select_knowledge_graph_prompt = tk.Label(select_knowledge_graph_window, text = f"No Knowledge Graphs are available! ", font = (config.standard_font_family, int(config.standard_font_size * 1.2)), padx = 10, pady = 10)
+                            select_knowledge_graph_prompt.pack(side = "top", anchor = "n")
+                            if (knowledge_graph_names): 
+                                select_knowledge_graph_frame = tk.Frame(select_knowledge_graph_window, bg = color_tuple_to_rgb(config.left_panel_color))
+                                select_knowledge_graph_frame.pack(side = "top", anchor = "n", fill = "both", padx = 10, pady = 0)
+                                knowledge_graph_list = Listbox(select_knowledge_graph_frame, selectmode = "multiple", 
+                                                            bg = color_tuple_to_rgb(config.left_panel_color), 
+                                                            fg = color_tuple_to_rgb(config.VSCode_font_grey_color), 
+                                                            selectbackground = color_tuple_to_rgb(config.VSCode_highlight_color), 
+                                                            selectforeground = color_tuple_to_rgb(config.left_panel_color), 
+                                                            font = (config.standard_font_family, config.standard_font_size), 
+                                                            height = len(knowledge_graph_names), activestyle='none')
+                                for knowledge_graph_name in knowledge_graph_names: knowledge_graph_list.insert("end", f"{knowledge_graph_name}")
+                                if (len(knowledge_graph_names) > 12): 
+                                    select_knowledge_graph_frame_scrollbar = Scrollbar(select_knowledge_graph_frame)
+                                    select_knowledge_graph_frame_scrollbar.pack(side = "right", fill = "y")
+                                    select_knowledge_graph_frame_scrollbar.config(command = knowledge_graph_list.yview, yscrollcommand = select_knowledge_graph_frame_scrollbar.set) 
+                                    select_knowledge_graph_window.geometry(f'600x300+{max(event.x_root-300, 0)}+{max(event.y_root-150, 0)}')
+                                else: 
+                                    select_knowledge_graph_window.geometry(f'600x{84+18*len(knowledge_graph_names)}+{max(event.x_root-300, 0)}+{max(int(event.y_root-(84+18*len(knowledge_graph_names))/2), 0)}')
+                                knowledge_graph_list.pack(fill='x', expand=True)
+                            '''
+                            Cancel and OK buttons
+                            '''
+                            button_frame = tkinter.Frame (select_knowledge_graph_window)
+                            button_frame.pack (side = 'top', fill = 'x', expand = True)
+                            def select_knowledge_graph_cancel(event): 
+                                select_knowledge_graph_window.destroy()
+                                select_knowledge_graph_window.update()
+                            def select_knowledge_graph_OK(event): 
+                                selected_items = [knowledge_graph_names[item] for item in knowledge_graph_list.curselection()]
+                                success_items = environment_add_knowledge_graphs(environment_name, selected_items)
+                                select_knowledge_graph_window.destroy()
+                                select_knowledge_graph_window.update()
+                                config.toggle_list_created = False; create_toggle_list()
+                                show_popup_message (f"Knowledge Graphs {', '.join([f"'{item}'" for item in success_items])} successfully added to the Environment '{environment_name}'.")
+                            if (knowledge_graph_names): 
+                                Cancel_button = tkinter.Button(button_frame, text = "Cancel")
+                                Cancel_button.pack (side = 'left', padx = 100)
+                                Cancel_button.bind("<Button-1>", lambda event: select_knowledge_graph_cancel (event))
+                                OK_button = tkinter.Button(button_frame, text = "OK")
+                                OK_button.pack (side = 'right', padx = 100)
+                                OK_button.bind("<Button-1>", lambda event: select_knowledge_graph_OK (event))
+                            else: 
+                                Cancel_button = tkinter.Button(button_frame, text = "Cancel")
+                                Cancel_button.pack (side = 'top')
+                                Cancel_button.bind("<Button-1>", lambda event: select_knowledge_graph_cancel (event))
+
+                        def export_environment(): 
+                            '''
+                            Export the whole environment as a Zip file
+                            '''
+                            pass
+
+                        if (key_pressed == "<BackSpace>"): delete_environment(); return
+                        modify_menu_list = tkinter.Menu(self.toggle_item_modify, tearoff=0)
+                        modify_menu_list.add_command(label="Rename the Environment", command = rename_environment)
+                        modify_menu_list.add_command(label="Delete the Environment", command = delete_environment)
+                        modify_menu_list.add_command(label="Copy the Environment", command = copy_environment_menu)
+                        modify_menu_list.add_command(label="Set as the current", command = set_as_current_environment)
+                        modify_menu_list.add_command(label="Add Knowledge Graphs", command = add_knowledge_graphs)
+                        modify_menu_list.add_command(label="Export the Environment (to be completed)", command = export_environment)
+                        modify_menu_list.post(event.x_root, event.y_root)
+
+                    elif (self.toggle_info[1].startswith("environments") and self.toggle_info[1].count('/') == 2): 
+
+                        environment_name = self.toggle_info[1].split('/')[1]
+                        knowledge_graph_name = self.toggle_info[1].split('/')[2]
+
+                        def rename_knowledge_graph(): 
+                            '''
+                            Rename the Knowledge Graph inside an environment
+                            '''
+                            knowledge_graph_name_new = simpledialog.askstring("Rename Knowledge Graph", f"Enter the new name of the Knowledge Graph '{knowledge_graph_name}': ", parent = self)
+                            if knowledge_graph_name_new:
+                                if (environment_rename_knowledge_graph(environment_name, knowledge_graph_name_new, knowledge_graph_name, showinfo = "messagebox", parent_item = self) == 0): 
+                                    config.toggle_list_created = False; create_toggle_list()
+                                    show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully renamed to '{knowledge_graph_name_new}' inside Environment '{environment_name}'.", parent_item = self)
+
+                        def delete_knowledge_graph(): 
+                            '''
+                            Delete the Knowledge Graph inside an environment
+                            '''
+                            confirm = messagebox.askyesno("Confirm Knowledge Graph Deletion", f"Are you sure you want to delete the Knowledge Graph '{knowledge_graph_name}'?", parent = self)
+                            if confirm:
+                                knowledge_graph_path = os.path.join(DATA_PATH, "environments", environment_name, knowledge_graph_name)
+                                try:
+                                    shutil.rmtree(knowledge_graph_path)
+                                    config.toggle_list_created = False; create_toggle_list()
+                                    show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' inside Environment {environment_name} successfully deleted.", parent_item = self)
+                                except OSError:
+                                    messagebox.showerror("Knowledge Graph Deletion Failed", f"Knowledge Graph '{knowledge_graph_name}' inside Environment '{environment_name}' deletion FAILED.", parent = self)
+
+                        def copy_knowledge_graph_menu(): 
+                            '''
+                            Copy the Knowledge Graph inside an environment
+                            '''
+                            knowledge_graph_name_new = simpledialog.askstring("Rename Knowledge Graph", f"Enter the copy name of the Knowledge Graph '{knowledge_graph_name}': ", parent = self)
+                            if knowledge_graph_name_new:
+                                knowledge_graph_path = os.path.join(DATA_PATH, "environments", environment_name)
+                                if (new_name_check(knowledge_graph_name_new, knowledge_graph_path, showinfo="messagebox", keyword="Knowledge Graph", parent_item = self) == 0): 
+                                    if (copy_knowledge_graph(knowledge_graph_name, knowledge_graph_name_new, environment_name, showinfo="messagebox", parent_item = self) == 0): 
+                                        config.toggle_list_created = False; create_toggle_list()
+                                        show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully copied as '{knowledge_graph_name_new}'.", parent_item = self)
+                                    else: show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' copy FAILED.", parent_item = self)
+
+                        def save_to_knowledge_graph(): 
+                            '''
+                            Save the Knowledge Graph to the Knowledge Graph folder
+                            '''
+                            knowledge_graph_export_path = os.path.join(DATA_PATH, "knowledge_graphs")
+                            if (new_name_check(knowledge_graph_name, knowledge_graph_export_path, showinfo="messagebox", keyword="Knowledge Graph", parent_item = self) == 0): 
+                                shutil.copytree(os.path.join(DATA_PATH, "environments", environment_name, knowledge_graph_name), os.path.join(knowledge_graph_export_path, knowledge_graph_name))
+                                config.toggle_list_created = False; create_toggle_list()
+                                show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully saved to the Knowledge Graph folder.", parent_item = self)
+
+                        if (key_pressed == "<BackSpace>"): delete_knowledge_graph(); return
+                        modify_menu_list = tkinter.Menu(self.toggle_item_modify, tearoff=0)
+                        modify_menu_list.add_command(label="Rename the Knowledge Graph", command = rename_knowledge_graph)
+                        modify_menu_list.add_command(label="Delete the Knowledge Graph", command = delete_knowledge_graph)
+                        modify_menu_list.add_command(label="Copy the Knowledge Graph", command = copy_knowledge_graph_menu)
+                        modify_menu_list.add_command(label="Save the Knowledge Graph", command = save_to_knowledge_graph)
+                        modify_menu_list.post(event.x_root, event.y_root)
+
+                    elif (self.toggle_info[1] == "knowledge_graphs"): 
+                        '''
+                        Knowledge graph folder toggle item
+                        '''
+                        def create_knowledge_graph_menu(): 
+                            '''
+                            Create a knowledge graph from the menu. 
+                            '''
+                            graph_name = simpledialog.askstring("Create Knowledge Graph", "Enter the name of the Knowledge Graph: ", parent = self)
+                            if graph_name:
+                                graph_path = os.path.join(DATA_PATH, "knowledge_graphs")
+                                if (new_name_check(graph_name, graph_path, showinfo="messagebox", keyword="Knowledge Graph", parent_item = self) == 0): 
+                                    create_knowledge_graph(graph_name)
+                                    config.toggle_list_created = False; create_toggle_list()
+                                    show_popup_message(f"Knowledge Graph '{graph_name}' successfully created.", parent_item = self)
+                        
+                        def import_knowledge_graph(): 
+                            '''
+                            '''
+                            pass
+
+                        modify_menu_list = tkinter.Menu(self.toggle_item_modify, tearoff=0)
+                        modify_menu_list.add_command(label="Create a Knowledge Graph", command = create_knowledge_graph_menu)
+                        modify_menu_list.add_command(label="Import a Knowledge Graph (to be completed)", command = import_knowledge_graph)
+                        modify_menu_list.post(event.x_root, event.y_root)
+                    
+                    elif (self.toggle_info[1].startswith("knowledge_graphs") and self.toggle_info[1].count('/') == 1): 
+                        '''
+                        Single Knowledge Graph toggle item
+                        '''
+                        knowledge_graph_name = self.toggle_info[1].split('/')[1]
+
+                        def rename_knowledge_graph(): 
+                            '''
+                            Rename the Knowledge Graph
+                            '''
+                            knowledge_graph_name_new = simpledialog.askstring("Rename Knowledge Graph", f"Enter the new name of the Knowledge Graph '{knowledge_graph_name}': ", parent = self)
+                            if knowledge_graph_name_new:
+                                knowledge_graph_path = os.path.join(DATA_PATH, "knowledge_graphs")
+                                if (new_name_check(knowledge_graph_name_new, knowledge_graph_path, showinfo="messagebox", keyword="Knowledge Graph", parent_item = self) == 0): 
+                                    if (create_knowledge_graph(knowledge_graph_name_new, knowledge_graph_name, showinfo="messagebox") == 0): 
+                                        config.toggle_list_created = False; create_toggle_list()
+                                        show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully renamed to '{knowledge_graph_name_new}'.", parent_item = self)
+                                else: show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' rename FAILED.", parent_item = self)
+
+                        def delete_knowledge_graph(): 
+                            '''
+                            Delete the Knowledge Graph
+                            '''
+                            confirm = messagebox.askyesno("Confirm Knowledge Graph Deletion", f"Are you sure you want to delete the Knowledge Graph '{knowledge_graph_name}'?", parent = self)
+                            if confirm:
+                                knowledge_graph_path = os.path.join(DATA_PATH, "knowledge_graphs")
+                                try:
+                                    shutil.rmtree(os.path.join(knowledge_graph_path, knowledge_graph_name))
+                                    config.toggle_list_created = False; create_toggle_list()
+                                    show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully deleted.", parent_item = self)
+                                except OSError:
+                                    messagebox.showerror("Knowledge Graph Deletion Failed", f"Knowledge Graph '{knowledge_graph_name}' deletion FAILED.", parent = self)
+
+                        def copy_knowledge_graph_menu(): 
+                            '''
+                            Copy the Knowledge Graph
+                            '''
+                            knowledge_graph_name_new = simpledialog.askstring("Copy Knowledge Graph", f"Enter the copy name of the Knowledge Graph '{knowledge_graph_name}': ", parent = self)
+                            if knowledge_graph_name_new:
+                                knowledge_graph_path = os.path.join(DATA_PATH, "knowledge_graphs")
+                                if (new_name_check(knowledge_graph_name_new, knowledge_graph_path, showinfo="messagebox", keyword="Knowledge Graph", parent_item = self) == 0): 
+                                    copy_knowledge_graph(knowledge_graph_name, knowledge_graph_name_new, showinfo="messagebox", parent_item = self)
+                                    config.toggle_list_created = False; create_toggle_list()
+                                    show_popup_message(f"Knowledge Graph '{knowledge_graph_name}' successfully copied as '{knowledge_graph_name_new}'.", parent_item = self)
+
+                        def export_knowledge_graph(): 
+                            '''
+                            Export the Knowledge Graph as a zip file
+                            '''
+                            pass
+
+                        if (key_pressed == "<BackSpace>"): delete_knowledge_graph(); return
+                        modify_menu_list = tkinter.Menu(self.toggle_item_modify, tearoff=0)
+                        modify_menu_list.add_command(label="Rename the Knowledge Graph", command = rename_knowledge_graph)
+                        modify_menu_list.add_command(label="Delete the Knowledge Graph", command = delete_knowledge_graph)
+                        modify_menu_list.add_command(label="Copy the Knowledge Graph", command = copy_knowledge_graph_menu)
+                        modify_menu_list.add_command(label="Export the Knowledge Grpah (to be completed)", command = export_knowledge_graph)
+                        modify_menu_list.post(event.x_root, event.y_root)
+                    
+                    self.menu_open = False
+
+                '''
+                Click the item and change the focus
+                '''
+                def click_toggle_item(self, event): 
+
+                    config.toggle_selected = self.toggle_info[1]
+                    self.toggle_info[2][0] = not self.toggle_info[2][0]
+                    if (debug == 1): print (f"Change focus to {config.toggle_selected}")
+                    self.bind("<BackSpace>", lambda event: self.modify_menu(event, key_pressed = "<BackSpace>"))
+                    self.focus_set()
+                    config.toggle_list_created = False; create_toggle_list()
+
+                def __init__(self, master, toggle_display_name, toggle_info, bold=False):
+
+                    super().__init__(master, bg=color_tuple_to_rgb(config.left_panel_color))
+                    self.pack_propagate(False)
+                    self.toggle_info = toggle_info
+                    self.menu_open = False
+                    self.label = tk.Label(self, text=toggle_display_name, font=(config.standard_font_family, config.standard_font_size, "bold" if bold else "normal"), anchor = "w", 
+                                        fg=color_tuple_to_rgb(config.VSCode_font_grey_color), bg=color_tuple_to_rgb(config.left_panel_color), 
+                                        relief="flat", borderwidth=0)
+                    if (self.toggle_info[1].startswith("knowledge_graphs") or (self.toggle_info[1].startswith("environments"))): 
+                        self.toggle_item_modify = tk.Canvas(self, width=config.toggle_modify_width, height=config.toggle_modify_height, 
+                                                    bg=color_tuple_to_rgb(config.left_panel_color), highlightthickness=0, relief='ridge')
+                        self.toggle_item_modify.pack (side = 'right', padx = 0, pady = 0)
+                        self.toggle_item_modify.bind('<Configure>', self.configure_canvas_modify)
+                        self.toggle_item_modify.bind("<Button-1>", self.modify_menu)
+
+                    self.label.pack (side = "top", fill = "x")
+                    if (config.toggle_selected == self.toggle_info[1]): 
+                        self.configure(bg=color_tuple_to_rgb(config.clicked_grey_color))
+                        self.label.configure(bg=color_tuple_to_rgb(config.clicked_grey_color))
+                        if (self.toggle_info[1].startswith("knowledge_graphs") or self.toggle_info[1].startswith("environments")): 
+                            self.toggle_item_modify.configure(bg=color_tuple_to_rgb(config.clicked_grey_color))
+
+                    self.configure(height=config.toggle_item_height, width=config.left_panel_width - config.left_panel_sidebar_width)
+                    self.bind("<Button-1>", self.click_toggle_item)
+                    self.label.bind("<Button-1>", self.click_toggle_item)
+
+                    '''
+                    WARNING Some platforms may use Button-3 instead
+                    TO BE COMPLETED
+                    '''
+                    if (True): 
+                        self.bind("<Button-2>", self.modify_menu)
+                        self.label.bind("<Button-2>", self.modify_menu)
+                        self.toggle_item_modify.bind("<Button-2>", self.modify_menu)
+            
             if (toggle_info[3] != None): display_name = '  ' * toggle_level + ('▿  ' if toggle_info[2][0] else '▹  ') + toggle_info[0]
             else: display_name = '  ' * toggle_level + '   ' + toggle_info[0]
             if (toggle_info[1].startswith("environments") and toggle_info[1].count('/') == 1 and toggle_info[1].split('/')[1] == config.CURRENT_ENV): 
@@ -734,17 +820,17 @@ def main():
             return total_height
         
         def create_toggle_list(): 
+            '''
+            Create the toggle list under the left panel
+            '''
 
             if (not config.toggle_list_created): 
-
                 if (config.toggle_list): config.toggle_list.pack_forget()
 
                 '''
                 Generate the toggle environment name list
                 Check whether the previous state is valid: Remove missed environments
                 '''
-                # from pprint import pprint
-                # pprint (config.toggle_list_states)
                 environment_dict = dict()
                 if ("environments" in config.toggle_list_states): 
                     environment_dict = config.toggle_list_states["environments"][3]
@@ -816,10 +902,10 @@ def main():
 
         def resize_window(): 
             '''
-            Resizes the main window. Toggle lists, and other elements will be recreated when appropriate. 
+            Resizes the main window. Toggle lists, etc. will be rendered again when appropriate. 
             '''
-            if (debug == 0): print (f"Event triggered ({new_ID()}): {window.geometry()}")
-            window_geometry = list(map(int, window.geometry().replace('x', ' ').replace('+', ' ').split(' ')))
+            if (debug == 0): print (f"Event triggered ({new_ID()}): {config.window.geometry()}")
+            window_geometry = list(map(int, config.window.geometry().replace('x', ' ').replace('+', ' ').split(' ')))
             config.window_width = window_geometry[0]
             config.window_height = window_geometry[1]
 
@@ -839,37 +925,44 @@ def main():
             config.right_panel.configure (height = config.window_height)
             config.left_panel_change_arrow.place(x = config.left_panel_width - 3 * config.boundary_width, y = config.window_height - 4 * config.boundary_width, anchor = tkinter.SE)
             config.right_panel_change_arrow.place(x = 1 * config.boundary_width, y = config.window_height - 4 * config.boundary_width, anchor = tk.SW)
-
-            '''
-            Configure the environment and Knowledge Graph toggle lists
-            '''
             create_toggle_list()
 
-        '''
-        Create the main window
-        '''
-        window = tkinter.Tk()
-        window.title("RTSAI")
-        if (debug == 0): print (f"sys.platform: {sys.platform}")
-        if (sys.platform.startswith("darwin")): window.iconphoto(False, ImageTk.PhotoImage(Image.open(f"{PACKAGE_PATH}/assets/images/RTSAI_logo_iconphoto.png")))
-        else: window.iconbitmap(False, ImageTk.PhotoImage(Image.open(f"{PACKAGE_PATH}/assets/images/RTSAI_logo_iconphoto.png"))) # to be tested
-        window.geometry(f"{config.window_width}x{config.window_height}")
-        window.maxsize(config.window_width_max, config.window_height_max)
-        window.minsize(config.window_width_min, config.window_height_min)
+        def show_tabbar(): 
+            config.right_panel_tabbar = tk.Frame(config.right_panel, height=config.right_panel_tabbar_height, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
+            config.right_panel_tabbar.pack(side='top', fill='x')
+        
+        def hide_tabbar(): 
+            if config.right_panel_tabbar:
+                config.right_panel_tabbar.pack_forget()
+                config.right_panel_tabbar = None
 
-        '''
-        Create the window components
-        '''
-        create_left_panel()
-        create_right_panel()
-        config.toggle_list_created = False
-        create_toggle_list()
+        def create_main_window(): 
+            '''
+            Create the main window
+            '''
+            config.window = tkinter.Tk()
+            config.window.title("RTSAI")
+            if (debug == 0): print (f"sys.platform: {sys.platform}")
+            if (sys.platform.startswith("darwin")): 
+                config.window.iconphoto(False, ImageTk.PhotoImage(Image.open(f"{PACKAGE_PATH}/assets/images/RTSAI_logo_iconphoto.png")))
+            else: 
+                '''
+                TO BE COMPLETED (Tested)
+                '''
+                config.window.iconbitmap(False, ImageTk.PhotoImage(Image.open(f"{PACKAGE_PATH}/assets/images/RTSAI_logo_iconphoto.png")))
+            config.window.geometry(f"{config.window_width}x{config.window_height}")
+            config.window.maxsize(config.window_width_max, config.window_height_max)
+            config.window.minsize(config.window_width_min, config.window_height_min)
 
-        '''
-        Starts running the main window
-        '''
-        window.bind("<Configure>", lambda event: resize_window())
-        window.mainloop()
+            '''
+            Create the window components
+            '''
+            create_left_panel(config.window)
+            create_right_panel(config.window)
+            config.window.bind("<Configure>", lambda event: resize_window())
+
+        create_main_window()
+        config.window.mainloop()
 
     elif (sys.argv[1] == "graph"): 
 

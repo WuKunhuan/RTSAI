@@ -34,6 +34,7 @@ DESKTOP_SIZE = tuple(pyautogui.size())
 RTSAI UI Components
 No Need to Change
 '''
+window = None
 left_panel = None
 left_panel_sidebar = None
 left_panel_main = None
@@ -41,6 +42,8 @@ right_panel = None
 right_panel_tabbar = None
 right_panel_main = None
 left_panel_change_arrow = None
+left_panel_sidebar_chat = None
+left_panel_sidebar_crawl = None
 right_panel_change_arrow = None
 
 toggle_list = None
@@ -83,6 +86,6 @@ standard_font_size = 12
 toggle_item_padx = 5
 toggle_item_pady = 2
 toggle_item_height = standard_font_size * 1.5 + 2 * toggle_item_pady
-toggle_create_new_modify_width = toggle_item_height - 2 * toggle_item_pady
-toggle_create_new_modify_height = toggle_item_height - 2 * toggle_item_pady
+toggle_modify_width = toggle_item_height - 2 * toggle_item_pady
+toggle_modify_height = toggle_item_height - 2 * toggle_item_pady
 
