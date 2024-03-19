@@ -209,13 +209,52 @@ def main():
             The editor tabs inside the tab bar
             '''
             def draw_tab_status(self): 
-                pass
+                canvas_width = config.right_panel_tabbar_height - self.active_bar_thickness; 
+                canvas_height = config.right_panel_tabbar_height - self.active_bar_thickness; 
+                self.tab_status.delete("tab_status_indicator")
+                if (self.tab_status_display == "HOVER"): 
+                    cross_points = [
+                        canvas_width * 0.3, canvas_height * 0.2,  
+                        canvas_width * 0.5, canvas_height * 0.4,  
+                        canvas_width * 0.7, canvas_height * 0.2,  
+                        canvas_width * 0.8, canvas_height * 0.3,  
+                        canvas_width * 0.6, canvas_height * 0.5, 
+                        canvas_width * 0.8, canvas_height * 0.7,  
+                        canvas_width * 0.7, canvas_height * 0.8, 
+                        canvas_width * 0.5, canvas_height * 0.6,  
+                        canvas_width * 0.3, canvas_height * 0.8,  
+                        canvas_width * 0.2, canvas_height * 0.7,  
+                        canvas_width * 0.4, canvas_height * 0.5, 
+                        canvas_width * 0.2, canvas_height * 0.3,  
+                    ]
+                    self.tab_status.create_polygon(cross_points, tags = "tab_status_indicator", fill = color_tuple_to_rgb(config.VSCode_font_grey_color))
+                elif (self.tab_status == "MODIFIED"): 
+                    self.tab_status.create_oval(canvas_width * 0.25, canvas_height * 0.25, canvas_height * 0.75, canvas_height * 0.75, tags = "tab_status_indicator", fill = color_tuple_to_rgb(config.VSCode_font_grey_color))
+                else: pass # == "SAVED"
 
             def hover_tab_status(self): 
-                pass
+                self.tab_status_display = "HOVER"; self.draw_tab_status()
+                if (not config.editor_tab_on_focus == self.id): 
+                    self.tab_label.configure(bg = color_tuple_to_rgb(config.right_panel_color))
+                    self.tab_status.configure(bg = color_tuple_to_rgb(config.right_panel_color))
 
             def leave_tab_status(self): 
-                pass
+                self.tab_status_display = "DEFAULT"; self.draw_tab_status()
+                if (not config.editor_tab_on_focus == self.id): 
+                    self.tab_label.configure(bg = color_tuple_to_rgb(config.left_panel_color))
+                    self.tab_status.configure(bg = color_tuple_to_rgb(config.left_panel_color))
+            
+            def click_tab(self): 
+                config.editor_tab_on_focus = self.id
+                config.tabbar_created = False; show_tabbar()
+
+            def close_tab(self): 
+                config.editor_states = config.editor_states[0:self.id] + config.editor_states[self.id+1:]
+                if (config.editor_tab_on_focus == self.id): config.editor_tab_on_focus = -1
+                elif (config.editor_tab_on_focus > self.id): config.editor_tab_on_focus -= 1
+                config.tabbar_created = False; 
+                if (config.editor_states): show_tabbar()
+                else: hide_tabbar()
 
             def measure_label_width(self, label): 
                 label_text = label.cget("text")
@@ -224,28 +263,36 @@ def main():
                 if (debug == 0): print (f"Label width measuring: '{label_text}' [{label_width}]")
                 return (label_width)
 
-            def __init__(self, master, tab_type, tab_value, tab_display_name, tab_status): 
-                super().__init__(master, bg = color_tuple_to_rgb(config.VSCode_new_color), 
+            def __init__(self, id, master, tab_type, tab_value, tab_display_name, tab_status): 
+                super().__init__(master, bg = color_tuple_to_rgb(config.left_panel_color), 
                                  highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), 
                                  highlightthickness=config.boundary_width)
                 
-                self.tab_type = tab_type; self.tab_value = tab_value
+                self.id = id; self.tab_type = tab_type; self.tab_value = tab_value
                 self.tab_display_name = tab_display_name; 
                 self.tab_status = tab_status; 
-                self.tab_status_display = "DOT"
+                self.tab_status_display = "DEFAULT"
+                self.active_bar_thickness = 4
 
                 self.font = (config.standard_font_family, config.standard_font_size)
+                self.tab_active_bar = tkinter.Frame(self, height = self.active_bar_thickness, bg = color_tuple_to_rgb(config.right_panel_color))
                 self.tab_label = tkinter.Label(self, text = tab_display_name, font = self.font, 
-                                            bg = color_tuple_to_rgb(config.VSCode_highlight_color), fg = color_tuple_to_rgb(config.VSCode_font_grey_color), )
+                                            fg = color_tuple_to_rgb(config.VSCode_font_grey_color)) # No need to specify height
                 tab_label_width = math.ceil(self.measure_label_width(self.tab_label) / config.label_width_ratio)
                 self.tab_label.configure(width = tab_label_width)
-                self.tab_status = tkinter.Canvas(self, height = config.right_panel_tabbar_height, highlightthickness=0, 
-                                            bg = color_tuple_to_rgb(config.left_panel_color))
-                tab_status_width = config.right_panel_tabbar_height
+                self.tab_status = tkinter.Canvas(self, height = config.right_panel_tabbar_height - self.active_bar_thickness, highlightthickness=0)
+                if (config.editor_tab_on_focus == self.id or self.tab_status_display == "HOVER"): 
+                    self.tab_active_bar.configure(bg = color_tuple_to_rgb(config.VSCode_highlight_color))
+                    self.tab_label.configure(bg = color_tuple_to_rgb(config.boundary_grey_color))
+                    self.tab_status.configure(bg = color_tuple_to_rgb(config.boundary_grey_color))
+                else: 
+                    self.tab_label.configure(bg = color_tuple_to_rgb(config.left_panel_color))
+                    self.tab_status.configure(bg = color_tuple_to_rgb(config.left_panel_color))
+                tab_status_width = config.right_panel_tabbar_height - self.active_bar_thickness
                 self.tab_status.configure(width = tab_status_width)
                 self.width = int((tab_label_width + 1) * config.label_width_ratio + tab_status_width)
                 self.configure(width = self.width) 
-
+                self.tab_active_bar.pack(side = 'top', fill = 'x')
                 self.tab_label.pack(side = 'left', expand = False); 
                 self.tab_status.pack(side = 'left', expand = False)
                 self.bind("<Configure>", lambda event: self.draw_tab_status())
@@ -253,6 +300,8 @@ def main():
                 self.tab_status.bind("<Enter>", lambda event: self.hover_tab_status())
                 self.tab_label.bind("<Leave>", lambda event: self.leave_tab_status())
                 self.tab_status.bind("<Leave>", lambda event: self.leave_tab_status())
+                self.tab_label.bind("<Button-1>", lambda event: self.click_tab())
+                self.tab_status.bind("<Button-1>", lambda event: self.close_tab())
 
         class Left_Panel_Toggle_Item(tk.Frame): 
             '''
@@ -702,10 +751,16 @@ def main():
             '''
             pass
 
-        def show_tabbar(): 
+        def show_tabbar(tabbar_width = None): 
+
+            if (not tabbar_width): 
+                tabbar_width = config.right_panel.winfo_width() - 4 * config.boundary_width
+            if (config.tabbar_created): return
+            else: config.tabbar_created = True
             if (not config.right_panel): return
             else: 
                 if (config.right_panel_tabbar): config.right_panel_tabbar.pack_forget()
+                if (config.right_panel_tabbar_scrollbar): config.right_panel_tabbar_scrollbar.pack_forget()
                 config.right_panel_main.pack_forget()
             config.right_panel_tabbar = tk.Canvas(config.right_panel, height=config.right_panel_tabbar_height, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
             config.right_panel_tabbar.pack(side='top', fill='x')
@@ -713,18 +768,17 @@ def main():
             tab_frame = tk.Frame(config.right_panel_tabbar); # tab_frame.pack(side = 'left', fill = 'both')
             config.right_panel_tabbar.create_window((0, 0), window=tab_frame, anchor="nw", tags="tab_frame")
             
-            for editor_tab in config.editor_states: 
+            for tab_id, editor_tab in enumerate(config.editor_states): 
                 tab_type = editor_tab[0][0]; tab_value = editor_tab[0][1]
                 tab_display_name = editor_tab[0][2]; tab_status = editor_tab[1]
-                new_tab = Editor_Tab(tab_frame, tab_type, tab_value, tab_display_name, tab_status)
+                new_tab = Editor_Tab(tab_id, tab_frame, tab_type, tab_value, tab_display_name, tab_status)
                 total_width += new_tab.width; 
                 new_tab.pack(side = 'left')
-            print  (total_width, config.right_panel.winfo_width() - 4 * config.boundary_width)
-            if (total_width > config.right_panel.winfo_width() - 4 * config.boundary_width): 
-                tab_scrollbar = tk.Scrollbar(config.right_panel, orient="horizontal", command=config.right_panel_tabbar.xview)
-                config.right_panel_tabbar.configure(xscrollcommand=tab_scrollbar.set)
-                tab_scrollbar.pack(side='top', fill='x')
-                # config.right_panel_tabbar.create_window((0, 0), window=tab_frame, anchor="nw", tags="tab_frame")
+                if (debug == 1): print (f"Tab '{editor_tab[0][2]}' opened. Length: {total_width}/{tabbar_width}")
+            if (config.right_panel.winfo_width() != 1 and total_width > tabbar_width): 
+                config.right_panel_tabbar_scrollbar = tk.Scrollbar(config.right_panel, orient="horizontal", command=config.right_panel_tabbar.xview, width = config.right_panel_tabbar_scrollbar_width) # color setting options do not work
+                config.right_panel_tabbar.configure(xscrollcommand=config.right_panel_tabbar_scrollbar.set)
+                config.right_panel_tabbar_scrollbar.pack(side='top', fill='x')
                 def tab_frame_configure(event): 
                     config.right_panel_tabbar.configure(scrollregion=config.right_panel_tabbar.bbox("all"))
                 tab_frame.bind("<Configure>", tab_frame_configure)
@@ -792,7 +846,8 @@ def main():
 
             def open_editor(tab_type, tab_value, tab_display_name): 
                 config.editor_states.append([(tab_type, tab_value, tab_display_name), "SAVED"])
-                show_tabbar()
+                config.editor_tab_on_focus = len(config.editor_states) - 1
+                config.tabbar_created = False; show_tabbar()
 
             def draw_sidebar_crawl(parent_canvas): 
                 '''
@@ -838,7 +893,7 @@ def main():
                 config.left_panel_sidebar_chat.bind("<Button-1>", lambda event: open_editor("CHAT", config.CURRENT_ENV, config.CURRENT_ENV))
                 config.left_panel_sidebar_crawl = Left_Sidebar_Icon()
                 config.left_panel_sidebar_crawl.bind("<Configure>", lambda event: draw_sidebar_crawl(config.left_panel_sidebar_crawl))
-                config.left_panel_sidebar_crawl.bind("<Button-1>", lambda event: open_editor("CRAWL", "Web Crawl", "wwww"))
+                config.left_panel_sidebar_crawl.bind("<Button-1>", lambda event: open_editor("CRAWL", "Web Crawl", "Web Crawl"))
 
             def draw_left_panel_arrow(event):
                 canvas_width = config.left_panel_change_arrow.winfo_width()
@@ -861,6 +916,7 @@ def main():
                     config.left_panel_relwidth = config.left_panel_relwidth_max
                 config.left_panel_width = int(config.left_panel_relwidth * config.window_width)
                 config.left_panel.configure(width=config.left_panel_width)
+                config.tabbar_created = False; show_tabbar(tabbar_width = config.window_width - config.left_panel_width - 4 * config.boundary_width)
 
             def hover_left_panel_arrow(event):
                 config.left_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.VSCode_highlight_color))
@@ -917,6 +973,7 @@ def main():
                     left_panel_width = int(config.left_panel_relwidth * config.window_width)
                 config.left_panel_width = left_panel_width
                 config.left_panel.configure(width = config.left_panel_width)
+                config.tabbar_created = False; show_tabbar(tabbar_width = config.window_width - config.left_panel_width - 4 * config.boundary_width)
 
             def arrow_hover(event):
                 config.right_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.VSCode_highlight_color))
@@ -926,7 +983,6 @@ def main():
 
             config.right_panel = tk.Frame(window, bg=color_tuple_to_rgb(config.right_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
             config.right_panel.pack(side='left', fill='both', expand=True)
-
             config.right_panel_main = tk.Frame(config.right_panel, bg=color_tuple_to_rgb(config.right_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
             config.right_panel_main.pack(side='top', fill='both', expand=True)
             config.right_panel_change_arrow = tk.Canvas(config.right_panel, width=config.size_increase_arrow_width, height=config.size_increase_arrow_height, bg=color_tuple_to_rgb(config.right_panel_color), highlightthickness=0, relief='ridge')

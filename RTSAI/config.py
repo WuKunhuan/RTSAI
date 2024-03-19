@@ -59,8 +59,9 @@ toggle_item_on_focus = None # The current selected toggle item
 toggle_list_operations = [] # A list of operations done; for reverting purposes (max. 100 operations)
 toggle_list_operation_current = 0  # The operation corresponding to the current state
 
-editor_states = [] # Sequential order of opened editors: (editor tab: (type, value, display), status)
-editor_item_on_focus = 0 # The current selected editor; id of the editor_states
+tabbar_created = False
+editor_states = [] # Sequential order of opened editors: [editor tab: (type, value, display), status]
+editor_tab_on_focus = -1 # The current selected editor; id of the editor_states
 editor_item_operations = dict() # key: editor_item; value: l[ist of operations done on this item (max. 100 operations); operation_current]
 
 label_width_ratio = 8
@@ -80,7 +81,9 @@ left_panel_relwidth_max = 0.4;
 left_panel_sidebar_width = 50
 
 right_panel_color = (31, 31, 31)
-right_panel_tabbar_height = 20
+right_panel_tabbar_height = 25
+right_panel_tabbar_scrollbar = None
+right_panel_tabbar_scrollbar_width = 10
 
 size_increase_arrow_width = 25; 
 size_increase_arrow_height = 12.5; 
