@@ -1,5 +1,5 @@
 
-import os, sys, pyautogui
+import os, sys, pyautogui, random
 
 '''
 Package information
@@ -44,8 +44,12 @@ window = None
 left_panel = None
 left_panel_sidebar = None
 left_panel_main = None
+left_panel_main_scrollbar = None
+left_panel_main_scrollbar_position = None
 right_panel = None
 right_panel_tabbar = None
+right_panel_tabbar_scrollbar = None
+right_panel_tabbar_scrollbar_position = None
 right_panel_main = None
 left_panel_change_arrow = None
 left_panel_sidebar_chat = None
@@ -54,12 +58,13 @@ right_panel_change_arrow = None
 
 toggle_list = None
 toggle_list_created = False
+toggle_list_scrollbar_created = False
 toggle_list_states = dict()
 toggle_item_on_focus = None # The current selected toggle item
 toggle_list_operations = [] # A list of operations done; for reverting purposes (max. 100 operations)
 toggle_list_operation_current = 0  # The operation corresponding to the current state
-
 tabbar_created = False
+tabbar_scrollbar_created = False
 editor_states = [] # Sequential order of opened editors: [editor tab: (type, value, display), status]
 editor_tab_on_focus = -1 # The current selected editor; id of the editor_states
 editor_item_operations = dict() # key: editor_item; value: l[ist of operations done on this item (max. 100 operations); operation_current]
@@ -79,10 +84,10 @@ left_panel_width = 240;
 left_panel_width_min = 200; 
 left_panel_relwidth_max = 0.4; 
 left_panel_sidebar_width = 50
+left_panel_main_scrollbar_width = 10
 
 right_panel_color = (31, 31, 31)
 right_panel_tabbar_height = 25
-right_panel_tabbar_scrollbar = None
 right_panel_tabbar_scrollbar_width = 10
 
 size_increase_arrow_width = 25; 
@@ -99,9 +104,25 @@ VSCode_font_grey_color = (204, 204, 204)
 
 standard_font_family = "Consolas"
 standard_font_size = 12
+
 toggle_item_padx = 5
 toggle_item_pady = 2
 toggle_item_height = standard_font_size * 1.5 + 2 * toggle_item_pady
 toggle_modify_width = toggle_item_height - 2 * toggle_item_pady
 toggle_modify_height = toggle_item_height - 2 * toggle_item_pady
+
+random_color_list = [
+    (235, 75, 66), #RED
+    (239, 138, 74), #ORANGE
+    (250, 227, 131), #YELLOW
+    (172, 223, 125), #GREEN
+    (109, 213, 184), #TURQUISE
+    (107, 173, 248), #BLUE
+    (208, 117, 248), #PURPLE
+    (238, 124, 185), #PINK
+    (187, 154, 110), #BROWN
+]
+random.shuffle(random_color_list)
+chat_icon_color = random_color_list[0]
+crawl_icon_color = random_color_list[1]
 

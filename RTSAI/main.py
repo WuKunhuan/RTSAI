@@ -24,10 +24,11 @@ def new_ID():
     global ID_counter; ID_counter += 1
     return ID_counter
 
-'''
-Package setup
-'''
 def setup(): 
+    '''
+    RTSAI Package setup
+    '''
+
     '''
     For MacOS: Remove .DS_Store
     '''
@@ -49,6 +50,12 @@ def setup():
             src_dir = os.path.join(PRE_INSTALLED_KG_PATH, graph_name)
             dst_dir = os.path.join(knowledge_graphs_path, graph_name)
             shutil.copytree(src_dir, dst_dir)
+
+def color_tuple_to_rgb (color_tuple): 
+    '''
+    Convert color tuples to rgb string
+    '''
+    return ("#%02x%02x%02x" % color_tuple)
 
 def show_popup_message(message, title = "Message", parent_item = None):
     import tkinter
@@ -199,111 +206,36 @@ def main():
         Create the RTSAI graphical window
         '''
         import tkinter
-        import tkinter as tk
         from tkinter import simpledialog, Scrollbar, Listbox, messagebox
         from tkinter.font import Font
         from PIL import Image, ImageTk
 
-        class Editor_Tab(tk.Frame): 
+
+        class Left_Sidebar_Icon(tkinter.Canvas):
             '''
-            The editor tabs inside the tab bar
+            The left sidebar icon objects
             '''
-            def draw_tab_status(self): 
-                canvas_width = config.right_panel_tabbar_height - self.active_bar_thickness; 
-                canvas_height = config.right_panel_tabbar_height - self.active_bar_thickness; 
-                self.tab_status.delete("tab_status_indicator")
-                if (self.tab_status_display == "HOVER"): 
-                    cross_points = [
-                        canvas_width * 0.3, canvas_height * 0.2,  
-                        canvas_width * 0.5, canvas_height * 0.4,  
-                        canvas_width * 0.7, canvas_height * 0.2,  
-                        canvas_width * 0.8, canvas_height * 0.3,  
-                        canvas_width * 0.6, canvas_height * 0.5, 
-                        canvas_width * 0.8, canvas_height * 0.7,  
-                        canvas_width * 0.7, canvas_height * 0.8, 
-                        canvas_width * 0.5, canvas_height * 0.6,  
-                        canvas_width * 0.3, canvas_height * 0.8,  
-                        canvas_width * 0.2, canvas_height * 0.7,  
-                        canvas_width * 0.4, canvas_height * 0.5, 
-                        canvas_width * 0.2, canvas_height * 0.3,  
-                    ]
-                    self.tab_status.create_polygon(cross_points, tags = "tab_status_indicator", fill = color_tuple_to_rgb(config.VSCode_font_grey_color))
-                elif (self.tab_status == "MODIFIED"): 
-                    self.tab_status.create_oval(canvas_width * 0.25, canvas_height * 0.25, canvas_height * 0.75, canvas_height * 0.75, tags = "tab_status_indicator", fill = color_tuple_to_rgb(config.VSCode_font_grey_color))
-                else: pass # == "SAVED"
+            def __init__(self, hover_color = config.VSCode_highlight_color):
+                super().__init__(master = config.left_panel_sidebar, width=config.left_panel_sidebar_width, height=config.left_panel_sidebar_width, 
+                                    bg=color_tuple_to_rgb(config.left_panel_color), highlightthickness=0)
+                self.hovered = False
+                self.hover_color = hover_color
+                self.items_in_panel = []
+                self.bind("<Enter>", self.on_enter)
+                self.bind("<Leave>", self.on_leave)
+                self.pack(side = "top")
 
-            def hover_tab_status(self): 
-                self.tab_status_display = "HOVER"; self.draw_tab_status()
-                if (not config.editor_tab_on_focus == self.id): 
-                    self.tab_label.configure(bg = color_tuple_to_rgb(config.right_panel_color))
-                    self.tab_status.configure(bg = color_tuple_to_rgb(config.right_panel_color))
+            def on_enter(self, event): 
+                self.hovered = True
+                for item in self.items_in_panel: 
+                    self.itemconfigure(item, fill=color_tuple_to_rgb(self.hover_color))
 
-            def leave_tab_status(self): 
-                self.tab_status_display = "DEFAULT"; self.draw_tab_status()
-                if (not config.editor_tab_on_focus == self.id): 
-                    self.tab_label.configure(bg = color_tuple_to_rgb(config.left_panel_color))
-                    self.tab_status.configure(bg = color_tuple_to_rgb(config.left_panel_color))
-            
-            def click_tab(self): 
-                config.editor_tab_on_focus = self.id
-                config.tabbar_created = False; show_tabbar()
+            def on_leave(self, event):
+                self.hovered = False
+                for item in self.items_in_panel: 
+                    self.itemconfigure(item, fill=color_tuple_to_rgb(config.VSCode_font_grey_color))
 
-            def close_tab(self): 
-                config.editor_states = config.editor_states[0:self.id] + config.editor_states[self.id+1:]
-                if (config.editor_tab_on_focus == self.id): config.editor_tab_on_focus = -1
-                elif (config.editor_tab_on_focus > self.id): config.editor_tab_on_focus -= 1
-                config.tabbar_created = False; 
-                if (config.editor_states): show_tabbar()
-                else: hide_tabbar()
-
-            def measure_label_width(self, label): 
-                label_text = label.cget("text")
-                font = Font(font=label.cget("font"))
-                label_width = font.measure(label_text)
-                if (debug == 0): print (f"Label width measuring: '{label_text}' [{label_width}]")
-                return (label_width)
-
-            def __init__(self, id, master, tab_type, tab_value, tab_display_name, tab_status): 
-                super().__init__(master, bg = color_tuple_to_rgb(config.left_panel_color), 
-                                 highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), 
-                                 highlightthickness=config.boundary_width)
-                
-                self.id = id; self.tab_type = tab_type; self.tab_value = tab_value
-                self.tab_display_name = tab_display_name; 
-                self.tab_status = tab_status; 
-                self.tab_status_display = "DEFAULT"
-                self.active_bar_thickness = 4
-
-                self.font = (config.standard_font_family, config.standard_font_size)
-                self.tab_active_bar = tkinter.Frame(self, height = self.active_bar_thickness, bg = color_tuple_to_rgb(config.right_panel_color))
-                self.tab_label = tkinter.Label(self, text = tab_display_name, font = self.font, 
-                                            fg = color_tuple_to_rgb(config.VSCode_font_grey_color)) # No need to specify height
-                tab_label_width = math.ceil(self.measure_label_width(self.tab_label) / config.label_width_ratio)
-                self.tab_label.configure(width = tab_label_width)
-                self.tab_status = tkinter.Canvas(self, height = config.right_panel_tabbar_height - self.active_bar_thickness, highlightthickness=0)
-                if (config.editor_tab_on_focus == self.id or self.tab_status_display == "HOVER"): 
-                    self.tab_active_bar.configure(bg = color_tuple_to_rgb(config.VSCode_highlight_color))
-                    self.tab_label.configure(bg = color_tuple_to_rgb(config.boundary_grey_color))
-                    self.tab_status.configure(bg = color_tuple_to_rgb(config.boundary_grey_color))
-                else: 
-                    self.tab_label.configure(bg = color_tuple_to_rgb(config.left_panel_color))
-                    self.tab_status.configure(bg = color_tuple_to_rgb(config.left_panel_color))
-                tab_status_width = config.right_panel_tabbar_height - self.active_bar_thickness
-                self.tab_status.configure(width = tab_status_width)
-                self.width = int((tab_label_width + 1) * config.label_width_ratio + tab_status_width)
-                self.configure(width = self.width) 
-                self.tab_active_bar.pack(side = 'top', fill = 'x')
-                self.tab_label.pack(side = 'left', expand = False); 
-                self.tab_status.pack(side = 'left', expand = False)
-                self.bind("<Configure>", lambda event: self.draw_tab_status())
-                self.tab_label.bind("<Enter>", lambda event: self.hover_tab_status())
-                self.tab_status.bind("<Enter>", lambda event: self.hover_tab_status())
-                self.tab_label.bind("<Leave>", lambda event: self.leave_tab_status())
-                self.tab_status.bind("<Leave>", lambda event: self.leave_tab_status())
-                self.tab_label.bind("<Button-1>", lambda event: self.click_tab())
-                self.tab_status.bind("<Button-1>", lambda event: self.close_tab())
-
-        class Left_Panel_Toggle_Item(tk.Frame): 
+        class Left_Panel_Toggle_Item(tkinter.Frame): 
             '''
             Toggle Item class objects in the left panel main
             '''
@@ -413,7 +345,7 @@ def main():
                         '''
                         Add Knowledge Graphs to the Environment
                         '''
-                        select_knowledge_graph_window = tk.Toplevel(self)
+                        select_knowledge_graph_window = tkinter.Toplevel(self)
                         select_knowledge_graph_window.title(f"Select Knowledge Graphs for the Environment '{environment_name}'")
                         select_knowledge_graph_window.resizable(width = False, height = False)
                         knowledge_graph_names = os.listdir(os.path.join(DATA_PATH, "knowledge_graphs")) 
@@ -422,16 +354,16 @@ def main():
                         knowledge_graph_names = [name for name in knowledge_graph_names if name not in knowledge_graph_names_current]
                         knowledge_graph_list = None
 
-                        if (not knowledge_graph_names): select_knowledge_graph_prompt = tk.Label(select_knowledge_graph_window, text = f"No Knowledge Graphs are available! ", font = (config.standard_font_family, int(config.standard_font_size * 1.2)), padx = 10, pady = 10); return
+                        if (not knowledge_graph_names): select_knowledge_graph_prompt = tkinter.Label(select_knowledge_graph_window, text = f"No Knowledge Graphs are available! ", font = (config.standard_font_family, int(config.standard_font_size * 1.2)), padx = 10, pady = 10); return
 
                         if (len(knowledge_graph_names) > 12): 
-                            select_knowledge_graph_prompt = tk.Label(select_knowledge_graph_window, text = f"Select all Knowledge Graphs to be added from the below list. \nPlease scroll down to see the full list ({len(knowledge_graph_names)} items). ", font = (config.standard_font_family, int(config.standard_font_size * 1.2)), padx = 10, pady = 10)
+                            select_knowledge_graph_prompt = tkinter.Label(select_knowledge_graph_window, text = f"Select all Knowledge Graphs to be added from the below list. \nPlease scroll down to see the full list ({len(knowledge_graph_names)} items). ", font = (config.standard_font_family, int(config.standard_font_size * 1.2)), padx = 10, pady = 10)
                             select_knowledge_graph_prompt.pack(side = "top", anchor = "n")
                         else: 
-                            select_knowledge_graph_prompt = tk.Label(select_knowledge_graph_window, text = f"Select all Knowledge Graphs to be added from the below list. ", font = (config.standard_font_family, int(config.standard_font_size * 1.2)), padx = 10, pady = 10)
+                            select_knowledge_graph_prompt = tkinter.Label(select_knowledge_graph_window, text = f"Select all Knowledge Graphs to be added from the below list. ", font = (config.standard_font_family, int(config.standard_font_size * 1.2)), padx = 10, pady = 10)
                             select_knowledge_graph_prompt.pack(side = "top", anchor = "n")
                         
-                        select_knowledge_graph_frame = tk.Frame(select_knowledge_graph_window, bg = color_tuple_to_rgb(config.left_panel_color))
+                        select_knowledge_graph_frame = tkinter.Frame(select_knowledge_graph_window, bg = color_tuple_to_rgb(config.left_panel_color))
                         select_knowledge_graph_frame.pack(side = "top", anchor = "n", fill = "both", padx = 10, pady = 0)
                         knowledge_graph_list = Listbox(select_knowledge_graph_frame, selectmode = "multiple", 
                                                     bg = color_tuple_to_rgb(config.left_panel_color), 
@@ -447,19 +379,6 @@ def main():
                             select_knowledge_graph_window.geometry(f'600x{int((292-12*16.8)+16.8*len(knowledge_graph_names))}+{max(event.x_root-300, 0)}+{max(int(event.y_root-(84+18*len(knowledge_graph_names))/2), 0)}')
                         knowledge_graph_list.pack(fill='x', expand=True)
                             
-                        
-
-
-
-
-
-
-
-
-
-
-
-
                         '''
                         Cancel and OK buttons
                         '''
@@ -495,12 +414,12 @@ def main():
 
                     if (key_pressed == "<BackSpace>"): delete_environment(); return
                     modify_menu_list = tkinter.Menu(self.toggle_item_modify, tearoff=0)
-                    modify_menu_list.add_command(label="Rename the Environment", command = rename_environment)
-                    modify_menu_list.add_command(label="Delete the Environment", command = delete_environment)
-                    modify_menu_list.add_command(label="Copy the Environment", command = copy_environment_menu)
-                    modify_menu_list.add_command(label="Set as the current", command = set_as_current_environment)
-                    modify_menu_list.add_command(label="Add Knowledge Graphs", command = add_knowledge_graphs)
-                    modify_menu_list.add_command(label="Export the Environment (to be completed)", command = export_environment)
+                    modify_menu_list.add_command(label=f"Rename the Environment '{environment_name}'", command = rename_environment)
+                    modify_menu_list.add_command(label=f"Delete the Environment '{environment_name}'", command = delete_environment)
+                    modify_menu_list.add_command(label=f"Copy the Environment '{environment_name}'", command = copy_environment_menu)
+                    modify_menu_list.add_command(label=f"Set '{environment_name}' as the Current Environment", command = set_as_current_environment)
+                    modify_menu_list.add_command(label=f"Add Knowledge Graphs to the Environment '{environment_name}'", command = add_knowledge_graphs)
+                    modify_menu_list.add_command(label=f"Export the Environment '{environment_name}' (to be completed)", command = export_environment)
                     modify_menu_list.post(event.x_root, event.y_root)
 
                 elif (self.toggle_info[1].startswith("environments") and self.toggle_info[1].count('/') == 2): 
@@ -557,10 +476,10 @@ def main():
 
                     if (key_pressed == "<BackSpace>"): delete_knowledge_graph(); return
                     modify_menu_list = tkinter.Menu(self.toggle_item_modify, tearoff=0)
-                    modify_menu_list.add_command(label="Rename the Knowledge Graph", command = rename_knowledge_graph)
-                    modify_menu_list.add_command(label="Delete the Knowledge Graph", command = delete_knowledge_graph)
-                    modify_menu_list.add_command(label="Copy the Knowledge Graph", command = copy_knowledge_graph_menu)
-                    modify_menu_list.add_command(label="Save the Knowledge Graph", command = save_to_knowledge_graph)
+                    modify_menu_list.add_command(label=f"Rename the Knowledge Graph '{knowledge_graph_name}'", command = rename_knowledge_graph)
+                    modify_menu_list.add_command(label=f"Delete the Knowledge Graph '{knowledge_graph_name}'", command = delete_knowledge_graph)
+                    modify_menu_list.add_command(label=f"Copy the Knowledge Graph '{knowledge_graph_name}'", command = copy_knowledge_graph_menu)
+                    modify_menu_list.add_command(label=f"Save the Knowledge Graph '{knowledge_graph_name}'", command = save_to_knowledge_graph)
                     modify_menu_list.post(event.x_root, event.y_root)
 
                 elif (self.toggle_info[1] == "knowledge_graphs"): 
@@ -642,10 +561,10 @@ def main():
 
                     if (key_pressed == "<BackSpace>"): delete_knowledge_graph(); return
                     modify_menu_list = tkinter.Menu(self.toggle_item_modify, tearoff=0)
-                    modify_menu_list.add_command(label="Rename the Knowledge Graph", command = rename_knowledge_graph)
-                    modify_menu_list.add_command(label="Delete the Knowledge Graph", command = delete_knowledge_graph)
-                    modify_menu_list.add_command(label="Copy the Knowledge Graph", command = copy_knowledge_graph_menu)
-                    modify_menu_list.add_command(label="Export the Knowledge Grpah (to be completed)", command = export_knowledge_graph)
+                    modify_menu_list.add_command(label=f"Rename the Knowledge Graph '{knowledge_graph_name}'", command = rename_knowledge_graph)
+                    modify_menu_list.add_command(label=f"Delete the Knowledge Graph '{knowledge_graph_name}'", command = delete_knowledge_graph)
+                    modify_menu_list.add_command(label=f"Copy the Knowledge Graph '{knowledge_graph_name}'", command = copy_knowledge_graph_menu)
+                    modify_menu_list.add_command(label=f"Export the Knowledge Grpah '{knowledge_graph_name}' (to be completed)", command = export_knowledge_graph)
                     modify_menu_list.post(event.x_root, event.y_root)
                 
                 self.menu_open = False
@@ -655,9 +574,7 @@ def main():
             '''
             def click_toggle_item(self, event): 
 
-                config.toggle_item_on_focus = self.toggle_info[1]
                 self.toggle_info[2][0] = not self.toggle_info[2][0]
-                if (debug == 1): print (f"Change focus to {config.toggle_item_on_focus}")
                 '''
                 Bind BackSpace to delete the current Environment / Knowledge Graph
                 Bind Command + Z (MAC SYSTEM) to revert; Bind Command + Shift + Z
@@ -668,7 +585,13 @@ def main():
                 Set the current focus to Toggle List -> Current Item
                 '''
                 self.focus_set()
-                config.toggle_list_created = False; create_toggle_list()
+                if (config.toggle_item_on_focus == self.toggle_info[1]): 
+                    config.toggle_list_created = False; create_toggle_list()
+                    self.modify_toggle_item(event)
+                else: 
+                    config.toggle_item_on_focus = self.toggle_info[1]
+                    config.toggle_list_created = False; create_toggle_list()
+                    if (debug == 1): print (f"Change focus to {self.toggle_info[1]}")
 
             def __init__(self, master, toggle_display_name, toggle_info, bold=False):
 
@@ -676,11 +599,11 @@ def main():
                 self.pack_propagate(False)
                 self.toggle_info = toggle_info
                 self.menu_open = False
-                self.label = tk.Label(self, text=toggle_display_name, font=(config.standard_font_family, config.standard_font_size, "bold" if bold else "normal"), anchor = "w", 
+                self.label = tkinter.Label(self, text=toggle_display_name, font=(config.standard_font_family, config.standard_font_size, "bold" if bold else "normal"), anchor = "w", 
                                     fg=color_tuple_to_rgb(config.VSCode_font_grey_color), bg=color_tuple_to_rgb(config.left_panel_color), 
                                     relief="flat", borderwidth=0)
                 if (self.toggle_info[1].startswith("knowledge_graphs") or (self.toggle_info[1].startswith("environments"))): 
-                    self.toggle_item_modify = tk.Canvas(self, width=config.toggle_modify_width, height=config.toggle_modify_height, 
+                    self.toggle_item_modify = tkinter.Canvas(self, width=config.toggle_modify_width, height=config.toggle_modify_height, 
                                                 bg=color_tuple_to_rgb(config.left_panel_color), highlightthickness=0, relief='ridge')
                     self.toggle_item_modify.pack (side = 'right', padx = 0, pady = 0)
                     self.toggle_item_modify.bind('<Configure>', self.configure_canvas_modify)
@@ -699,18 +622,207 @@ def main():
 
                 '''
                 WARNING Some platforms may use Button-3 instead
-                TO BE COMPLETED
+                TO BE COMPLETED / VERIFIED
                 '''
                 if (True): 
                     self.bind("<Button-2>", self.modify_toggle_item)
                     self.label.bind("<Button-2>", self.modify_toggle_item)
                     self.toggle_item_modify.bind("<Button-2>", self.modify_toggle_item)
 
-        def color_tuple_to_rgb (color_tuple): 
+        class Right_Panel_Tab(tkinter.Frame): 
             '''
-            Convert color tuples to rgb string
+            The editor tabs inside the tab bar
             '''
-            return ("#%02x%02x%02x" % color_tuple)
+
+            def draw_tab_icon_status(self): 
+                '''
+                Draw tab icon and status
+                '''
+
+                canvas_width = config.right_panel_tabbar_height - self.active_bar_thickness; 
+                canvas_height = config.right_panel_tabbar_height - self.active_bar_thickness; 
+                self.tab_status.delete("tab_status_indicator")
+                '''
+                Draw tab icon
+                '''
+                if (self.tab_type == "CHAT"): draw_chat_icon(self.tab_icon, color_tuple_to_rgb(config.chat_icon_color))
+                elif (self.tab_type == "CRAWL"): draw_crawl_icon(self.tab_icon, color_tuple_to_rgb(config.crawl_icon_color))
+                '''
+                Draw tab status
+                '''
+                if (self.tab_status_display == "HOVER"): 
+                    cross_points = [
+                        canvas_width * 0.3, canvas_height * 0.2,  
+                        canvas_width * 0.5, canvas_height * 0.4,  
+                        canvas_width * 0.7, canvas_height * 0.2,  
+                        canvas_width * 0.8, canvas_height * 0.3,  
+                        canvas_width * 0.6, canvas_height * 0.5, 
+                        canvas_width * 0.8, canvas_height * 0.7,  
+                        canvas_width * 0.7, canvas_height * 0.8, 
+                        canvas_width * 0.5, canvas_height * 0.6,  
+                        canvas_width * 0.3, canvas_height * 0.8,  
+                        canvas_width * 0.2, canvas_height * 0.7,  
+                        canvas_width * 0.4, canvas_height * 0.5, 
+                        canvas_width * 0.2, canvas_height * 0.3,  
+                    ]
+                    self.tab_status.create_polygon(cross_points, tags = "tab_status_indicator", fill = color_tuple_to_rgb(config.VSCode_font_grey_color))
+                elif (self.tab_status == "MODIFIED"): 
+                    self.tab_status.create_oval(canvas_width * 0.25, canvas_height * 0.25, canvas_height * 0.75, canvas_height * 0.75, tags = "tab_status_indicator", fill = color_tuple_to_rgb(config.VSCode_font_grey_color))
+                else: pass # == "SAVED"
+
+            def hover_tab(self): 
+                self.tab_status_display = "HOVER"; self.draw_tab_icon_status()
+                if (not config.editor_tab_on_focus == self.id): 
+                    self.tab_label.configure(bg = color_tuple_to_rgb(config.right_panel_color))
+                    self.tab_status.configure(bg = color_tuple_to_rgb(config.right_panel_color))
+
+            def leave_tab(self): 
+                self.tab_status_display = "DEFAULT"; self.draw_tab_icon_status()
+                if (not config.editor_tab_on_focus == self.id): 
+                    self.tab_label.configure(bg = color_tuple_to_rgb(config.left_panel_color))
+                    self.tab_status.configure(bg = color_tuple_to_rgb(config.left_panel_color))
+            
+            def click_tab(self): 
+                if (config.editor_tab_on_focus != self.id): 
+                    config.editor_tab_on_focus = self.id
+                    config.tabbar_created = False; show_tabbar()
+                    # NEED TO render the right panel main
+
+            def close_tab(self): 
+                config.editor_states = config.editor_states[0:self.id] + config.editor_states[self.id+1:]
+                if (config.editor_tab_on_focus == self.id): 
+                    config.editor_tab_on_focus = -1
+                    # NEED TO render the right panel main
+                elif (config.editor_tab_on_focus > self.id): config.editor_tab_on_focus -= 1
+                config.tabbar_created = False; 
+                if (config.editor_states): show_tabbar()
+                else: hide_tabbar()
+
+            def measure_tab_label_width(self, label): 
+                label_text = label.cget("text")
+                font = Font(font=label.cget("font"))
+                label_width = font.measure(label_text)
+                if (debug == 0): print (f"Label width measuring: '{label_text}' [{label_width}]")
+                return (label_width)
+
+            def __init__(self, id, master, tab_type, tab_value, tab_display_name, tab_status): 
+                super().__init__(master, bg = color_tuple_to_rgb(config.left_panel_color), 
+                                 highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), 
+                                 highlightthickness=config.boundary_width)
+                
+                self.id = id; self.tab_type = tab_type; self.tab_value = tab_value
+                self.tab_display_name = tab_display_name; 
+                self.tab_status = tab_status; 
+                self.tab_status_display = "DEFAULT"
+                self.active_bar_thickness = 4
+
+                self.font = (config.standard_font_family, config.standard_font_size)
+                self.tab_active_bar = tkinter.Frame(self, height = self.active_bar_thickness, bg = color_tuple_to_rgb(config.right_panel_color))
+                self.tab_icon = tkinter.Canvas(self, height = config.right_panel_tabbar_height - self.active_bar_thickness, highlightthickness=0)
+                self.tab_label = tkinter.Label(self, text = tab_display_name, font = self.font, 
+                                            fg = color_tuple_to_rgb(config.VSCode_font_grey_color))
+                self.tab_status = tkinter.Canvas(self, height = config.right_panel_tabbar_height - self.active_bar_thickness, highlightthickness=0)
+
+                if (config.editor_tab_on_focus == self.id or self.tab_status_display == "HOVER"): 
+                    self.tab_active_bar.configure(bg = color_tuple_to_rgb(config.VSCode_highlight_color))
+                    self.tab_icon.configure(bg = color_tuple_to_rgb(config.boundary_grey_color))
+                    self.tab_label.configure(bg = color_tuple_to_rgb(config.boundary_grey_color))
+                    self.tab_status.configure(bg = color_tuple_to_rgb(config.boundary_grey_color))
+                else: 
+                    self.tab_icon.configure(bg = color_tuple_to_rgb(config.left_panel_color))
+                    self.tab_label.configure(bg = color_tuple_to_rgb(config.left_panel_color))
+                    self.tab_status.configure(bg = color_tuple_to_rgb(config.left_panel_color))
+                
+                '''
+                Configure the width of items
+                '''
+                tab_label_width = math.ceil(self.measure_tab_label_width(self.tab_label) / config.label_width_ratio)
+                self.tab_label.configure(width = tab_label_width)
+                tab_icon_width = config.right_panel_tabbar_height - self.active_bar_thickness
+                tab_status_width = config.right_panel_tabbar_height - self.active_bar_thickness
+                self.tab_icon.configure(width = tab_icon_width)
+                self.tab_status.configure(width = tab_status_width)
+                self.width = int(tab_icon_width + (tab_label_width + 1) * config.label_width_ratio + tab_status_width)
+                self.configure(width = self.width) 
+
+                self.tab_active_bar.pack(side = 'top', fill = 'x')
+                self.tab_icon.pack(side = 'left', expand = False)
+                self.tab_label.pack(side = 'left', expand = False)
+                self.tab_status.pack(side = 'left', expand = False)
+
+                '''
+                Bind tab events
+                '''
+                self.bind("<Configure>", lambda event: self.draw_tab_icon_status())
+                self.tab_icon.bind("<Enter>", lambda event: self.hover_tab())
+                self.tab_label.bind("<Enter>", lambda event: self.hover_tab())
+                self.tab_status.bind("<Enter>", lambda event: self.hover_tab())
+                self.tab_icon.bind("<Leave>", lambda event: self.leave_tab())
+                self.tab_label.bind("<Leave>", lambda event: self.leave_tab())
+                self.tab_status.bind("<Leave>", lambda event: self.leave_tab())
+                self.tab_label.bind("<Button-1>", lambda event: self.click_tab())
+                self.tab_status.bind("<Button-1>", lambda event: self.close_tab())
+
+        def draw_chat_icon(parent_canvas, fill = color_tuple_to_rgb(config.VSCode_font_grey_color)): 
+            '''
+            Draw the chat logo
+            '''
+            canvas_width = parent_canvas.winfo_width()
+            canvas_height = parent_canvas.winfo_height()
+            parent_canvas.delete("item_1_rectangle")
+            parent_canvas.delete("item_2_triangle")
+            def round_rectangle_points(x1, y1, x2, y2, radius): 
+                return([
+                    x1+radius, y1, x1+radius, y1, x2-radius, y1, x2-radius, y1,
+                    x2, y1, x2, y1+radius, x2, y1+radius, x2, y2-radius,
+                    x2, y2-radius, x2, y2, x2-radius, y2, x2-radius, y2,
+                    x1+radius, y2, x1+radius, y2, x1, y2, x1, y2-radius,
+                    x1, y2-radius, x1, y1+radius, x1, y1+radius, x1, y1
+                ])
+            item_1_rectangle_coords = round_rectangle_points(0.2 * canvas_width, 0.2 * canvas_height, 0.8 * canvas_width, 0.6 * canvas_height, 0.2 * canvas_height)
+            item_2_triangle_coords = [
+                canvas_width * 0.35, canvas_height * 0.6,
+                canvas_width * 0.3, canvas_height * 0.75,
+                canvas_width * 0.5, canvas_height * 0.6, 
+            ]
+            parent_canvas.create_polygon(item_1_rectangle_coords, fill = fill, tags="item_1_rectangle", smooth=True, outline = "")
+            parent_canvas.create_polygon(item_2_triangle_coords, fill = fill, tags="item_2_triangle", outline = "")
+            parent_canvas.items_in_panel = ["item_1_rectangle", "item_2_triangle"]
+
+        def draw_crawl_icon(parent_canvas, fill = color_tuple_to_rgb(config.VSCode_font_grey_color)): 
+            '''
+            Draw the web crawl logo
+            '''
+            canvas_width = parent_canvas.winfo_width()
+            canvas_height = parent_canvas.winfo_height()
+            parent_canvas.delete("item_1_spider_body")
+            parent_canvas.delete("item_8_spider_head")
+            parent_canvas.delete("item_2_spider_leg_1")
+            parent_canvas.delete("item_3_spider_leg_2")
+            parent_canvas.delete("item_4_spider_leg_3")
+            parent_canvas.delete("item_5_spider_leg_4")
+            parent_canvas.delete("item_6_spider_leg_5")
+            parent_canvas.delete("item_7_spider_leg_6")
+
+            def spider_leg_points(x, y, x_first_joint, y_first_joint, thickness):
+                return [
+                    x, y - thickness / 2, 
+                    x, y + thickness / 2, 
+                    x_first_joint, y_first_joint + thickness / 2, 
+                    2 * x_first_joint - x, 3 * y_first_joint - 2 * y + thickness / 2, 
+                    2 * x_first_joint - x, 3 * y_first_joint - 2 * y - thickness / 2, 
+                    x_first_joint, y_first_joint - thickness / 2, 
+                ]
+            
+            parent_canvas.create_oval(0.3 * canvas_width, 0.3 * canvas_height, 0.7 * canvas_width, 0.7 * canvas_height, fill=fill, tags="item_1_spider_body", outline = "")
+            parent_canvas.create_oval(0.4 * canvas_width, 0.2 * canvas_height, 0.6 * canvas_width, 0.4 * canvas_height, fill=fill, tags="item_8_spider_head", outline = "")
+            parent_canvas.create_polygon(spider_leg_points(0.35 * canvas_width, 0.4 * canvas_height, 0.27 * canvas_width, 0.35 * canvas_height, 0.07 * canvas_height), fill=fill, tags="item_2_spider_leg_1", outline = "")
+            parent_canvas.create_polygon(spider_leg_points(0.35 * canvas_width, 0.5 * canvas_height, 0.27 * canvas_width, 0.5 * canvas_height, 0.06 * canvas_height), fill=fill, tags="item_3_spider_leg_2", outline = "")
+            parent_canvas.create_polygon(spider_leg_points(0.35 * canvas_width, 0.6 * canvas_height, 0.27 * canvas_width, 0.65 * canvas_height, 0.07 * canvas_height), fill=fill, tags="item_4_spider_leg_3", outline = "")
+            parent_canvas.create_polygon(spider_leg_points(0.65 * canvas_width, 0.4 * canvas_height, 0.73 * canvas_width, 0.35 * canvas_height, 0.07 * canvas_height), fill=fill, tags="item_5_spider_leg_4", outline = "")
+            parent_canvas.create_polygon(spider_leg_points(0.65 * canvas_width, 0.5 * canvas_height, 0.73 * canvas_width, 0.5 * canvas_height, 0.06 * canvas_height), fill=fill, tags="item_6_spider_leg_5", outline = "")
+            parent_canvas.create_polygon(spider_leg_points(0.65 * canvas_width, 0.6 * canvas_height, 0.73 * canvas_width, 0.65 * canvas_height, 0.07 * canvas_height), fill=fill, tags="item_7_spider_leg_6", outline = "")
+            parent_canvas.items_in_panel = ["item_1_spider_body", "item_8_spider_head", "item_2_spider_leg_1", "item_3_spider_leg_2", "item_4_spider_leg_3", "item_5_spider_leg_4", "item_6_spider_leg_5", "item_7_spider_leg_6"]
 
         def check_editor_status (source_file): 
             opened_editors = [editor[0] for editor in config.editor_states]
@@ -741,7 +853,7 @@ def main():
                 config.toggle_list.configure (width = config.left_panel_width - config.left_panel_sidebar_width)
                 config.right_panel.configure (height = config.window_height)
                 config.left_panel_change_arrow.place(x = config.left_panel_width - 3 * config.boundary_width, y = config.window_height - 4 * config.boundary_width, anchor = tkinter.SE)
-                config.right_panel_change_arrow.place(x = 1 * config.boundary_width, y = config.window_height - 4 * config.boundary_width, anchor = tk.SW)
+                config.right_panel_change_arrow.place(x = 1 * config.boundary_width, y = config.window_height - 4 * config.boundary_width, anchor = tkinter.SW)
             except: pass
             create_toggle_list()
 
@@ -752,6 +864,9 @@ def main():
             pass
 
         def show_tabbar(tabbar_width = None): 
+            '''
+            Show the tab bar in the right panel
+            '''
 
             if (not tabbar_width): 
                 tabbar_width = config.right_panel.winfo_width() - 4 * config.boundary_width
@@ -762,26 +877,46 @@ def main():
                 if (config.right_panel_tabbar): config.right_panel_tabbar.pack_forget()
                 if (config.right_panel_tabbar_scrollbar): config.right_panel_tabbar_scrollbar.pack_forget()
                 config.right_panel_main.pack_forget()
-            config.right_panel_tabbar = tk.Canvas(config.right_panel, height=config.right_panel_tabbar_height, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
+            config.right_panel_tabbar = tkinter.Canvas(config.right_panel, height=config.right_panel_tabbar_height, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
             config.right_panel_tabbar.pack(side='top', fill='x')
-            total_width = 0; maximum_width = config.right_panel.winfo_width()
-            tab_frame = tk.Frame(config.right_panel_tabbar); # tab_frame.pack(side = 'left', fill = 'both')
+            total_width = 0; 
+            tab_frame = tkinter.Frame(config.right_panel_tabbar); 
             config.right_panel_tabbar.create_window((0, 0), window=tab_frame, anchor="nw", tags="tab_frame")
             
             for tab_id, editor_tab in enumerate(config.editor_states): 
                 tab_type = editor_tab[0][0]; tab_value = editor_tab[0][1]
                 tab_display_name = editor_tab[0][2]; tab_status = editor_tab[1]
-                new_tab = Editor_Tab(tab_id, tab_frame, tab_type, tab_value, tab_display_name, tab_status)
+                new_tab = Right_Panel_Tab(tab_id, tab_frame, tab_type, tab_value, tab_display_name, tab_status)
                 total_width += new_tab.width; 
                 new_tab.pack(side = 'left')
-                if (debug == 1): print (f"Tab '{editor_tab[0][2]}' opened. Length: {total_width}/{tabbar_width}")
+                if (debug == 1): print (f"Tab '{editor_tab[0][2]}' opened. ") # Length: {total_width}/{tabbar_width}
+            
             if (config.right_panel.winfo_width() != 1 and total_width > tabbar_width): 
-                config.right_panel_tabbar_scrollbar = tk.Scrollbar(config.right_panel, orient="horizontal", command=config.right_panel_tabbar.xview, width = config.right_panel_tabbar_scrollbar_width) # color setting options do not work
+                config.right_panel_tabbar_scrollbar = tkinter.Scrollbar(config.right_panel, orient="horizontal", command=config.right_panel_tabbar.xview, width = config.right_panel_tabbar_scrollbar_width) # color setting options do not work
                 config.right_panel_tabbar.configure(xscrollcommand=config.right_panel_tabbar_scrollbar.set)
                 config.right_panel_tabbar_scrollbar.pack(side='top', fill='x')
-                def tab_frame_configure(event): 
-                    config.right_panel_tabbar.configure(scrollregion=config.right_panel_tabbar.bbox("all"))
-                tab_frame.bind("<Configure>", tab_frame_configure)
+                config.tabbar_scrollbar_created = True
+                if (config.right_panel_tabbar_scrollbar_position): 
+                    position = config.right_panel_tabbar_scrollbar_position
+                    config.right_panel_tabbar.after(1000, lambda: config.right_panel_tabbar.xview_moveto(position[0]))
+                def right_panel_tabbar_scrollbar_save_scroll_position(): 
+                    config.right_panel_tabbar_scrollbar_position = config.right_panel_tabbar_scrollbar.get()
+                config.right_panel_tabbar_scrollbar.bind("<Motion>", lambda event: right_panel_tabbar_scrollbar_save_scroll_position())
+
+            def tab_frame_configure(event): 
+                config.right_panel_tabbar.configure(scrollregion=config.right_panel_tabbar.bbox("all"))
+                tabbar_width_new = config.right_panel.winfo_width() - 4 * config.boundary_width
+                if (total_width <= tabbar_width_new and config.right_panel_tabbar_scrollbar): 
+                    config.right_panel_tabbar_scrollbar.pack_forget(); 
+                    config.right_panel_tabbar_scrollbar = None
+                    config.tabbar_scrollbar_created = False
+                    config.right_panel_tabbar_scrollbar_position = None
+                elif (total_width > tabbar_width_new and not config.tabbar_scrollbar_created): 
+                    config.tabbar_scrollbar_created = True
+                    config.tabbar_created = False; config.right_panel_tabbar.after(100, show_tabbar)
+
+            tab_frame.bind("<Configure>", tab_frame_configure)
+
             config.right_panel_main.pack(side='top', fill='both', expand=True)
 
         def hide_tabbar(): 
@@ -795,104 +930,22 @@ def main():
             Create the left panel in the window
             '''
 
-            class Left_Sidebar_Icon(tk.Canvas):
-                '''
-                The left sidebar icon entity
-                '''
-                def __init__(self):
-                    super().__init__(master = config.left_panel_sidebar, width=config.left_panel_sidebar_width, height=config.left_panel_sidebar_width, 
-                                     bg=color_tuple_to_rgb(config.left_panel_color), highlightthickness=0)
-                    self.hovered = False
-                    self.items_in_panel = []
-                    self.bind("<Enter>", self.on_enter)
-                    self.bind("<Leave>", self.on_leave)
-                    self.pack(side = "top")
-
-                def on_enter(self, event): 
-                    self.hovered = True
-                    for item in self.items_in_panel: 
-                        self.itemconfigure(item, fill=color_tuple_to_rgb(config.VSCode_highlight_color))
-
-                def on_leave(self, event):
-                    self.hovered = False
-                    for item in self.items_in_panel: 
-                        self.itemconfigure(item, fill=color_tuple_to_rgb(config.VSCode_font_grey_color))
-
-            def draw_sidebar_chat(parent_canvas): 
-                '''
-                Draw the chat logo
-                '''
-                canvas_width = parent_canvas.winfo_width()
-                canvas_height = parent_canvas.winfo_height()
-                parent_canvas.delete("item_1_rectangle")
-                parent_canvas.delete("item_2_triangle")
-                def round_rectangle_points(x1, y1, x2, y2, radius): 
-                    return([
-                        x1+radius, y1, x1+radius, y1, x2-radius, y1, x2-radius, y1,
-                        x2, y1, x2, y1+radius, x2, y1+radius, x2, y2-radius,
-                        x2, y2-radius, x2, y2, x2-radius, y2, x2-radius, y2,
-                        x1+radius, y2, x1+radius, y2, x1, y2, x1, y2-radius,
-                        x1, y2-radius, x1, y1+radius, x1, y1+radius, x1, y1
-                    ])
-                item_1_rectangle_coords = round_rectangle_points(0.2 * canvas_width, 0.2 * canvas_height, 0.8 * canvas_width, 0.6 * canvas_height, 0.2 * canvas_height)
-                item_2_triangle_coords = [
-                    canvas_width * 0.35, canvas_height * 0.6,
-                    canvas_width * 0.3, canvas_height * 0.75,
-                    canvas_width * 0.5, canvas_height * 0.6, 
-                ]
-                parent_canvas.create_polygon(item_1_rectangle_coords, fill = color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_1_rectangle", smooth=True, outline = "")
-                parent_canvas.create_polygon(item_2_triangle_coords, fill = color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_2_triangle", outline = "")
-                parent_canvas.items_in_panel = ["item_1_rectangle", "item_2_triangle"]
-
             def open_editor(tab_type, tab_value, tab_display_name): 
                 config.editor_states.append([(tab_type, tab_value, tab_display_name), "SAVED"])
                 config.editor_tab_on_focus = len(config.editor_states) - 1
                 config.tabbar_created = False; show_tabbar()
-
-            def draw_sidebar_crawl(parent_canvas): 
-                '''
-                Draw the web crawl logo
-                '''
-                canvas_width = parent_canvas.winfo_width()
-                canvas_height = parent_canvas.winfo_height()
-                parent_canvas.delete("item_1_spider_body")
-                parent_canvas.delete("item_8_spider_head")
-                parent_canvas.delete("item_2_spider_leg_1")
-                parent_canvas.delete("item_3_spider_leg_2")
-                parent_canvas.delete("item_4_spider_leg_3")
-                parent_canvas.delete("item_5_spider_leg_4")
-                parent_canvas.delete("item_6_spider_leg_5")
-                parent_canvas.delete("item_7_spider_leg_6")
-
-                def spider_leg_points(x, y, x_first_joint, y_first_joint, thickness):
-                    return [
-                        x, y - thickness / 2, 
-                        x, y + thickness / 2, 
-                        x_first_joint, y_first_joint + thickness / 2, 
-                        2 * x_first_joint - x, 3 * y_first_joint - 2 * y + thickness / 2, 
-                        2 * x_first_joint - x, 3 * y_first_joint - 2 * y - thickness / 2, 
-                        x_first_joint, y_first_joint - thickness / 2, 
-                    ]
-                
-                parent_canvas.create_oval(0.3 * canvas_width, 0.3 * canvas_height, 0.7 * canvas_width, 0.7 * canvas_height, fill=color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_1_spider_body", outline = "")
-                parent_canvas.create_oval(0.4 * canvas_width, 0.2 * canvas_height, 0.6 * canvas_width, 0.4 * canvas_height, fill=color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_8_spider_head", outline = "")
-                parent_canvas.create_polygon(spider_leg_points(0.35 * canvas_width, 0.4 * canvas_height, 0.27 * canvas_width, 0.35 * canvas_height, 0.07 * canvas_height), fill=color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_2_spider_leg_1", outline = "")
-                parent_canvas.create_polygon(spider_leg_points(0.35 * canvas_width, 0.5 * canvas_height, 0.27 * canvas_width, 0.5 * canvas_height, 0.06 * canvas_height), fill=color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_3_spider_leg_2", outline = "")
-                parent_canvas.create_polygon(spider_leg_points(0.35 * canvas_width, 0.6 * canvas_height, 0.27 * canvas_width, 0.65 * canvas_height, 0.07 * canvas_height), fill=color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_4_spider_leg_3", outline = "")
-                parent_canvas.create_polygon(spider_leg_points(0.65 * canvas_width, 0.4 * canvas_height, 0.73 * canvas_width, 0.35 * canvas_height, 0.07 * canvas_height), fill=color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_5_spider_leg_4", outline = "")
-                parent_canvas.create_polygon(spider_leg_points(0.65 * canvas_width, 0.5 * canvas_height, 0.73 * canvas_width, 0.5 * canvas_height, 0.06 * canvas_height), fill=color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_6_spider_leg_5", outline = "")
-                parent_canvas.create_polygon(spider_leg_points(0.65 * canvas_width, 0.6 * canvas_height, 0.73 * canvas_width, 0.65 * canvas_height, 0.07 * canvas_height), fill=color_tuple_to_rgb(config.VSCode_font_grey_color), tags="item_7_spider_leg_6", outline = "")
-                parent_canvas.items_in_panel = ["item_1_spider_body", "item_8_spider_head", "item_2_spider_leg_1", "item_3_spider_leg_2", "item_4_spider_leg_3", "item_5_spider_leg_4", "item_6_spider_leg_5", "item_7_spider_leg_6"]
+                # NEED TO render the right panel main
 
             def create_left_sidebar(): 
                 '''
                 Fill in the sidebar of the left panel
+                binds open editor to create the right panel editor
                 '''
-                config.left_panel_sidebar_chat = Left_Sidebar_Icon()
-                config.left_panel_sidebar_chat.bind("<Configure>", lambda event: draw_sidebar_chat(config.left_panel_sidebar_chat))
-                config.left_panel_sidebar_chat.bind("<Button-1>", lambda event: open_editor("CHAT", config.CURRENT_ENV, config.CURRENT_ENV))
-                config.left_panel_sidebar_crawl = Left_Sidebar_Icon()
-                config.left_panel_sidebar_crawl.bind("<Configure>", lambda event: draw_sidebar_crawl(config.left_panel_sidebar_crawl))
+                config.left_panel_sidebar_chat = Left_Sidebar_Icon(hover_color = config.chat_icon_color)
+                config.left_panel_sidebar_chat.bind("<Configure>", lambda event: draw_chat_icon(config.left_panel_sidebar_chat))
+                config.left_panel_sidebar_chat.bind("<Button-1>", lambda event: open_editor("CHAT", config.CURRENT_ENV, f"Chat: {config.CURRENT_ENV}"))
+                config.left_panel_sidebar_crawl = Left_Sidebar_Icon(hover_color = config.crawl_icon_color)
+                config.left_panel_sidebar_crawl.bind("<Configure>", lambda event: draw_crawl_icon(config.left_panel_sidebar_crawl))
                 config.left_panel_sidebar_crawl.bind("<Button-1>", lambda event: open_editor("CRAWL", "Web Crawl", "Web Crawl"))
 
             def draw_left_panel_arrow(event):
@@ -916,7 +969,8 @@ def main():
                     config.left_panel_relwidth = config.left_panel_relwidth_max
                 config.left_panel_width = int(config.left_panel_relwidth * config.window_width)
                 config.left_panel.configure(width=config.left_panel_width)
-                config.tabbar_created = False; show_tabbar(tabbar_width = config.window_width - config.left_panel_width - 4 * config.boundary_width)
+                if (config.editor_states): 
+                    config.tabbar_created = False; show_tabbar(tabbar_width = config.window_width - config.left_panel_width - 4 * config.boundary_width)
 
             def hover_left_panel_arrow(event):
                 config.left_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.VSCode_highlight_color))
@@ -927,14 +981,14 @@ def main():
             '''
             Create the left panel background and bind events
             '''
-            config.left_panel = tk.Frame(window, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
+            config.left_panel = tkinter.Frame(window, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
             config.left_panel.pack(side='left', fill='y')
-            config.left_panel_sidebar = tk.Frame(config.left_panel, width=config.left_panel_sidebar_width, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
+            config.left_panel_sidebar = tkinter.Frame(config.left_panel, width=config.left_panel_sidebar_width, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
             config.left_panel_sidebar.pack(side="left", fill='y')
-            config.left_panel_main = tk.Frame(config.left_panel, bg=color_tuple_to_rgb(config.left_panel_color))
+            config.left_panel_main = tkinter.Frame(config.left_panel, bg=color_tuple_to_rgb(config.left_panel_color))
             config.left_panel_main.pack(side="left", fill='both')
 
-            config.left_panel_change_arrow = tk.Canvas(config.left_panel, width=config.size_increase_arrow_width, height=config.size_increase_arrow_height, bg=color_tuple_to_rgb(config.left_panel_color), highlightthickness=0, relief='ridge')
+            config.left_panel_change_arrow = tkinter.Canvas(config.left_panel, width=config.size_increase_arrow_width, height=config.size_increase_arrow_height, bg=color_tuple_to_rgb(config.left_panel_color), highlightthickness=0, relief='ridge')
             config.left_panel_change_arrow.bind("<Enter>", hover_left_panel_arrow)
             config.left_panel_change_arrow.bind("<Leave>", leave_left_panel_arrow)
             config.left_panel_change_arrow.bind("<Configure>", draw_left_panel_arrow)
@@ -973,7 +1027,8 @@ def main():
                     left_panel_width = int(config.left_panel_relwidth * config.window_width)
                 config.left_panel_width = left_panel_width
                 config.left_panel.configure(width = config.left_panel_width)
-                config.tabbar_created = False; show_tabbar(tabbar_width = config.window_width - config.left_panel_width - 4 * config.boundary_width)
+                if (config.editor_states): 
+                    config.tabbar_created = False; show_tabbar(tabbar_width = config.window_width - config.left_panel_width - 4 * config.boundary_width)
 
             def arrow_hover(event):
                 config.right_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.VSCode_highlight_color))
@@ -981,11 +1036,11 @@ def main():
             def arrow_leave(event):
                 config.right_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.default_grey_color))
 
-            config.right_panel = tk.Frame(window, bg=color_tuple_to_rgb(config.right_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
+            config.right_panel = tkinter.Frame(window, bg=color_tuple_to_rgb(config.right_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
             config.right_panel.pack(side='left', fill='both', expand=True)
-            config.right_panel_main = tk.Frame(config.right_panel, bg=color_tuple_to_rgb(config.right_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
+            config.right_panel_main = tkinter.Frame(config.right_panel, bg=color_tuple_to_rgb(config.right_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
             config.right_panel_main.pack(side='top', fill='both', expand=True)
-            config.right_panel_change_arrow = tk.Canvas(config.right_panel, width=config.size_increase_arrow_width, height=config.size_increase_arrow_height, bg=color_tuple_to_rgb(config.right_panel_color), highlightthickness=0, relief='ridge')
+            config.right_panel_change_arrow = tkinter.Canvas(config.right_panel, width=config.size_increase_arrow_width, height=config.size_increase_arrow_height, bg=color_tuple_to_rgb(config.right_panel_color), highlightthickness=0, relief='ridge')
             config.right_panel_change_arrow.bind("<Enter>", arrow_hover)
             config.right_panel_change_arrow.bind("<Leave>", arrow_leave)
             config.right_panel_change_arrow.bind("<Configure>", draw_right_panel_arrow)
@@ -1015,7 +1070,6 @@ def main():
             Create the toggle list under the left panel
             '''
             if (config.toggle_list_created): return
-
             if (config.toggle_list): config.toggle_list.pack_forget()
 
             '''
@@ -1066,27 +1120,66 @@ def main():
             if ("knowledge_graphs" not in config.toggle_list_states): 
                 config.toggle_list_states["knowledge_graphs"] = ["KNOWLEDGE GRAPHS", "knowledge_graphs", [True, None], knowledge_graph_dict]
 
-            config.toggle_list = tk.Frame(config.left_panel_main, bg=color_tuple_to_rgb(config.VSCode_new_color))
             '''
             The toggle list stays on the top, expanding in the x direction
-            Option: pack
             '''
-            # config.toggle_list.place(x = 0, y = 0)
-            config.toggle_list.pack(anchor="n", fill="x", expand = True)
+            config.toggle_list = tkinter.Frame(config.left_panel_main, bg=color_tuple_to_rgb(config.VSCode_highlight_color))
+            config.toggle_list.pack(anchor="n", fill="both", expand = True)
             config.toggle_list.pack_propagate(False)
-            total_height = 0
-            if (debug == 0): print (config.toggle_list_states) 
             
             '''
             Add environment and Knowledge Graphs into the toggle list
             '''
+            bottom_arrow_area = tkinter.Canvas(config.toggle_list, height = config.size_increase_arrow_height + 8 * config.boundary_width, 
+                                               bg=color_tuple_to_rgb(config.left_panel_color), highlightthickness = 0, relief='ridge')
+            bottom_arrow_area.pack(side="bottom", fill="x")
+            temp_canvas = tkinter.Canvas(config.toggle_list, bg = color_tuple_to_rgb(config.left_panel_color), highlightthickness=0, relief='ridge'); 
+            temp_canvas.pack(side="top", fill="both", expand=True)
+            temp_frame = tkinter.Frame(temp_canvas, highlightthickness=0, relief='ridge')
+            temp_canvas.create_window((0, 0), window=temp_frame, anchor="nw", tags="temp_frame")
+            total_height = 0
+            if (debug == 0): print (config.toggle_list_states) 
             for name, value in config.toggle_list_states.items(): 
-                total_height += create_toggle_list_recursive(config.toggle_list, 0, value)
-                division_bar = tkinter.Frame (config.toggle_list, height = config.boundary_width, bg = color_tuple_to_rgb(config.boundary_grey_color))
+                total_height += create_toggle_list_recursive(temp_frame, 0, value)
+                division_bar = tkinter.Frame (temp_frame, height = config.boundary_width, bg = color_tuple_to_rgb(config.boundary_grey_color))
                 division_bar.pack(anchor = 'n', fill = 'x')
                 total_height += config.boundary_width
 
-            config.toggle_list.configure (height = total_height)
+            '''
+            Create the scrollbar, when applicable
+            '''
+            if (config.left_panel.winfo_height() != 1 and total_height > config.window_height - config.size_increase_arrow_height): 
+                if (config.left_panel_main_scrollbar): 
+                    config.left_panel_main_scrollbar.pack_forget()
+                config.left_panel_main_scrollbar = tkinter.Scrollbar(temp_canvas, orient="vertical", command=temp_canvas.yview, width = config.left_panel_main_scrollbar_width)
+                temp_canvas.configure(yscrollcommand = config.left_panel_main_scrollbar.set)
+                config.left_panel_main_scrollbar.pack(side='right', fill='y')
+                config.toggle_list_scrollbar_created = True
+
+                if (config.left_panel_main_scrollbar_position): 
+                    position = config.left_panel_main_scrollbar_position
+                    temp_canvas.after(1000, lambda: temp_canvas.yview_moveto(position[0]))
+                def left_panel_main_scrollbar_save_scroll_position(): 
+                    config.left_panel_main_scrollbar_position = config.left_panel_main_scrollbar.get()
+                config.left_panel_main_scrollbar.bind("<Motion>", lambda event: left_panel_main_scrollbar_save_scroll_position())
+
+            def toggle_list_configure(event): 
+                temp_canvas.configure(scrollregion=temp_canvas.bbox("all"))
+                if (config.left_panel.winfo_height() != 1 and total_height > config.window_height - config.size_increase_arrow_height): 
+                    temp_canvas.itemconfigure("temp_frame", width=temp_canvas.winfo_width() - config.left_panel_main_scrollbar_width)
+                else: temp_canvas.itemconfigure("temp_frame", width=temp_canvas.winfo_width())
+                
+                tabbar_height_new = config.window_height - config.size_increase_arrow_height
+                if (total_height <= tabbar_height_new and config.left_panel_main_scrollbar): 
+                    config.left_panel_main_scrollbar.pack_forget(); 
+                    config.left_panel_main_scrollbar = None
+                    config.toggle_list_scrollbar_created = False
+                    config.left_panel_main_scrollbar_position = None
+                elif (total_height > tabbar_height_new and not config.toggle_list_scrollbar_created): 
+                    config.toggle_list_scrollbar_created = True
+                    config.toggle_list_created = False; create_toggle_list()
+
+            temp_frame.bind("<Configure>", toggle_list_configure)
             config.toggle_list_created = True
 
         def create_main_window(): 
