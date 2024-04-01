@@ -63,13 +63,26 @@ toggle_list_states = dict()
 toggle_item_on_focus = None # The current selected toggle item
 toggle_list_operations = [] # A list of operations done; for reverting purposes (max. 100 operations)
 toggle_list_operation_current = 0  # The operation corresponding to the current state
+
+# Tabbar components
 tabbar_created = False
 tabbar_scrollbar_created = False
-editor_states = [] # Sequential order of opened editors: [editor tab: (type, value, display), status]
+editor_states = [] # Sequential order of opened editors: [type, value, display] ## status can be obtained within the Main
 editor_tab_on_focus = -1 # The current selected editor; id of the editor_states
-editor_item_operations = dict() # key: editor_item; value: l[ist of operations done on this item (max. 100 operations); operation_current]
+editor_item_operations = dict() # key: editor_item; value: list of operations done on this item (max. 100 operations); operation_current]
 
+# related to label width setting
 label_width_ratio = 8
+label_width_one_unit_characters = 5
+
+# Main window components
+previous_window = None # The previous loaded window
+main_windows = dict() # Key: Type + Value; Value: Right_Panel_Main_Window object
+    # Key Value part of different tabs: 
+    # -     Chat: path to environment
+    # -     Knowledge Graph: path to knowledge graph
+    # -     Web Crawl: crawl/new_ID()
+dialog_box_icon_size = 20
 
 '''
 RTSAI UI Config
@@ -94,9 +107,9 @@ size_increase_arrow_width = 25;
 size_increase_arrow_height = 12.5; 
 boundary_width = 1; 
 
-boundary_grey_color = (43, 43, 43)
-clicked_grey_color = (51, 51, 51)
-default_grey_color = (64, 64, 64)
+grey_color_43 = (43, 43, 43)
+grey_color_51 = (51, 51, 51)
+grey_color_64 = (64, 64, 64)
 
 VSCode_highlight_color = (47, 108, 187)
 VSCode_new_color = (82, 158, 78)
@@ -104,6 +117,9 @@ VSCode_font_grey_color = (204, 204, 204)
 
 standard_font_family = "Consolas"
 standard_font_size = 12
+h1_font_size = 24
+h2_font_size = 20
+h3_font_size = 16
 
 toggle_item_padx = 5
 toggle_item_pady = 2

@@ -147,8 +147,6 @@ def copy_knowledge_graph(existing_graph_name, copied_graph_name, environment_nam
         else: show_popup_message(f"Knowledge Graph '{copied_graph_name}' already exists{" inside Environment '" + environment_name + "'" if environment_name else ""}.", parent = parent_item)
         return 1
     elif (new_name_check(copied_graph_name, graph_path, showinfo = showinfo, parent_item = parent_item) == 0): 
-        print  (os.path.join(graph_path, existing_graph_name))
-        print  (os.path.join(graph_path, copied_graph_name))
         shutil.copytree(os.path.join(graph_path, existing_graph_name), os.path.join(graph_path, copied_graph_name))
         return 0
 
@@ -239,6 +237,7 @@ def main():
             '''
             Toggle Item class objects in the left panel main
             '''
+
             def configure_canvas_modify(self, event): 
                 '''
                 Generates the modify sign. 
@@ -247,7 +246,7 @@ def main():
                 canvas_height = config.toggle_modify_height
                 self.toggle_item_modify.delete("modify")
                 self.toggle_item_modify.config(width=canvas_width, height=canvas_height)
-                self.toggle_item_modify.create_oval(canvas_width * 0.25, canvas_height * 0.25, canvas_height * 0.75, canvas_height * 0.75, fill=color_tuple_to_rgb(config.default_grey_color), tags="modify", outline = color_tuple_to_rgb(config.left_panel_color))
+                self.toggle_item_modify.create_oval(canvas_width * 0.25, canvas_height * 0.25, canvas_height * 0.75, canvas_height * 0.75, fill=color_tuple_to_rgb(config.grey_color_64), tags="modify", outline = color_tuple_to_rgb(config.left_panel_color))
 
             def modify_toggle_item(self, event, key_pressed = None): 
                 '''
@@ -569,10 +568,10 @@ def main():
                 
                 self.menu_open = False
 
-            '''
-            Click the item and change the focus
-            '''
             def click_toggle_item(self, event): 
+                '''
+                Click the item and change the focus
+                '''
 
                 self.toggle_info[2][0] = not self.toggle_info[2][0]
                 '''
@@ -611,10 +610,10 @@ def main():
 
                 self.label.pack (side = "top", fill = "x")
                 if (config.toggle_item_on_focus == self.toggle_info[1]): 
-                    self.configure(bg=color_tuple_to_rgb(config.clicked_grey_color))
-                    self.label.configure(bg=color_tuple_to_rgb(config.clicked_grey_color))
+                    self.configure(bg=color_tuple_to_rgb(config.grey_color_51))
+                    self.label.configure(bg=color_tuple_to_rgb(config.grey_color_51))
                     if (self.toggle_info[1].startswith("knowledge_graphs") or self.toggle_info[1].startswith("environments")): 
-                        self.toggle_item_modify.configure(bg=color_tuple_to_rgb(config.clicked_grey_color))
+                        self.toggle_item_modify.configure(bg=color_tuple_to_rgb(config.grey_color_51))
 
                 self.configure(height=config.toggle_item_height, width=config.left_panel_width - config.left_panel_sidebar_width)
                 self.bind("<Button-1>", self.click_toggle_item)
@@ -686,14 +685,17 @@ def main():
                 if (config.editor_tab_on_focus != self.id): 
                     config.editor_tab_on_focus = self.id
                     config.tabbar_created = False; show_tabbar()
-                    # NEED TO render the right panel main
 
             def close_tab(self): 
                 config.editor_states = config.editor_states[0:self.id] + config.editor_states[self.id+1:]
                 if (config.editor_tab_on_focus == self.id): 
                     config.editor_tab_on_focus = -1
-                    # NEED TO render the right panel main
-                elif (config.editor_tab_on_focus > self.id): config.editor_tab_on_focus -= 1
+                    if (config.previous_window): 
+                        config.previous_window.pack_forget()
+                        config.previous_window = None
+                elif (config.editor_tab_on_focus > self.id): 
+                    config.editor_tab_on_focus -= 1
+
                 config.tabbar_created = False; 
                 if (config.editor_states): show_tabbar()
                 else: hide_tabbar()
@@ -707,7 +709,7 @@ def main():
 
             def __init__(self, id, master, tab_type, tab_value, tab_display_name, tab_status): 
                 super().__init__(master, bg = color_tuple_to_rgb(config.left_panel_color), 
-                                 highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), 
+                                 highlightbackground=color_tuple_to_rgb(config.grey_color_43), 
                                  highlightthickness=config.boundary_width)
                 
                 self.id = id; self.tab_type = tab_type; self.tab_value = tab_value
@@ -725,9 +727,9 @@ def main():
 
                 if (config.editor_tab_on_focus == self.id or self.tab_status_display == "HOVER"): 
                     self.tab_active_bar.configure(bg = color_tuple_to_rgb(config.VSCode_highlight_color))
-                    self.tab_icon.configure(bg = color_tuple_to_rgb(config.boundary_grey_color))
-                    self.tab_label.configure(bg = color_tuple_to_rgb(config.boundary_grey_color))
-                    self.tab_status.configure(bg = color_tuple_to_rgb(config.boundary_grey_color))
+                    self.tab_icon.configure(bg = color_tuple_to_rgb(config.grey_color_43))
+                    self.tab_label.configure(bg = color_tuple_to_rgb(config.grey_color_43))
+                    self.tab_status.configure(bg = color_tuple_to_rgb(config.grey_color_43))
                 else: 
                     self.tab_icon.configure(bg = color_tuple_to_rgb(config.left_panel_color))
                     self.tab_label.configure(bg = color_tuple_to_rgb(config.left_panel_color))
@@ -762,6 +764,203 @@ def main():
                 self.tab_status.bind("<Leave>", lambda event: self.leave_tab())
                 self.tab_label.bind("<Button-1>", lambda event: self.click_tab())
                 self.tab_status.bind("<Button-1>", lambda event: self.close_tab())
+
+        class Right_Panel_Main_Window(tkinter.Frame): 
+
+            class Window_Operation: 
+                
+                def __init__ (self, optype, opinfo): 
+                    pass
+            
+            class Window_File: 
+
+                def __init__(self): 
+                    pass
+            
+            def create_dialog_box(self, parent_frame, hint_text, button_text, web_crawl_function, upload_file_function = None): 
+                '''
+                Create the dialog box and pack it to the parent frame. 
+                '''
+                
+                def dialog_box_upload_configure(dialog_box_upload): 
+                    canvas_width = dialog_box_upload.winfo_width()
+                    canvas_height = dialog_box_upload.winfo_height()
+                    dialog_box_upload.delete("box")
+                    dialog_box_upload.delete("arrow")
+                    box_points = [
+                        canvas_width * 0.1, canvas_height * 0.5, 
+                        canvas_width * 0.2, canvas_height * 0.5, 
+                        canvas_width * 0.2, canvas_height * 0.8, 
+                        canvas_width * 0.8, canvas_height * 0.8, 
+                        canvas_width * 0.8, canvas_height * 0.5, 
+                        canvas_width * 0.9, canvas_height * 0.5, 
+                        canvas_width * 0.9, canvas_height * 0.9, 
+                        canvas_width * 0.1, canvas_height * 0.9, 
+                    ]
+                    arrow_points = [
+                        canvas_width * 0.5, canvas_height * 0.05, 
+                        canvas_width * 0.75, canvas_height * 0.3, 
+                        canvas_width * 0.65, canvas_height * 0.3, 
+                        canvas_width * 0.55, canvas_height * 0.35, 
+                        canvas_width * 0.55, canvas_height * 0.7, 
+                        canvas_width * 0.45, canvas_height * 0.7, 
+                        canvas_width * 0.45, canvas_height * 0.35, 
+                        canvas_width * 0.35, canvas_height * 0.3, 
+                        canvas_width * 0.25, canvas_height * 0.3, 
+                    ]
+                    dialog_box_upload.create_polygon(box_points, tags = "box", fill=color_tuple_to_rgb(config.VSCode_font_grey_color), smooth = False)
+                    dialog_box_upload.create_polygon(arrow_points, tags = "arrow", fill=color_tuple_to_rgb(config.VSCode_font_grey_color), smooth = False)
+
+                def dialog_box_text_change(dialogue_box):
+                    if dialogue_box.get("1.0", "end-1c") == "": 
+                        dialogue_box.master.focus_set()
+                        dialogue_box.after(10, lambda: dialog_box_restore_hint_text(dialogue_box))
+                    else: dialogue_box.config(fg="black")  # Change text color to black
+                    dialogue_box_height = dialogue_box.tk.call((dialogue_box._w, "count", "-update", "-displaylines", "1.0", "end"))
+                    dialogue_box.configure(height = dialogue_box_height)
+
+                def dialog_box_restore_hint_text(dialogue_box):
+                    if dialogue_box.get("1.0", "end-1c") == "":
+                        dialogue_box.delete("1.0", "end")  # Clear the hint text
+                        dialogue_box.insert("1.0", hint_text)  # Restore the hint text
+                        dialogue_box.config(fg="gray")  # Change text color to gray
+
+                def upload_hover_leave(parent_canvas, parent_elements, fill_color = config.VSCode_new_color): 
+                    for element in parent_elements: 
+                        parent_canvas.itemconfigure(element, fill=color_tuple_to_rgb(fill_color))
+
+                def upload_focus_in(dialogue_box):
+                    if dialogue_box.get("1.0", "end-1c") == hint_text:
+                        dialogue_box.delete("1.0", "end")  # Clear the hint text
+                        dialogue_box.config(fg="black")  # Restore black text color
+
+                def upload_focus_out(dialogue_box):
+                    if dialogue_box.get("1.0", "end-1c") == "":
+                        dialogue_box.after(10, lambda: dialog_box_restore_hint_text(dialogue_box))
+
+                def crawl_hover(crawl_canvas): 
+                    crawl_canvas.configure(fg = 'white', bg = color_tuple_to_rgb(config.VSCode_new_color))
+
+                def crawl_leave(crawl_canvas): 
+                    crawl_canvas.configure(fg = color_tuple_to_rgb(config.VSCode_font_grey_color), bg = color_tuple_to_rgb(config.grey_color_64))
+
+                '''
+                Create the dialog box
+                '''
+                dialogue_box = tkinter.Text(parent_frame, height=1, wrap="word", fg="gray", highlightthickness=0, relief='ridge')
+                dialogue_box.insert("1.0", hint_text)
+                dialogue_box.bind("<FocusIn>", lambda event: upload_focus_in(dialogue_box))
+                dialogue_box.bind("<FocusOut>", lambda event: upload_focus_out(dialogue_box))
+                dialogue_box.bind("<KeyRelease>", lambda event: dialog_box_text_change(dialogue_box))
+
+                '''
+                Create the dialog box button
+                '''
+                dialog_box_button = tkinter.Label(parent_frame, text = button_text, font = [config.standard_font_family, config.standard_font_size], 
+                                                    bg = color_tuple_to_rgb(config.grey_color_64), fg = color_tuple_to_rgb(config.VSCode_font_grey_color))
+                dialog_box_button.pack(side="right", padx=5, pady=5)
+                dialog_box_button.bind("<Enter>", lambda event: crawl_hover(dialog_box_button))
+                dialog_box_button.bind("<Leave>", lambda event: crawl_leave(dialog_box_button))
+                dialog_box_button.bind("<Button-1>", lambda event: web_crawl_function(dialogue_box))
+
+                '''
+                Create the dialog box upload button (if applicable)
+                '''
+                if (upload_file_function): 
+                    dialog_box_upload = tkinter.Canvas(parent_frame, width = config.dialog_box_icon_size, height = config.dialog_box_icon_size, 
+                                                       bg = color_tuple_to_rgb(config.grey_color_43), highlightthickness=0, relief='ridge')
+                    dialog_box_upload.bind("<Enter>", lambda event: upload_hover_leave(dialog_box_upload, ["box", "arrow"], config.VSCode_new_color))
+                    dialog_box_upload.bind("<Leave>", lambda event: upload_hover_leave(dialog_box_upload, ["box", "arrow"], config.VSCode_font_grey_color))
+                    dialog_box_upload.bind("<Configure>", lambda event: dialog_box_upload_configure(dialog_box_upload))
+                    dialog_box_upload.bind("<Button-1>", lambda event: upload_file_function(dialogue_box))
+                    dialog_box_upload.pack(side="right", padx=5, pady=5)
+                    
+                dialogue_box.pack(side="left", fill='both', expand=True, pady=5)
+
+            def render_text_into_label(self, parent_label, label_text_original, label_width_row): 
+
+                # config.label_width_one_unit_characters: number of new characters to put in the label, before measuring the label width again
+                label_font = Font(font=parent_label.cget("font"))
+
+                '''
+                Rendering the label_text, by adding necessary newline characters
+                '''
+                label_text_rendered = ''
+                label_text_remaining = label_text_original
+                label_text_rendered_row = ''
+                
+                current_width = 0
+                one_unit_characters = config.label_width_one_unit_characters
+                
+                pass
+
+
+
+
+
+                '''
+                Finalize the label
+                '''
+                parent_label.configure(text = label_text_original)
+                parent_label.configure(width = label_width_row * config.label_width_ratio)
+
+            def __init__(self, winkey, wintype): 
+
+                super().__init__(master=config.right_panel_main, bg=color_tuple_to_rgb(config.right_panel_color))
+                right_panel_main_bottom_arrow_area = tkinter.Canvas(self, height = config.size_increase_arrow_height + 8 * config.boundary_width, 
+                                                   bg=color_tuple_to_rgb(config.right_panel_color), highlightthickness = 0, relief='ridge')
+                right_panel_main_bottom_arrow_area.pack(side="bottom", fill="x")
+                self.key = winkey; self.type = wintype; self.status = "SAVED"
+                self.window_elements = []  # A sequence of Window_Element. Order matters. Elements will be packed. 
+
+                '''
+                Save window operations. Allow restoration. 
+                '''
+                self.operations = []
+                self.current_operation = -1
+
+                '''
+                Create the main window components based on the window type
+                '''
+                if (wintype == "CRAWL"): 
+                    dialog_box_uploaded_files = []
+
+                    def web_crawl(dialogue_box): 
+                        dialog_box_value = dialogue_box.get("1.0", "end-1c")
+                        print (dialog_box_value)
+
+                    def file_upload(dialogue_box): 
+                        pass
+
+                    '''
+                    Generate the dialog box (including the upload and the crawl buttons) on the botton
+                    '''
+                    dialogue_box_panel = tkinter.Frame(self, bg=color_tuple_to_rgb(config.grey_color_43))
+                    self.create_dialog_box(dialogue_box_panel, "Enter web URL ...", "Crawl", web_crawl, file_upload)
+                    dialogue_box_panel.pack(side='bottom', fill='x')
+
+                    '''
+                    Generate the main panel to display AI chat
+                    '''
+                    web_crawl_main_panel = tkinter.Canvas(self, bg=color_tuple_to_rgb(config.right_panel_color), highlightthickness=0, relief='ridge')
+                    web_crawl_main_panel.pack(side = 'top', fill = 'both', expand = True)
+                    temp_frame = tkinter.Frame(web_crawl_main_panel, bg=color_tuple_to_rgb(config.VSCode_highlight_color))
+
+                    web_crawl_title = tkinter.Label(web_crawl_main_panel, text="Web Crawl", font = [config.standard_font_family, config.h1_font_size, "bold"], 
+                                                    bg = color_tuple_to_rgb(config.right_panel_color), fg = color_tuple_to_rgb(config.VSCode_font_grey_color))
+                    web_crawl_title.pack (side = 'top', fill = 'x')
+                    print  (web_crawl_title.winfo_height())
+
+
+                    '''
+                    The web crawl function is designed to automatically gather valuable data and construct a knowledge graph, enabling the retrieval of useful information from the web.
+                    '''
+
+                '''
+                No need to pack the window into the right panel
+                Instead, we save it to the config list. 
+                '''
+                config.main_windows[winkey] = self
 
         def draw_chat_icon(parent_canvas, fill = color_tuple_to_rgb(config.VSCode_font_grey_color)): 
             '''
@@ -868,29 +1067,45 @@ def main():
             Show the tab bar in the right panel
             '''
 
+            '''
+            Create the tab bar
+            '''
             if (not tabbar_width): 
                 tabbar_width = config.right_panel.winfo_width() - 4 * config.boundary_width
             if (config.tabbar_created): return
             else: config.tabbar_created = True
             if (not config.right_panel): return
-            else: 
-                if (config.right_panel_tabbar): config.right_panel_tabbar.pack_forget()
-                if (config.right_panel_tabbar_scrollbar): config.right_panel_tabbar_scrollbar.pack_forget()
-                config.right_panel_main.pack_forget()
-            config.right_panel_tabbar = tkinter.Canvas(config.right_panel, height=config.right_panel_tabbar_height, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
+            if (config.right_panel_tabbar): config.right_panel_tabbar.pack_forget()
+            if (config.right_panel_tabbar_scrollbar): config.right_panel_tabbar_scrollbar.pack_forget()
+            config.right_panel_main.pack_forget()
+            config.right_panel_tabbar = tkinter.Canvas(config.right_panel, height=config.right_panel_tabbar_height, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.grey_color_43), highlightthickness=config.boundary_width)
             config.right_panel_tabbar.pack(side='top', fill='x')
             total_width = 0; 
             tab_frame = tkinter.Frame(config.right_panel_tabbar); 
             config.right_panel_tabbar.create_window((0, 0), window=tab_frame, anchor="nw", tags="tab_frame")
             
+            '''
+            Create the tabs for each editor
+            '''
             for tab_id, editor_tab in enumerate(config.editor_states): 
-                tab_type = editor_tab[0][0]; tab_value = editor_tab[0][1]
-                tab_display_name = editor_tab[0][2]; tab_status = editor_tab[1]
+                tab_type = editor_tab[0]; tab_value = editor_tab[1]
+                tab_display_name = editor_tab[2]; 
+                
+
+
+                
+                tab_status = "SAVED" ### TO BE FIXED: detection method
+
+
+
+
                 new_tab = Right_Panel_Tab(tab_id, tab_frame, tab_type, tab_value, tab_display_name, tab_status)
                 total_width += new_tab.width; 
                 new_tab.pack(side = 'left')
-                if (debug == 1): print (f"Tab '{editor_tab[0][2]}' opened. ") # Length: {total_width}/{tabbar_width}
             
+            '''
+            Create the scrollbar when there are too many editors
+            '''
             if (config.right_panel.winfo_width() != 1 and total_width > tabbar_width): 
                 config.right_panel_tabbar_scrollbar = tkinter.Scrollbar(config.right_panel, orient="horizontal", command=config.right_panel_tabbar.xview, width = config.right_panel_tabbar_scrollbar_width) # color setting options do not work
                 config.right_panel_tabbar.configure(xscrollcommand=config.right_panel_tabbar_scrollbar.set)
@@ -903,6 +1118,9 @@ def main():
                     config.right_panel_tabbar_scrollbar_position = config.right_panel_tabbar_scrollbar.get()
                 config.right_panel_tabbar_scrollbar.bind("<Motion>", lambda event: right_panel_tabbar_scrollbar_save_scroll_position())
 
+            '''
+            Bind the tabbar with configuration event
+            '''
             def tab_frame_configure(event): 
                 config.right_panel_tabbar.configure(scrollregion=config.right_panel_tabbar.bbox("all"))
                 tabbar_width_new = config.right_panel.winfo_width() - 4 * config.boundary_width
@@ -914,8 +1132,21 @@ def main():
                 elif (total_width > tabbar_width_new and not config.tabbar_scrollbar_created): 
                     config.tabbar_scrollbar_created = True
                     config.tabbar_created = False; config.right_panel_tabbar.after(100, show_tabbar)
-
             tab_frame.bind("<Configure>", tab_frame_configure)
+
+            '''
+            Render the right_panel_main if editor_tab_on_focus is set
+            TO BE COMPLETED: Render upon information given
+            Pack the right_panel_main panel back after updating the tab bar
+            '''
+            if (config.editor_tab_on_focus != -1): 
+                if (config.previous_window): config.previous_window.pack_forget()
+                state = config.editor_states[config.editor_tab_on_focus]
+                if (f"{state[0]}|{state[1]}" in config.main_windows.keys()): 
+                    config.previous_window = config.main_windows[f"{state[0]}|{state[1]}"]
+                else: 
+                    config.previous_window = Right_Panel_Main_Window(f"{state[0]}|{state[1]}", state[0])
+                config.previous_window.pack(side = 'top', fill = 'both', expand = True)
 
             config.right_panel_main.pack(side='top', fill='both', expand=True)
 
@@ -930,11 +1161,12 @@ def main():
             Create the left panel in the window
             '''
 
+            ## TO BE COMPLETED
             def open_editor(tab_type, tab_value, tab_display_name): 
-                config.editor_states.append([(tab_type, tab_value, tab_display_name), "SAVED"])
+                config.editor_states.append([tab_type, tab_value, tab_display_name])
+                if (debug == 1): print (f"Tab '{tab_value}' ({tab_type}) opened. ")
                 config.editor_tab_on_focus = len(config.editor_states) - 1
                 config.tabbar_created = False; show_tabbar()
-                # NEED TO render the right panel main
 
             def create_left_sidebar(): 
                 '''
@@ -946,7 +1178,7 @@ def main():
                 config.left_panel_sidebar_chat.bind("<Button-1>", lambda event: open_editor("CHAT", config.CURRENT_ENV, f"Chat: {config.CURRENT_ENV}"))
                 config.left_panel_sidebar_crawl = Left_Sidebar_Icon(hover_color = config.crawl_icon_color)
                 config.left_panel_sidebar_crawl.bind("<Configure>", lambda event: draw_crawl_icon(config.left_panel_sidebar_crawl))
-                config.left_panel_sidebar_crawl.bind("<Button-1>", lambda event: open_editor("CRAWL", "Web Crawl", "Web Crawl"))
+                config.left_panel_sidebar_crawl.bind("<Button-1>", lambda event: open_editor("CRAWL", f"Web Crawl {new_ID()}", "Web Crawl"))
 
             def draw_left_panel_arrow(event):
                 canvas_width = config.left_panel_change_arrow.winfo_width()
@@ -961,7 +1193,7 @@ def main():
                     canvas_width * 0.5, canvas_height * 0.75,
                     canvas_width * 0.5, canvas_height * 1, 
                 ]
-                config.left_panel_change_arrow.create_polygon(arrow_coords, fill=color_tuple_to_rgb(config.default_grey_color), tags="arrow")
+                config.left_panel_change_arrow.create_polygon(arrow_coords, fill=color_tuple_to_rgb(config.grey_color_64), tags="arrow")
 
             def resize_left_panel(event): 
                 config.left_panel_relwidth += 0.05
@@ -976,14 +1208,14 @@ def main():
                 config.left_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.VSCode_highlight_color))
 
             def leave_left_panel_arrow(event):
-                config.left_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.default_grey_color))
+                config.left_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.grey_color_64))
 
             '''
             Create the left panel background and bind events
             '''
-            config.left_panel = tkinter.Frame(window, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
+            config.left_panel = tkinter.Frame(window, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.grey_color_43), highlightthickness=config.boundary_width)
             config.left_panel.pack(side='left', fill='y')
-            config.left_panel_sidebar = tkinter.Frame(config.left_panel, width=config.left_panel_sidebar_width, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
+            config.left_panel_sidebar = tkinter.Frame(config.left_panel, width=config.left_panel_sidebar_width, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.grey_color_43), highlightthickness=config.boundary_width)
             config.left_panel_sidebar.pack(side="left", fill='y')
             config.left_panel_main = tkinter.Frame(config.left_panel, bg=color_tuple_to_rgb(config.left_panel_color))
             config.left_panel_main.pack(side="left", fill='both')
@@ -1016,7 +1248,7 @@ def main():
                     canvas_width * 0.5, canvas_height * 0.75,
                     canvas_width * 0.5, canvas_height * 1
                 ]
-                config.right_panel_change_arrow.create_polygon(arrow_coords, fill=color_tuple_to_rgb(config.default_grey_color), tags="arrow")
+                config.right_panel_change_arrow.create_polygon(arrow_coords, fill=color_tuple_to_rgb(config.grey_color_64), tags="arrow")
 
             def resize_right_panel(event): 
                 config.left_panel_relwidth -= 0.05
@@ -1034,11 +1266,11 @@ def main():
                 config.right_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.VSCode_highlight_color))
 
             def arrow_leave(event):
-                config.right_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.default_grey_color))
+                config.right_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.grey_color_64))
 
-            config.right_panel = tkinter.Frame(window, bg=color_tuple_to_rgb(config.right_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
+            config.right_panel = tkinter.Frame(window, bg=color_tuple_to_rgb(config.right_panel_color), highlightbackground=color_tuple_to_rgb(config.grey_color_43), highlightthickness=config.boundary_width)
             config.right_panel.pack(side='left', fill='both', expand=True)
-            config.right_panel_main = tkinter.Frame(config.right_panel, bg=color_tuple_to_rgb(config.right_panel_color), highlightbackground=color_tuple_to_rgb(config.boundary_grey_color), highlightthickness=config.boundary_width)
+            config.right_panel_main = tkinter.Frame(config.right_panel, bg=color_tuple_to_rgb(config.right_panel_color), highlightbackground=color_tuple_to_rgb(config.grey_color_43), highlightthickness=config.boundary_width)
             config.right_panel_main.pack(side='top', fill='both', expand=True)
             config.right_panel_change_arrow = tkinter.Canvas(config.right_panel, width=config.size_increase_arrow_width, height=config.size_increase_arrow_height, bg=color_tuple_to_rgb(config.right_panel_color), highlightthickness=0, relief='ridge')
             config.right_panel_change_arrow.bind("<Enter>", arrow_hover)
@@ -1130,9 +1362,9 @@ def main():
             '''
             Add environment and Knowledge Graphs into the toggle list
             '''
-            bottom_arrow_area = tkinter.Canvas(config.toggle_list, height = config.size_increase_arrow_height + 8 * config.boundary_width, 
+            left_panel_main_bottom_arrow_area = tkinter.Canvas(config.toggle_list, height = config.size_increase_arrow_height + 8 * config.boundary_width, 
                                                bg=color_tuple_to_rgb(config.left_panel_color), highlightthickness = 0, relief='ridge')
-            bottom_arrow_area.pack(side="bottom", fill="x")
+            left_panel_main_bottom_arrow_area.pack(side="bottom", fill="x")
             temp_canvas = tkinter.Canvas(config.toggle_list, bg = color_tuple_to_rgb(config.left_panel_color), highlightthickness=0, relief='ridge'); 
             temp_canvas.pack(side="top", fill="both", expand=True)
             temp_frame = tkinter.Frame(temp_canvas, highlightthickness=0, relief='ridge')
@@ -1141,7 +1373,7 @@ def main():
             if (debug == 0): print (config.toggle_list_states) 
             for name, value in config.toggle_list_states.items(): 
                 total_height += create_toggle_list_recursive(temp_frame, 0, value)
-                division_bar = tkinter.Frame (temp_frame, height = config.boundary_width, bg = color_tuple_to_rgb(config.boundary_grey_color))
+                division_bar = tkinter.Frame (temp_frame, height = config.boundary_width, bg = color_tuple_to_rgb(config.grey_color_43))
                 division_bar.pack(anchor = 'n', fill = 'x')
                 total_height += config.boundary_width
 
