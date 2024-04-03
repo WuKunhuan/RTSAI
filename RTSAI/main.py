@@ -20,9 +20,13 @@ Debug purpose codes
 debug = 1
 ID_counter = 0
 def new_ID(): 
-
     global ID_counter; ID_counter += 1
     return ID_counter
+
+resize_window_ID_counter = 0
+def new_resize_window_ID(): 
+    global resize_window_ID_counter; resize_window_ID_counter += 1
+    return resize_window_ID_counter
 
 def setup(): 
     '''
@@ -139,12 +143,28 @@ def copy_knowledge_graph(existing_graph_name, copied_graph_name, environment_nam
     if (environment_name): graph_path = os.path.join(DATA_PATH, "environments", environment_name)
     else: graph_path = os.path.join(DATA_PATH, "knowledge_graphs")
     if not os.path.exists(os.path.join(graph_path, existing_graph_name)):
-        if (showinfo == "print"): print(f"Knowledge Graph '{existing_graph_name}' does not exist{" inside Environment '" + environment_name + "'" if environment_name else ""}.")
-        else: show_popup_message(f"Knowledge Graph '{existing_graph_name}' does not exist{" inside Environment '" + environment_name + "'" if environment_name else ""}.", parent = parent_item)
+        if (showinfo == "print"): 
+            if (environment_name): 
+                print(f"Knowledge Graph '{existing_graph_name}' does not exist inside Environment '{environment_name}'. ")
+            else: 
+                print(f"Knowledge Graph '{existing_graph_name}' does not exist." )
+        else: 
+            if (environment_name): 
+                show_popup_message(f"Knowledge Graph '{existing_graph_name}' does not exist inside Environment '{environment_name}'. ", parent = parent_item)
+            else: 
+                show_popup_message(f"Knowledge Graph '{existing_graph_name}' does not exist.", parent = parent_item)
         return 1
     elif os.path.exists(os.path.join(graph_path, copied_graph_name)):
-        if (showinfo == "print"): print(f"Knowledge Graph '{copied_graph_name}' already exists{" inside Environment '" + environment_name + "'" if environment_name else ""}.")
-        else: show_popup_message(f"Knowledge Graph '{copied_graph_name}' already exists{" inside Environment '" + environment_name + "'" if environment_name else ""}.", parent = parent_item)
+        if (showinfo == "print"): 
+            if (environment_name): 
+                print(f"Knowledge Graph '{copied_graph_name}' already exists inside Environment '{environment_name}'. ")
+            else: 
+                print(f"Knowledge Graph '{copied_graph_name}' already exists." )
+        else: 
+            if (environment_name): 
+                show_popup_message(f"Knowledge Graph '{copied_graph_name}' already exists inside Environment '{environment_name}'. ", parent = parent_item)
+            else: 
+                show_popup_message(f"Knowledge Graph '{copied_graph_name}' already exists.", parent = parent_item)
         return 1
     elif (new_name_check(copied_graph_name, graph_path, showinfo = showinfo, parent_item = parent_item) == 0): 
         shutil.copytree(os.path.join(graph_path, existing_graph_name), os.path.join(graph_path, copied_graph_name))
@@ -190,6 +210,8 @@ def main():
     The main function handling both the UI and the Terminal Application
     '''
 
+    print  (sys.argv[0])
+    
     if (not (len(sys.argv) >= 1 and sys.argv[0] == f'{EXECUTABLE_PATH}/{COMMAND_NAME}')): 
         return
 
@@ -207,7 +229,6 @@ def main():
         from tkinter import simpledialog, Scrollbar, Listbox, messagebox
         from tkinter.font import Font
         from PIL import Image, ImageTk
-
 
         class Left_Sidebar_Icon(tkinter.Canvas):
             '''
@@ -392,7 +413,8 @@ def main():
                             select_knowledge_graph_window.destroy()
                             select_knowledge_graph_window.update()
                             config.toggle_list_created = False; create_toggle_list()
-                            show_popup_message (f"Knowledge Graphs {', '.join([f"'{item}'" for item in success_items])} successfully added to the Environment '{environment_name}'.")
+                            temp_string = ', '.join([f"'{item}'" for item in success_items]) # fit python 3.9 version
+                            show_popup_message (f"Knowledge Graphs {temp_string} successfully added to the Environment '{environment_name}'.")
                         if (knowledge_graph_names): 
                             Cancel_button = tkinter.Button(button_frame, text = "Cancel")
                             Cancel_button.pack (side = 'left', padx = 100)
@@ -671,33 +693,33 @@ def main():
 
             def hover_tab(self): 
                 self.tab_status_display = "HOVER"; self.draw_tab_icon_status()
-                if (not config.editor_tab_on_focus == self.id): 
+                if (not config.current_editor_id == self.id): 
                     self.tab_label.configure(bg = color_tuple_to_rgb(config.right_panel_color))
                     self.tab_status.configure(bg = color_tuple_to_rgb(config.right_panel_color))
 
             def leave_tab(self): 
                 self.tab_status_display = "DEFAULT"; self.draw_tab_icon_status()
-                if (not config.editor_tab_on_focus == self.id): 
+                if (not config.current_editor_id == self.id): 
                     self.tab_label.configure(bg = color_tuple_to_rgb(config.left_panel_color))
                     self.tab_status.configure(bg = color_tuple_to_rgb(config.left_panel_color))
             
             def click_tab(self): 
-                if (config.editor_tab_on_focus != self.id): 
-                    config.editor_tab_on_focus = self.id
+                if (config.current_editor_id != self.id): 
+                    config.current_editor_id = self.id
                     config.tabbar_created = False; show_tabbar()
 
             def close_tab(self): 
                 config.editor_states = config.editor_states[0:self.id] + config.editor_states[self.id+1:]
-                if (config.editor_tab_on_focus == self.id): 
-                    config.editor_tab_on_focus = -1
-                    if (config.previous_window): 
-                        config.previous_window.pack_forget()
-                        config.previous_window = None
-                elif (config.editor_tab_on_focus > self.id): 
-                    config.editor_tab_on_focus -= 1
+                if (config.current_editor_id == self.id): 
+                    config.current_editor_id = -1
+                    if (config.current_editor): 
+                        config.current_editor.pack_forget()
+                        config.current_editor = None
+                elif (config.current_editor_id > self.id): 
+                    config.current_editor_id -= 1
 
-                config.tabbar_created = False; 
-                if (config.editor_states): show_tabbar()
+                if (config.editor_states): 
+                    config.tabbar_created = False; show_tabbar()
                 else: hide_tabbar()
 
             def measure_tab_label_width(self, label): 
@@ -725,7 +747,7 @@ def main():
                                             fg = color_tuple_to_rgb(config.VSCode_font_grey_color))
                 self.tab_status = tkinter.Canvas(self, height = config.right_panel_tabbar_height - self.active_bar_thickness, highlightthickness=0)
 
-                if (config.editor_tab_on_focus == self.id or self.tab_status_display == "HOVER"): 
+                if (config.current_editor_id == self.id or self.tab_status_display == "HOVER"): 
                     self.tab_active_bar.configure(bg = color_tuple_to_rgb(config.VSCode_highlight_color))
                     self.tab_icon.configure(bg = color_tuple_to_rgb(config.grey_color_43))
                     self.tab_label.configure(bg = color_tuple_to_rgb(config.grey_color_43))
@@ -765,7 +787,12 @@ def main():
                 self.tab_label.bind("<Button-1>", lambda event: self.click_tab())
                 self.tab_status.bind("<Button-1>", lambda event: self.close_tab())
 
+        '''
+        CURRENT
+        The main window of right panel
+        '''
         class Right_Panel_Main_Window(tkinter.Frame): 
+
 
             class Window_Operation: 
                 
@@ -777,6 +804,14 @@ def main():
                 def __init__(self): 
                     pass
             
+            class Window_Element: 
+                '''
+                Encapsulate the window elements
+                '''
+                def __init__ (self, element): 
+                    self.element = element
+                    self.relwidth = 1
+
             def create_dialog_box(self, parent_frame, hint_text, button_text, web_crawl_function, upload_file_function = None): 
                 '''
                 Create the dialog box and pack it to the parent frame. 
@@ -877,40 +912,26 @@ def main():
                     
                 dialogue_box.pack(side="left", fill='both', expand=True, pady=5)
 
-            def render_text_into_label(self, parent_label, label_text_original, label_width_row): 
-
-                # config.label_width_one_unit_characters: number of new characters to put in the label, before measuring the label width again
-                label_font = Font(font=parent_label.cget("font"))
-
-                '''
-                Rendering the label_text, by adding necessary newline characters
-                '''
-                label_text_rendered = ''
-                label_text_remaining = label_text_original
-                label_text_rendered_row = ''
-                
-                current_width = 0
-                one_unit_characters = config.label_width_one_unit_characters
-                
-                pass
-
-
-
-
-
-                '''
-                Finalize the label
-                '''
-                parent_label.configure(text = label_text_original)
-                parent_label.configure(width = label_width_row * config.label_width_ratio)
-
+            def configure(self): 
+                print (new_resize_window_ID())
+        
             def __init__(self, winkey, wintype): 
 
-                super().__init__(master=config.right_panel_main, bg=color_tuple_to_rgb(config.right_panel_color))
+                print  (f"Right_Panel_Main_Window init ...")
+
+                print  (f"new_resize_window_ID: {new_resize_window_ID()}")
+
+                super().__init__(master=config.right_panel_main, bg=color_tuple_to_rgb(config.right_panel_color))  # right_panel_main
+                self.bind('<Configure>', lambda event: self.configure())
+
                 right_panel_main_bottom_arrow_area = tkinter.Canvas(self, height = config.size_increase_arrow_height + 8 * config.boundary_width, 
                                                    bg=color_tuple_to_rgb(config.right_panel_color), highlightthickness = 0, relief='ridge')
                 right_panel_main_bottom_arrow_area.pack(side="bottom", fill="x")
                 self.key = winkey; self.type = wintype; self.status = "SAVED"
+
+                '''
+                Save the window elements for dynamic rendering (especially considering the width)
+                '''
                 self.window_elements = []  # A sequence of Window_Element. Order matters. Elements will be packed. 
 
                 '''
@@ -923,14 +944,19 @@ def main():
                 Create the main window components based on the window type
                 '''
                 if (wintype == "CRAWL"): 
-                    dialog_box_uploaded_files = []
 
                     def web_crawl(dialogue_box): 
                         dialog_box_value = dialogue_box.get("1.0", "end-1c")
                         print (dialog_box_value)
 
+                    dialog_box_uploaded_files = []
                     def file_upload(dialogue_box): 
                         pass
+
+                    web_crawl_main_panel = tkinter.Canvas(self, bg=color_tuple_to_rgb(config.right_panel_color), highlightthickness=0, relief='ridge')
+                    web_crawl_main_panel.pack(side = 'top', fill = 'both', expand = True)
+                    temp_frame = tkinter.Frame(web_crawl_main_panel, bg=color_tuple_to_rgb(config.VSCode_highlight_color))
+                    temp_frame.pack (side = 'top', fill = 'x')
 
                     '''
                     Generate the dialog box (including the upload and the crawl buttons) on the botton
@@ -940,21 +966,26 @@ def main():
                     dialogue_box_panel.pack(side='bottom', fill='x')
 
                     '''
-                    Generate the main panel to display AI chat
+                    Generate the main AI panel
+                    -  The title
+                    -  The introduction
+                    -  The existing chats
                     '''
-                    web_crawl_main_panel = tkinter.Canvas(self, bg=color_tuple_to_rgb(config.right_panel_color), highlightthickness=0, relief='ridge')
-                    web_crawl_main_panel.pack(side = 'top', fill = 'both', expand = True)
-                    temp_frame = tkinter.Frame(web_crawl_main_panel, bg=color_tuple_to_rgb(config.VSCode_highlight_color))
-
-                    web_crawl_title = tkinter.Label(web_crawl_main_panel, text="Web Crawl", font = [config.standard_font_family, config.h1_font_size, "bold"], 
+                    right_panel_width = math.floor(config.window_width - config.left_panel_width)
+                    web_crawl_title = tkinter.Label(temp_frame, text="Web Crawl", font = [config.standard_font_family, config.h1_font_size, "bold"], 
                                                     bg = color_tuple_to_rgb(config.right_panel_color), fg = color_tuple_to_rgb(config.VSCode_font_grey_color))
+                    wrap_label_text(web_crawl_title, math.floor(right_panel_width * 0.95))
                     web_crawl_title.pack (side = 'top', fill = 'x')
-                    print  (web_crawl_title.winfo_height())
+                    self.window_elements.append(self.Window_Element(web_crawl_title))
+                    web_crawl_intro = tkinter.Label(temp_frame, text="The web crawl function is designed to gather valuable data and construct a knowledge graph from the web, enabling the retrieval of useful information. ", 
+                                                    font = [config.standard_font_family, config.standard_font_size, "bold"], 
+                                                    bg = color_tuple_to_rgb(config.right_panel_color), fg = color_tuple_to_rgb(config.VSCode_font_grey_color))
+                    wrap_label_text(web_crawl_intro, math.floor(right_panel_width * 0.95))
+                    web_crawl_intro.pack(side = 'top', fill = 'x')
+                    self.window_elements.append(self.Window_Element(web_crawl_intro))
 
-
-                    '''
-                    The web crawl function is designed to automatically gather valuable data and construct a knowledge graph, enabling the retrieval of useful information from the web.
-                    '''
+                elif (wintype == "TEXT"): 
+                    pass
 
                 '''
                 No need to pack the window into the right panel
@@ -962,6 +993,14 @@ def main():
                 '''
                 config.main_windows[winkey] = self
 
+        def check_editor_status (source_file): 
+            opened_editors = [editor[0] for editor in config.editor_states]
+            if (source_file not in opened_editors): return None
+            else: return (config.editor_states[opened_editors.index(source_file)][1])
+
+        '''
+        Draw the icons for chat & web crawling
+        '''
         def draw_chat_icon(parent_canvas, fill = color_tuple_to_rgb(config.VSCode_font_grey_color)): 
             '''
             Draw the chat logo
@@ -1023,22 +1062,66 @@ def main():
             parent_canvas.create_polygon(spider_leg_points(0.65 * canvas_width, 0.6 * canvas_height, 0.73 * canvas_width, 0.65 * canvas_height, 0.07 * canvas_height), fill=fill, tags="item_7_spider_leg_6", outline = "")
             parent_canvas.items_in_panel = ["item_1_spider_body", "item_8_spider_head", "item_2_spider_leg_1", "item_3_spider_leg_2", "item_4_spider_leg_3", "item_5_spider_leg_4", "item_6_spider_leg_5", "item_7_spider_leg_6"]
 
-        def check_editor_status (source_file): 
-            opened_editors = [editor[0] for editor in config.editor_states]
-            if (source_file not in opened_editors): return None
-            else: return (config.editor_states[opened_editors.index(source_file)][1])
+        def wrap_label_text(parent_label, expected_row_width, label_text_original = None): 
+            '''
+            Rendering the label_text, by adding necessary newline characters
+            '''
+
+            # Calculate the expected row width
+            font = Font(font=parent_label.cget("font"))
+            if (not label_text_original): 
+                label_text_original = parent_label.cget("text")
+            remaining_text = label_text_original
+            rendered_text = ""
+
+            while remaining_text: 
+
+                remaining_width = font.measure(remaining_text)
+                remaining_density = remaining_width / len(remaining_text)
+                total_characters = min(len(remaining_text), math.floor(expected_row_width / remaining_width * len(remaining_text)))
+                cropped_text = remaining_text[0:total_characters]
+
+                if (total_characters != len(remaining_text)): 
+                    # diff_char_nums can either be positive (need more characters) or negative
+                    diff_char_nums = math.floor((expected_row_width - font.measure(cropped_text)) / remaining_density)
+                    while (abs(diff_char_nums) > 3): # let us fix the error threshold to be 3
+                        print (diff_char_nums)
+                        total_characters += diff_char_nums
+                        cropped_text = remaining_text[0:total_characters]
+                        remaining_density = remaining_width / len(remaining_text)
+                        diff_char_nums = math.floor((expected_row_width - font.measure(cropped_text)) / remaining_density)
+
+                # Check if the next character is not a space to avoid breaking words
+                if total_characters < len(remaining_text) and remaining_text[total_characters] != ' ':
+                    last_space_index = cropped_text.rfind(' ')
+                    if last_space_index != -1:
+                        cropped_text = cropped_text[:last_space_index + 1]
+                        total_characters = last_space_index + 1
+
+                # Add the cropped text to the rendered text with a newline character
+                # Skip multiple new line characters
+                if (not (rendered_text.endswith('\n\n') and cropped_text == '\n')): 
+                    rendered_text += cropped_text + '\n'
+                remaining_text = remaining_text[total_characters:]
+
+            '''
+            Finalize the label text
+            '''
+            parent_label.configure(text=rendered_text.rstrip())
+            parent_label.configure(width=expected_row_width)
 
         def resize_window(): 
             '''
-            Resizes the main window. Toggle lists, etc. will be rendered again when appropriate. 
+            Resizes the main window. 
+            Toggle lists, etc. will be rendered again when appropriate. 
             '''
+            # if (config.current_editor): 
+            #     config.current_editor.pack_forget()
+
             window_geometry = list(map(int, config.window.geometry().replace('x', ' ').replace('+', ' ').split(' ')))
             config.window_width = window_geometry[0]
             config.window_height = window_geometry[1]
 
-            '''
-            Configure the overall panel
-            '''
             left_panel_width = int(config.left_panel_relwidth * config.window_width)
             if (config.window_width >= config.window_width_min and left_panel_width < config.left_panel_width_min): 
                 left_panel_width = config.left_panel_width_min; 
@@ -1046,21 +1129,15 @@ def main():
                 left_panel_width = int(config.left_panel_relwidth * config.window_width)
 
             config.left_panel_width = left_panel_width
-            try: 
-                config.left_panel.configure (width = config.left_panel_width, height = config.window_height)
-                config.left_panel_sidebar.configure (width = config.left_panel_sidebar_width)
-                config.toggle_list.configure (width = config.left_panel_width - config.left_panel_sidebar_width)
-                config.right_panel.configure (height = config.window_height)
-                config.left_panel_change_arrow.place(x = config.left_panel_width - 3 * config.boundary_width, y = config.window_height - 4 * config.boundary_width, anchor = tkinter.SE)
-                config.right_panel_change_arrow.place(x = 1 * config.boundary_width, y = config.window_height - 4 * config.boundary_width, anchor = tkinter.SW)
-            except: pass
-            create_toggle_list()
+            config.left_panel.configure (width = config.left_panel_width, height = config.window_height)
+            config.left_panel_sidebar.configure (width = config.left_panel_sidebar_width)
+            config.toggle_list.configure (width = config.left_panel_width - config.left_panel_sidebar_width)
+            config.right_panel.configure (height = config.window_height)
+            config.left_panel_change_arrow.place(x = config.left_panel_width - 3 * config.boundary_width, y = config.window_height - 4 * config.boundary_width, anchor = tkinter.SE)
+            config.right_panel_change_arrow.place(x = 1 * config.boundary_width, y = config.window_height - 4 * config.boundary_width, anchor = tkinter.SW)
 
-        def render_right_panel(): 
-            '''
-            Retrieve the current editor opened and decide what to do
-            '''
-            pass
+            # TO BE VERIFIED: WHETHER I CAN REMOVE THE LINE
+            # create_toggle_list()
 
         def show_tabbar(tabbar_width = None): 
             '''
@@ -1069,6 +1146,7 @@ def main():
 
             '''
             Create the tab bar
+            Temporarily forget the right panel main as well as the scrollbar
             '''
             if (not tabbar_width): 
                 tabbar_width = config.right_panel.winfo_width() - 4 * config.boundary_width
@@ -1076,8 +1154,12 @@ def main():
             else: config.tabbar_created = True
             if (not config.right_panel): return
             if (config.right_panel_tabbar): config.right_panel_tabbar.pack_forget()
-            if (config.right_panel_tabbar_scrollbar): config.right_panel_tabbar_scrollbar.pack_forget()
+
+            if (config.right_panel_tabbar_scrollbar): 
+                config.right_panel_tabbar_scrollbar.pack_forget()
+
             config.right_panel_main.pack_forget()
+
             config.right_panel_tabbar = tkinter.Canvas(config.right_panel, height=config.right_panel_tabbar_height, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.grey_color_43), highlightthickness=config.boundary_width)
             config.right_panel_tabbar.pack(side='top', fill='x')
             total_width = 0; 
@@ -1132,23 +1214,9 @@ def main():
                 elif (total_width > tabbar_width_new and not config.tabbar_scrollbar_created): 
                     config.tabbar_scrollbar_created = True
                     config.tabbar_created = False; config.right_panel_tabbar.after(100, show_tabbar)
+            
             tab_frame.bind("<Configure>", tab_frame_configure)
-
-            '''
-            Render the right_panel_main if editor_tab_on_focus is set
-            TO BE COMPLETED: Render upon information given
-            Pack the right_panel_main panel back after updating the tab bar
-            '''
-            if (config.editor_tab_on_focus != -1): 
-                if (config.previous_window): config.previous_window.pack_forget()
-                state = config.editor_states[config.editor_tab_on_focus]
-                if (f"{state[0]}|{state[1]}" in config.main_windows.keys()): 
-                    config.previous_window = config.main_windows[f"{state[0]}|{state[1]}"]
-                else: 
-                    config.previous_window = Right_Panel_Main_Window(f"{state[0]}|{state[1]}", state[0])
-                config.previous_window.pack(side = 'top', fill = 'both', expand = True)
-
-            config.right_panel_main.pack(side='top', fill='both', expand=True)
+            update_editor()
 
         def hide_tabbar(): 
             if (not config.right_panel): return
@@ -1156,16 +1224,40 @@ def main():
                 config.right_panel_tabbar.pack_forget()
                 config.right_panel_tabbar = None
 
+        def update_editor(): 
+            '''
+            Render the right_panel_main if editor_tab_on_focus is set
+            '''
+            if (config.current_editor and not config.open_editor_configure): 
+                print ("pack forget current editor")
+                config.current_editor.pack_forget()
+            else: 
+                print ("open new editor - protection")
+                # config.open_editor_configure = False
+            print  (f"config.current_editor_id: {config.current_editor_id}")
+            if (config.current_editor_id != -1): 
+                config.open_editor_configure = True
+                state = config.editor_states[config.current_editor_id]
+                print  (config.editor_states, config.current_editor_id, state)
+                if (f"{state[0]}|{state[1]}" in config.main_windows.keys()): 
+                    config.current_editor = config.main_windows[f"{state[0]}|{state[1]}"]
+                else: 
+                    config.current_editor = Right_Panel_Main_Window(f"{state[0]}|{state[1]}", state[0])
+                config.current_editor.pack(side = 'top', fill = 'both', expand = True)
+
+            '''
+            Pack the right_panel_main panel back after updating the tab bar
+            '''
+            config.right_panel_main.pack(side='top', fill='both', expand=True)
+
         def create_left_panel(window):
             '''
             Create the left panel in the window
             '''
-
-            ## TO BE COMPLETED
             def open_editor(tab_type, tab_value, tab_display_name): 
                 config.editor_states.append([tab_type, tab_value, tab_display_name])
                 if (debug == 1): print (f"Tab '{tab_value}' ({tab_type}) opened. ")
-                config.editor_tab_on_focus = len(config.editor_states) - 1
+                config.current_editor_id = len(config.editor_states) - 1
                 config.tabbar_created = False; show_tabbar()
 
             def create_left_sidebar(): 
@@ -1234,7 +1326,6 @@ def main():
             '''
             Create the right panel in the window
             '''
-
             def draw_right_panel_arrow(event):
                 canvas_width = config.right_panel_change_arrow.winfo_width()
                 canvas_height = config.right_panel_change_arrow.winfo_height()
@@ -1268,16 +1359,30 @@ def main():
             def arrow_leave(event):
                 config.right_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.grey_color_64))
 
+            def configure_editor(event): 
+                if (config.current_editor and not config.open_editor_configure): 
+                    print ("Configure right panel main")
+                    config.current_editor.pack_forget()
+                    config.current_editor = None
+                    config.right_panel_main.after(100, update_editor())
+                else: 
+                    print ("New editor")
+                    config.open_editor_configure = False
+
             config.right_panel = tkinter.Frame(window, bg=color_tuple_to_rgb(config.right_panel_color), highlightbackground=color_tuple_to_rgb(config.grey_color_43), highlightthickness=config.boundary_width)
             config.right_panel.pack(side='left', fill='both', expand=True)
             config.right_panel_main = tkinter.Frame(config.right_panel, bg=color_tuple_to_rgb(config.right_panel_color), highlightbackground=color_tuple_to_rgb(config.grey_color_43), highlightthickness=config.boundary_width)
             config.right_panel_main.pack(side='top', fill='both', expand=True)
+            config.right_panel_main.bind("<Configure>", configure_editor)
             config.right_panel_change_arrow = tkinter.Canvas(config.right_panel, width=config.size_increase_arrow_width, height=config.size_increase_arrow_height, bg=color_tuple_to_rgb(config.right_panel_color), highlightthickness=0, relief='ridge')
             config.right_panel_change_arrow.bind("<Enter>", arrow_hover)
             config.right_panel_change_arrow.bind("<Leave>", arrow_leave)
             config.right_panel_change_arrow.bind("<Configure>", draw_right_panel_arrow)
             config.right_panel_change_arrow.bind("<Button-1>", resize_right_panel)
 
+        '''
+        Create the left panel toggle lists
+        '''
         def create_toggle_list_recursive(master, toggle_level, toggle_info): 
 
             if (toggle_info[3] != None): display_name = '  ' * toggle_level + ('▿  ' if toggle_info[2][0] else '▹  ') + toggle_info[0]
@@ -1437,6 +1542,7 @@ def main():
             '''
             create_left_panel(config.window)
             create_right_panel(config.window)
+            
             config.window.bind("<Configure>", lambda event: resize_window())
 
         create_main_window()

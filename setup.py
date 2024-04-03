@@ -1,6 +1,6 @@
 
 import os, setuptools
-from RTSAI.config import PACKAGE_NAME, PACKAGE_VERSION, DATA_PATH
+from RTSAI.config import PACKAGE_NAME, PACKAGE_VERSION, DATA_PATH, ASSETS_PATH
 
 setuptools.setup (
     name = PACKAGE_NAME, 
@@ -19,12 +19,12 @@ setuptools.setup (
     project_urls = {
         "Source": "https://github.com/WuKunhuan/RTSAI", 
     }, 
-    python_requires=">=3.12.0", 
+    python_requires=">=3.10.0", 
     install_requires = [
-        "kgtk-wukunhuan", 
-        "appdirs", 
         "pyautogui", 
-        "pillow", 
-        "pytest-shutil", 
-    ]
+    ], 
+    package_data={
+        PACKAGE_NAME: [os.path.join(DATA_PATH, '*'), os.path.join(ASSETS_PATH, '*')]
+    }, 
+
 )

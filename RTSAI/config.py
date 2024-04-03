@@ -4,11 +4,18 @@ import os, sys, pyautogui, random
 '''
 Package information
 '''
-PACKAGE_NAME = "package_RTSAI"
-PACKAGE_VERSION = '0.1.0'
+PACKAGE_NAME = "RTSAI"
+PACKAGE_VERSION = '0.1.5'
+
+def operating_system(): 
+    if (sys.platform.startswith("darwin")): return ("MacOS")
+    elif (): return ("Windows")
+    else: return ("Windows")
 
 PACKAGE_PATH = os.path.dirname(__file__)
-EXECUTABLE_PATH = sys.executable[::-1][sys.executable[::-1].index('/')+1:][::-1]
+if (operating_system() == "MacOS"):
+    EXECUTABLE_PATH = sys.executable[::-1][sys.executable[::-1].index('/')+1:][::-1]
+else: EXECUTABLE_PATH = sys.executable[::-1]
 
 ASSETS_PATH = os.path.join(os.path.dirname(__file__), 'assets')
 DATA_PATH = os.path.join(os.path.dirname(__file__), 'data')
@@ -21,12 +28,6 @@ if (not environment_names):
 else: 
     environment_names.sort (key = lambda name: name.lower())
     CURRENT_ENV = environment_names[0]
-
-def operating_system(): 
-    # print (f"sys.platform: {sys.platform}")
-    if (sys.platform.startswith("darwin")): return ("MacOS")
-    elif (): return ("Windows")
-    else: return ("Windows")
 
 PRE_INSTALLED_KG_PATH = os.path.join(os.path.dirname(__file__), 'assets', 'knowledge_graphs')
 PRE_INSTALLED_KG = ["HKU_Intuitive"]
@@ -68,7 +69,6 @@ toggle_list_operation_current = 0  # The operation corresponding to the current 
 tabbar_created = False
 tabbar_scrollbar_created = False
 editor_states = [] # Sequential order of opened editors: [type, value, display] ## status can be obtained within the Main
-editor_tab_on_focus = -1 # The current selected editor; id of the editor_states
 editor_item_operations = dict() # key: editor_item; value: list of operations done on this item (max. 100 operations); operation_current]
 
 # related to label width setting
@@ -76,7 +76,9 @@ label_width_ratio = 8
 label_width_one_unit_characters = 5
 
 # Main window components
-previous_window = None # The previous loaded window
+current_editor_id = -1 # The current selected editor; id of the editor_states
+current_editor = None # The previous loaded window
+open_editor_configure = True
 main_windows = dict() # Key: Type + Value; Value: Right_Panel_Main_Window object
     # Key Value part of different tabs: 
     # -     Chat: path to environment

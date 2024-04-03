@@ -1,4 +1,0 @@
-kgtk-wukunhuan
-appdirs
-pyautogui
-pillow
