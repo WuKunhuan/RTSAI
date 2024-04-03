@@ -5,7 +5,7 @@ import os, sys, pyautogui, random
 Package information
 '''
 PACKAGE_NAME = "RTSAI"
-PACKAGE_VERSION = '0.1.5'
+PACKAGE_VERSION = '0.1.6'
 
 def operating_system(): 
     if (sys.platform.startswith("darwin")): return ("MacOS")
