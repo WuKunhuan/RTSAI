@@ -1,4 +1,3 @@
-
 '''
 Tasks: 
 1. Import and Export functions
@@ -706,7 +705,8 @@ def main():
             def click_tab(self): 
                 if (config.current_editor_id != self.id): 
                     config.current_editor_id = self.id
-                    config.tabbar_created = False; show_tabbar()
+                    config.tabbar_shown = False; show_tabbar()
+                    config.editor_updated = False; update_editor()
 
             def close_tab(self): 
                 config.editor_states = config.editor_states[0:self.id] + config.editor_states[self.id+1:]
@@ -719,7 +719,7 @@ def main():
                     config.current_editor_id -= 1
 
                 if (config.editor_states): 
-                    config.tabbar_created = False; show_tabbar()
+                    config.tabbar_shown = False; show_tabbar()
                 else: hide_tabbar()
 
             def measure_tab_label_width(self, label): 
@@ -792,7 +792,6 @@ def main():
         The main window of right panel
         '''
         class Right_Panel_Main_Window(tkinter.Frame): 
-
 
             class Window_Operation: 
                 
@@ -916,11 +915,6 @@ def main():
                 print (new_resize_window_ID())
         
             def __init__(self, winkey, wintype): 
-
-                print  (f"Right_Panel_Main_Window init ...")
-
-                print  (f"new_resize_window_ID: {new_resize_window_ID()}")
-
                 super().__init__(master=config.right_panel_main, bg=color_tuple_to_rgb(config.right_panel_color))  # right_panel_main
                 self.bind('<Configure>', lambda event: self.configure())
 
@@ -1115,8 +1109,6 @@ def main():
             Resizes the main window. 
             Toggle lists, etc. will be rendered again when appropriate. 
             '''
-            # if (config.current_editor): 
-            #     config.current_editor.pack_forget()
 
             window_geometry = list(map(int, config.window.geometry().replace('x', ' ').replace('+', ' ').split(' ')))
             config.window_width = window_geometry[0]
@@ -1141,24 +1133,34 @@ def main():
 
         def show_tabbar(tabbar_width = None): 
             '''
-            Show the tab bar in the right panel
+            Show the tabbar in the right panel
             '''
 
+            if (config.tabbar_shown): return
+            else: config.tabbar_shown = True
+
             '''
-            Create the tab bar
+            Create the tabbar
             Temporarily forget the right panel main as well as the scrollbar
             '''
             if (not tabbar_width): 
                 tabbar_width = config.right_panel.winfo_width() - 4 * config.boundary_width
-            if (config.tabbar_created): return
-            else: config.tabbar_created = True
             if (not config.right_panel): return
             if (config.right_panel_tabbar): config.right_panel_tabbar.pack_forget()
 
             if (config.right_panel_tabbar_scrollbar): 
+                '''
+                Temporarily forget the scrollbar
+                '''
                 config.right_panel_tabbar_scrollbar.pack_forget()
 
-            config.right_panel_main.pack_forget()
+            '''
+            Temporarily forget the right panel main
+            Pack it back via update_editor is required elsewhere (otherwise, dead loop)
+            '''
+            if (config.right_panel_main): 
+                print  ("right_panel_main.pack_forget()")
+                config.right_panel_main.pack_forget()
 
             config.right_panel_tabbar = tkinter.Canvas(config.right_panel, height=config.right_panel_tabbar_height, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.grey_color_43), highlightthickness=config.boundary_width)
             config.right_panel_tabbar.pack(side='top', fill='x')
@@ -1172,12 +1174,10 @@ def main():
             for tab_id, editor_tab in enumerate(config.editor_states): 
                 tab_type = editor_tab[0]; tab_value = editor_tab[1]
                 tab_display_name = editor_tab[2]; 
-                
 
 
-                
+
                 tab_status = "SAVED" ### TO BE FIXED: detection method
-
 
 
 
@@ -1203,7 +1203,8 @@ def main():
             '''
             Bind the tabbar with configuration event
             '''
-            def tab_frame_configure(event): 
+            def configure_tab_frame(event): 
+                if (debug == 1): print (f"Configure tab frame ... {new_ID()}")
                 config.right_panel_tabbar.configure(scrollregion=config.right_panel_tabbar.bbox("all"))
                 tabbar_width_new = config.right_panel.winfo_width() - 4 * config.boundary_width
                 if (total_width <= tabbar_width_new and config.right_panel_tabbar_scrollbar): 
@@ -1213,10 +1214,15 @@ def main():
                     config.right_panel_tabbar_scrollbar_position = None
                 elif (total_width > tabbar_width_new and not config.tabbar_scrollbar_created): 
                     config.tabbar_scrollbar_created = True
-                    config.tabbar_created = False; config.right_panel_tabbar.after(100, show_tabbar)
-            
-            tab_frame.bind("<Configure>", tab_frame_configure)
-            update_editor()
+                    config.tabbar_shown = False; config.right_panel_tabbar.after(100, show_tabbar)
+
+            tab_frame.bind("<Configure>", configure_tab_frame)
+
+            # '''
+            # Pack the right panel main back
+            # '''
+            # if (config.right_panel_main): 
+            #     config.right_panel_main.pack()
 
         def hide_tabbar(): 
             if (not config.right_panel): return
@@ -1226,17 +1232,20 @@ def main():
 
         def update_editor(): 
             '''
-            Render the right_panel_main if editor_tab_on_focus is set
+            Render the right_panel_main, and show the editor window
             '''
-            if (config.current_editor and not config.open_editor_configure): 
-                print ("pack forget current editor")
-                config.current_editor.pack_forget()
+
+            if (config.editor_updated): 
+                print  ("editor already updated. ")
+                return
             else: 
-                print ("open new editor - protection")
-                # config.open_editor_configure = False
+                if (config.current_editor): 
+                    config.current_editor.pack_forget()
+                config.editor_updated = True
+            print  ("display the current editor")
+
             print  (f"config.current_editor_id: {config.current_editor_id}")
             if (config.current_editor_id != -1): 
-                config.open_editor_configure = True
                 state = config.editor_states[config.current_editor_id]
                 print  (config.editor_states, config.current_editor_id, state)
                 if (f"{state[0]}|{state[1]}" in config.main_windows.keys()): 
@@ -1254,11 +1263,13 @@ def main():
             '''
             Create the left panel in the window
             '''
+
             def open_editor(tab_type, tab_value, tab_display_name): 
                 config.editor_states.append([tab_type, tab_value, tab_display_name])
                 if (debug == 1): print (f"Tab '{tab_value}' ({tab_type}) opened. ")
                 config.current_editor_id = len(config.editor_states) - 1
-                config.tabbar_created = False; show_tabbar()
+                config.tabbar_shown = False; show_tabbar()
+                config.editor_updated = False; update_editor()
 
             def create_left_sidebar(): 
                 '''
@@ -1294,7 +1305,7 @@ def main():
                 config.left_panel_width = int(config.left_panel_relwidth * config.window_width)
                 config.left_panel.configure(width=config.left_panel_width)
                 if (config.editor_states): 
-                    config.tabbar_created = False; show_tabbar(tabbar_width = config.window_width - config.left_panel_width - 4 * config.boundary_width)
+                    config.tabbar_shown = False; show_tabbar(tabbar_width = config.window_width - config.left_panel_width - 4 * config.boundary_width)
 
             def hover_left_panel_arrow(event):
                 config.left_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.VSCode_highlight_color))
@@ -1351,7 +1362,7 @@ def main():
                 config.left_panel_width = left_panel_width
                 config.left_panel.configure(width = config.left_panel_width)
                 if (config.editor_states): 
-                    config.tabbar_created = False; show_tabbar(tabbar_width = config.window_width - config.left_panel_width - 4 * config.boundary_width)
+                    config.tabbar_shown = False; show_tabbar(tabbar_width = config.window_width - config.left_panel_width - 4 * config.boundary_width)
 
             def arrow_hover(event):
                 config.right_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.VSCode_highlight_color))
@@ -1359,21 +1370,19 @@ def main():
             def arrow_leave(event):
                 config.right_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.grey_color_64))
 
-            def configure_editor(event): 
-                if (config.current_editor and not config.open_editor_configure): 
-                    print ("Configure right panel main")
-                    config.current_editor.pack_forget()
-                    config.current_editor = None
-                    config.right_panel_main.after(100, update_editor())
-                else: 
-                    print ("New editor")
-                    config.open_editor_configure = False
+            # def configure_editor(event): 
+            #     if (config.current_editor and not config.editor_updated): 
+            #         if (debug == 1): print (f"Configure editor ... {new_ID()}")
+            #         config.current_editor.pack_forget()
+            #         config.current_editor = None
+            #         config.editor_updated = False; config.right_panel_main.after(100, update_editor())
+            #     else: config.editor_updated = True
 
             config.right_panel = tkinter.Frame(window, bg=color_tuple_to_rgb(config.right_panel_color), highlightbackground=color_tuple_to_rgb(config.grey_color_43), highlightthickness=config.boundary_width)
             config.right_panel.pack(side='left', fill='both', expand=True)
             config.right_panel_main = tkinter.Frame(config.right_panel, bg=color_tuple_to_rgb(config.right_panel_color), highlightbackground=color_tuple_to_rgb(config.grey_color_43), highlightthickness=config.boundary_width)
             config.right_panel_main.pack(side='top', fill='both', expand=True)
-            config.right_panel_main.bind("<Configure>", configure_editor)
+            # config.right_panel_main.bind("<Configure>", configure_editor)
             config.right_panel_change_arrow = tkinter.Canvas(config.right_panel, width=config.size_increase_arrow_width, height=config.size_increase_arrow_height, bg=color_tuple_to_rgb(config.right_panel_color), highlightthickness=0, relief='ridge')
             config.right_panel_change_arrow.bind("<Enter>", arrow_hover)
             config.right_panel_change_arrow.bind("<Leave>", arrow_leave)
@@ -1427,7 +1436,13 @@ def main():
             environment_names = os.listdir(os.path.join(DATA_PATH, "environments")) 
             environment_names.sort (key = lambda name: name.lower())
             for environment_name in environment_names: 
-                ## Toggle List Structure: name, value, [toggle status, "edit status"], toggle items
+                '''
+                Toggle List Structure: 
+                -  name
+                -  value
+                -  [toggle status, "edit status"]
+                -  toggle items
+                '''
                 if (not environment_name in environment_dict): 
                     environment_dict[environment_name] = [environment_name, f"environments/{environment_name}", [False, None], dict()] 
                 knowledge_graph_names = os.listdir(os.path.join(DATA_PATH, "environments", environment_name)) 

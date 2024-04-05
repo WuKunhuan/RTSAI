@@ -1,6 +1,10 @@
 
-import os, setuptools
+import os, glob, setuptools
 from RTSAI.config import PACKAGE_NAME, PACKAGE_VERSION, DATA_PATH, ASSETS_PATH
+
+def recursive(directory):
+    file_patterns = os.path.join(directory, '**', '*')
+    return [file for file in glob.glob(file_patterns, recursive=True)]
 
 setuptools.setup (
     name = PACKAGE_NAME, 
@@ -24,7 +28,7 @@ setuptools.setup (
         "pyautogui", 
     ], 
     package_data={
-        PACKAGE_NAME: [os.path.join(DATA_PATH, '*'), os.path.join(ASSETS_PATH, '*')]
+        PACKAGE_NAME: recursive(DATA_PATH) + recursive(ASSETS_PATH)
     }, 
 
 )

@@ -5,7 +5,7 @@ import os, sys, pyautogui, random
 Package information
 '''
 PACKAGE_NAME = "RTSAI"
-PACKAGE_VERSION = '0.1.6'
+PACKAGE_VERSION = '0.1.8'
 
 def operating_system(): 
     if (sys.platform.startswith("darwin")): return ("MacOS")
@@ -51,6 +51,7 @@ right_panel = None
 right_panel_tabbar = None
 right_panel_tabbar_scrollbar = None
 right_panel_tabbar_scrollbar_position = None
+right_panel_tabbar_scrollbar_created = False
 right_panel_main = None
 left_panel_change_arrow = None
 left_panel_sidebar_chat = None
@@ -66,8 +67,9 @@ toggle_list_operations = [] # A list of operations done; for reverting purposes 
 toggle_list_operation_current = 0  # The operation corresponding to the current state
 
 # Tabbar components
-tabbar_created = False
-tabbar_scrollbar_created = False
+right_panel_shown = False
+tab_total_width = 0
+
 editor_states = [] # Sequential order of opened editors: [type, value, display] ## status can be obtained within the Main
 editor_item_operations = dict() # key: editor_item; value: list of operations done on this item (max. 100 operations); operation_current]
 
@@ -78,7 +80,6 @@ label_width_one_unit_characters = 5
 # Main window components
 current_editor_id = -1 # The current selected editor; id of the editor_states
 current_editor = None # The previous loaded window
-open_editor_configure = True
 main_windows = dict() # Key: Type + Value; Value: Right_Panel_Main_Window object
     # Key Value part of different tabs: 
     # -     Chat: path to environment
