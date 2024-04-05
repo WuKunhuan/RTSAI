@@ -210,13 +210,11 @@ def main():
     '''
 
     print  (sys.argv[0])
-    
-    if (not (len(sys.argv) >= 1 and sys.argv[0] == f'{EXECUTABLE_PATH}/{COMMAND_NAME}')): 
-        return
 
     '''
     Run setup codes
     '''
+    if (not (len(sys.argv) >= 1 and sys.argv[0] == f'{EXECUTABLE_PATH}/{COMMAND_NAME}')): return
     setup()
 
     if (len(sys.argv) == 1): 
@@ -706,7 +704,7 @@ def main():
                 if (config.current_editor_id != self.id): 
                     config.current_editor_id = self.id
                     config.tabbar_shown = False; show_tabbar()
-                    config.editor_updated = False; update_editor()
+                    config.editor_updated = False; configure_editor()
 
             def close_tab(self): 
                 config.editor_states = config.editor_states[0:self.id] + config.editor_states[self.id+1:]
@@ -912,7 +910,8 @@ def main():
                 dialogue_box.pack(side="left", fill='both', expand=True, pady=5)
 
             def configure(self): 
-                print (new_resize_window_ID())
+                if (debug == 1): print (f"Configure right panel main window ... {new_ID()}")
+                pass
         
             def __init__(self, winkey, wintype): 
                 super().__init__(master=config.right_panel_main, bg=color_tuple_to_rgb(config.right_panel_color))  # right_panel_main
@@ -985,7 +984,7 @@ def main():
                 No need to pack the window into the right panel
                 Instead, we save it to the config list. 
                 '''
-                config.main_windows[winkey] = self
+                config.editor_windows[winkey] = self
 
         def check_editor_status (source_file): 
             opened_editors = [editor[0] for editor in config.editor_states]
@@ -1104,11 +1103,12 @@ def main():
             parent_label.configure(text=rendered_text.rstrip())
             parent_label.configure(width=expected_row_width)
 
-        def resize_window(): 
+        def configure_window(): 
             '''
             Resizes the main window. 
             Toggle lists, etc. will be rendered again when appropriate. 
             '''
+            if (debug == 1): print (f"Configure window ... {new_ID()}")
 
             window_geometry = list(map(int, config.window.geometry().replace('x', ' ').replace('+', ' ').split(' ')))
             config.window_width = window_geometry[0]
@@ -1121,15 +1121,12 @@ def main():
                 left_panel_width = int(config.left_panel_relwidth * config.window_width)
 
             config.left_panel_width = left_panel_width
-            config.left_panel.configure (width = config.left_panel_width, height = config.window_height)
-            config.left_panel_sidebar.configure (width = config.left_panel_sidebar_width)
-            config.toggle_list.configure (width = config.left_panel_width - config.left_panel_sidebar_width)
-            config.right_panel.configure (height = config.window_height)
-            config.left_panel_change_arrow.place(x = config.left_panel_width - 3 * config.boundary_width, y = config.window_height - 4 * config.boundary_width, anchor = tkinter.SE)
-            config.right_panel_change_arrow.place(x = 1 * config.boundary_width, y = config.window_height - 4 * config.boundary_width, anchor = tkinter.SW)
-
-            # TO BE VERIFIED: WHETHER I CAN REMOVE THE LINE
-            # create_toggle_list()
+            try: 
+                config.toggle_list.configure (width = config.left_panel_width - config.left_panel_sidebar_width)
+                config.right_panel.configure (height = config.window_height)
+                config.left_panel_change_arrow.place(x = config.left_panel_width - 3 * config.boundary_width, y = config.window_height - 4 * config.boundary_width, anchor = tkinter.SE)
+                config.right_panel_change_arrow.place(x = 1 * config.boundary_width, y = config.window_height - 4 * config.boundary_width, anchor = tkinter.SW)
+            except: pass  # window already closed
 
         def show_tabbar(tabbar_width = None): 
             '''
@@ -1146,20 +1143,11 @@ def main():
             if (not tabbar_width): 
                 tabbar_width = config.right_panel.winfo_width() - 4 * config.boundary_width
             if (not config.right_panel): return
-            if (config.right_panel_tabbar): config.right_panel_tabbar.pack_forget()
-
+            if (config.right_panel_tabbar): 
+                config.right_panel_tabbar.pack_forget()
             if (config.right_panel_tabbar_scrollbar): 
-                '''
-                Temporarily forget the scrollbar
-                '''
                 config.right_panel_tabbar_scrollbar.pack_forget()
-
-            '''
-            Temporarily forget the right panel main
-            Pack it back via update_editor is required elsewhere (otherwise, dead loop)
-            '''
             if (config.right_panel_main): 
-                print  ("right_panel_main.pack_forget()")
                 config.right_panel_main.pack_forget()
 
             config.right_panel_tabbar = tkinter.Canvas(config.right_panel, height=config.right_panel_tabbar_height, bg=color_tuple_to_rgb(config.left_panel_color), highlightbackground=color_tuple_to_rgb(config.grey_color_43), highlightthickness=config.boundary_width)
@@ -1192,7 +1180,7 @@ def main():
                 config.right_panel_tabbar_scrollbar = tkinter.Scrollbar(config.right_panel, orient="horizontal", command=config.right_panel_tabbar.xview, width = config.right_panel_tabbar_scrollbar_width) # color setting options do not work
                 config.right_panel_tabbar.configure(xscrollcommand=config.right_panel_tabbar_scrollbar.set)
                 config.right_panel_tabbar_scrollbar.pack(side='top', fill='x')
-                config.tabbar_scrollbar_created = True
+                config.right_panel_tabbar_scrollbar_created = True
                 if (config.right_panel_tabbar_scrollbar_position): 
                     position = config.right_panel_tabbar_scrollbar_position
                     config.right_panel_tabbar.after(1000, lambda: config.right_panel_tabbar.xview_moveto(position[0]))
@@ -1203,26 +1191,24 @@ def main():
             '''
             Bind the tabbar with configuration event
             '''
-            def configure_tab_frame(event): 
+            def configure_tab_frame(): 
                 if (debug == 1): print (f"Configure tab frame ... {new_ID()}")
+                # if (config.right_panel_main): 
+                #     config.right_panel_main.pack_forget()
+                #     print  ("temporarily forget the right main panel")
                 config.right_panel_tabbar.configure(scrollregion=config.right_panel_tabbar.bbox("all"))
                 tabbar_width_new = config.right_panel.winfo_width() - 4 * config.boundary_width
                 if (total_width <= tabbar_width_new and config.right_panel_tabbar_scrollbar): 
                     config.right_panel_tabbar_scrollbar.pack_forget(); 
                     config.right_panel_tabbar_scrollbar = None
-                    config.tabbar_scrollbar_created = False
+                    config.right_panel_tabbar_scrollbar_created = False
                     config.right_panel_tabbar_scrollbar_position = None
-                elif (total_width > tabbar_width_new and not config.tabbar_scrollbar_created): 
-                    config.tabbar_scrollbar_created = True
-                    config.tabbar_shown = False; config.right_panel_tabbar.after(100, show_tabbar)
+                elif (total_width > tabbar_width_new and not config.right_panel_tabbar_scrollbar_created): 
+                    config.right_panel_tabbar_scrollbar_created = True
+                    config.tabbar_shown = False; config.right_panel_tabbar.after(100, show_tabbar())
+                config.editor_updated = False; configure_editor()
 
-            tab_frame.bind("<Configure>", configure_tab_frame)
-
-            # '''
-            # Pack the right panel main back
-            # '''
-            # if (config.right_panel_main): 
-            #     config.right_panel_main.pack()
+            tab_frame.bind("<Configure>", lambda event: configure_tab_frame())
 
         def hide_tabbar(): 
             if (not config.right_panel): return
@@ -1230,26 +1216,22 @@ def main():
                 config.right_panel_tabbar.pack_forget()
                 config.right_panel_tabbar = None
 
-        def update_editor(): 
+        def configure_editor(): 
             '''
             Render the right_panel_main, and show the editor window
             '''
+            print  ("update editor")
 
             if (config.editor_updated): 
-                print  ("editor already updated. ")
                 return
             else: 
                 if (config.current_editor): 
                     config.current_editor.pack_forget()
                 config.editor_updated = True
-            print  ("display the current editor")
-
-            print  (f"config.current_editor_id: {config.current_editor_id}")
             if (config.current_editor_id != -1): 
                 state = config.editor_states[config.current_editor_id]
-                print  (config.editor_states, config.current_editor_id, state)
-                if (f"{state[0]}|{state[1]}" in config.main_windows.keys()): 
-                    config.current_editor = config.main_windows[f"{state[0]}|{state[1]}"]
+                if (f"{state[0]}|{state[1]}" in config.editor_windows.keys()): 
+                    config.current_editor = config.editor_windows[f"{state[0]}|{state[1]}"]
                 else: 
                     config.current_editor = Right_Panel_Main_Window(f"{state[0]}|{state[1]}", state[0])
                 config.current_editor.pack(side = 'top', fill = 'both', expand = True)
@@ -1269,7 +1251,7 @@ def main():
                 if (debug == 1): print (f"Tab '{tab_value}' ({tab_type}) opened. ")
                 config.current_editor_id = len(config.editor_states) - 1
                 config.tabbar_shown = False; show_tabbar()
-                config.editor_updated = False; update_editor()
+                config.editor_updated = False; configure_editor()
 
             def create_left_sidebar(): 
                 '''
@@ -1370,19 +1352,11 @@ def main():
             def arrow_leave(event):
                 config.right_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(config.grey_color_64))
 
-            # def configure_editor(event): 
-            #     if (config.current_editor and not config.editor_updated): 
-            #         if (debug == 1): print (f"Configure editor ... {new_ID()}")
-            #         config.current_editor.pack_forget()
-            #         config.current_editor = None
-            #         config.editor_updated = False; config.right_panel_main.after(100, update_editor())
-            #     else: config.editor_updated = True
-
             config.right_panel = tkinter.Frame(window, bg=color_tuple_to_rgb(config.right_panel_color), highlightbackground=color_tuple_to_rgb(config.grey_color_43), highlightthickness=config.boundary_width)
             config.right_panel.pack(side='left', fill='both', expand=True)
             config.right_panel_main = tkinter.Frame(config.right_panel, bg=color_tuple_to_rgb(config.right_panel_color), highlightbackground=color_tuple_to_rgb(config.grey_color_43), highlightthickness=config.boundary_width)
             config.right_panel_main.pack(side='top', fill='both', expand=True)
-            # config.right_panel_main.bind("<Configure>", configure_editor)
+            config.right_panel_main.bind("<Configure>", lambda event: configure_editor())
             config.right_panel_change_arrow = tkinter.Canvas(config.right_panel, width=config.size_increase_arrow_width, height=config.size_increase_arrow_height, bg=color_tuple_to_rgb(config.right_panel_color), highlightthickness=0, relief='ridge')
             config.right_panel_change_arrow.bind("<Enter>", arrow_hover)
             config.right_panel_change_arrow.bind("<Leave>", arrow_leave)
@@ -1558,7 +1532,7 @@ def main():
             create_left_panel(config.window)
             create_right_panel(config.window)
             
-            config.window.bind("<Configure>", lambda event: resize_window())
+            config.window.bind("<Configure>", lambda event: configure_window())
 
         create_main_window()
         config.window.mainloop()
