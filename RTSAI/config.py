@@ -103,6 +103,7 @@ left_panel_relwidth_max = 0.4;
 left_panel_sidebar_width = 50
 left_panel_main_scrollbar_width = 10
 
+right_panel_width = window_width - left_panel_width
 right_panel_color = (31, 31, 31)
 right_panel_tabbar_height = 25
 right_panel_tabbar_scrollbar_width = 10
