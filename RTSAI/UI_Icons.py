@@ -1,8 +1,8 @@
 
-import RTSAI.config as config
+import RTSAI.UI_config as UI_config
 from RTSAI.tool_funcs import color_tuple_to_rgb
 
-def draw_chat_icon(parent_canvas, canvas_width = None, canvas_height = None, fill = color_tuple_to_rgb(config.VSCode_font_grey_color)): 
+def draw_chat_icon(parent_canvas, canvas_width = None, canvas_height = None, fill = color_tuple_to_rgb(UI_config.VSCode_font_grey_color)): 
     '''
     Draw the chat logo
     '''
@@ -28,7 +28,7 @@ def draw_chat_icon(parent_canvas, canvas_width = None, canvas_height = None, fil
     parent_canvas.create_polygon(item_2_triangle_coords, fill = fill, tags="item_2_triangle", outline = "")
     parent_canvas.items_in_panel = ["item_1_rectangle", "item_2_triangle"]
 
-def draw_crawl_icon(parent_canvas, canvas_width = None, canvas_height = None, fill = color_tuple_to_rgb(config.VSCode_font_grey_color)): 
+def draw_crawl_icon(parent_canvas, canvas_width = None, canvas_height = None, fill = color_tuple_to_rgb(UI_config.VSCode_font_grey_color)): 
     '''
     Draw the web crawl logo
     '''

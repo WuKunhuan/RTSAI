@@ -1,15 +1,16 @@
 
 import tkinter
-import RTSAI.config as config
+import RTSAI.UI_config as UI_config
+import RTSAI.UI_components as UI_components
 from RTSAI.tool_funcs import color_tuple_to_rgb
 
 class Left_Sidebar_Icon(tkinter.Canvas):
     '''
     The left sidebar icon objects
     '''
-    def __init__(self, hover_color = config.VSCode_highlight_color):
-        super().__init__(master = config.left_panel_sidebar, width=config.left_panel_sidebar_width, height=config.left_panel_sidebar_width, 
-                            bg=color_tuple_to_rgb(config.left_panel_color), highlightthickness=0)
+    def __init__(self, hover_color = UI_config.VSCode_highlight_color):
+        super().__init__(master = UI_components.left_panel_sidebar, width=UI_config.left_panel_sidebar_width, height=UI_config.left_panel_sidebar_width, 
+                            bg=color_tuple_to_rgb(UI_config.left_panel_color), highlightthickness=0)
         self.hovered = False
         self.hover_color = hover_color
         self.items_in_panel = []
@@ -25,4 +26,4 @@ class Left_Sidebar_Icon(tkinter.Canvas):
     def on_leave(self, event):
         self.hovered = False
         for item in self.items_in_panel: 
-            self.itemconfigure(item, fill=color_tuple_to_rgb(config.VSCode_font_grey_color))
+            self.itemconfigure(item, fill=color_tuple_to_rgb(UI_config.VSCode_font_grey_color))
