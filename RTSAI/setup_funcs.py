@@ -15,8 +15,9 @@ def RTSAI_setup():
     '''
     if (operating_system() == "MacOS"): 
         ds_store_files = subprocess.Popen(["find", PACKAGE_PATH, "-name", ".DS_Store"], stdout = subprocess.PIPE).stdout.read().decode('utf-8').strip().split('\n')
-        find_ds_store_result = len(ds_store_files)
-        if (debug == 1): print (f"Find {find_ds_store_result} .DS_Store files at {PACKAGE_PATH}: {', '.join(ds_store_files)}. ")
+        if (ds_store_files[0] != ""): 
+            find_ds_store_result = len(ds_store_files)
+            if (debug == 1): print (f"Find {find_ds_store_result} .DS_Store files at {PACKAGE_PATH}: {', '.join(ds_store_files)}. ")
         subprocess.run(["find", PACKAGE_PATH, "-name", ".DS_Store", "-delete"])
 
     '''

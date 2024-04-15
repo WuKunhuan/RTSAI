@@ -6,16 +6,25 @@ left_panel_sidebar = None
 left_panel_main = None
 left_panel_main_scrollbar = None
 left_panel_main_scrollbar_position = None
+left_panel_change_arrow = None
+left_panel_sidebar_chat = None
+left_panel_sidebar_crawl = None
+left_panel_sidebar_logo = None
 right_panel = None
 right_panel_tabbar = None
 right_panel_tabbar_scrollbar = None
 right_panel_tabbar_scrollbar_position = None
 right_panel_tabbar_scrollbar_created = False
 right_panel_main = None
-left_panel_change_arrow = None
-left_panel_sidebar_chat = None
-left_panel_sidebar_crawl = None
 right_panel_change_arrow = None
+
+avatar_image = None
+avatar_image_item = None
+avatar_image_change = None
+avatar_image_in_setting = None
+avatar_item_in_setting = None
+avatar_canvas_in_setting = None
+avatar_image_change_in_setting = None
 
 # Toggle list components
 toggle_list = None

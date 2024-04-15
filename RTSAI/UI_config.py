@@ -6,6 +6,8 @@ window_width = 800; window_height = 600;
 window_width_min = 600; window_height_min = 450; 
 window_width_max = DESKTOP_SIZE[0]; window_height_max = DESKTOP_SIZE[1]; 
 
+user_avatar = "male_avatar_1.png"
+
 left_panel_color = (24, 24, 24)
 left_panel_relwidth = 0.3; 
 left_panel_width = 240; 
@@ -38,7 +40,7 @@ h2_font_size = 20
 h3_font_size = 16
 
 label_width_ratio = 8
-label_width_ratio_wrap = 6 # exact: 6; preserve some space: 6.1
+label_width_ratio_wrap = 6
 
 toggle_item_padx = 5
 toggle_item_pady = 2
