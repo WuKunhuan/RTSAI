@@ -23,10 +23,8 @@ def main():
     '''
     Run setup codes
     '''
-    if (not (len(sys.argv) >= 1 and sys.argv[0] == f'{config.EXECUTABLE_PATH}/{config.COMMAND_NAME}')): 
-        return
+    if (not (len(sys.argv) >= 1 and sys.argv[0] == f'{config.EXECUTABLE_PATH}/{config.COMMAND_NAME}')): return
     from RTSAI.setup_funcs import RTSAI_setup
-    
     print (sys.argv[0])
     RTSAI_setup()
 

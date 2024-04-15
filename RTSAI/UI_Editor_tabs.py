@@ -196,7 +196,7 @@ def show_editor_tabbar(tabbar_width = None):
         tabbar_width = UI_components.right_panel.winfo_width() - 4 * UI_config.boundary_width
     if (not UI_components.right_panel): return
     if (UI_components.right_panel_tabbar): 
-        if (debug == 0): print ("right panel tabbar pack forget. ")
+        if (debug == 0): print (f"right panel tabbar pack forget ... {new_ID()}")
         UI_components.right_panel_tabbar.pack_forget()
     if (UI_components.right_panel_tabbar_scrollbar): 
         UI_components.right_panel_tabbar_scrollbar.pack_forget()
@@ -205,7 +205,7 @@ def show_editor_tabbar(tabbar_width = None):
 
     UI_components.right_panel_tabbar = tkinter.Canvas(UI_components.right_panel, height=UI_config.right_panel_tabbar_height, 
                                                 bg=color_tuple_to_rgb(UI_config.left_panel_color), highlightbackground=color_tuple_to_rgb(UI_config.grey_color_43), highlightthickness=UI_config.boundary_width)
-    if (debug == 1): print ("right panel tabbar pack back. ")
+    if (debug == 1): print (f"right panel tabbar pack back ... {new_ID()}")
     UI_components.right_panel_tabbar.pack(side='top', fill='x')
     total_width = 0; 
     tab_frame = tkinter.Frame(UI_components.right_panel_tabbar); 

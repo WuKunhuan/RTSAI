@@ -1,6 +1,9 @@
 
-import os, shutil
-from RTSAI.config import DATA_PATH, CURRENT_ENV, PRE_INSTALLED_KG, PRE_INSTALLED_KG_PATH
+import os, subprocess, shutil
+from RTSAI.config import DATA_PATH, PACKAGE_PATH, PRE_INSTALLED_KG_PATH
+from RTSAI.config import CURRENT_ENV, PRE_INSTALLED_KG, operating_system
+
+debug = 1
 
 def RTSAI_setup(): 
     '''
@@ -10,7 +13,11 @@ def RTSAI_setup():
     '''
     For MacOS: Remove .DS_Store
     '''
-    os.system("find . -name '.DS_Store' -delete")
+    if (operating_system() == "MacOS"): 
+        ds_store_files = subprocess.Popen(["find", PACKAGE_PATH, "-name", ".DS_Store"], stdout = subprocess.PIPE).stdout.read().decode('utf-8').strip().split('\n')
+        find_ds_store_result = len(ds_store_files)
+        if (debug == 1): print (f"Find {find_ds_store_result} .DS_Store files at {PACKAGE_PATH}: {', '.join(ds_store_files)}. ")
+        subprocess.run(["find", PACKAGE_PATH, "-name", ".DS_Store", "-delete"])
 
     '''
     Pre-installation of Knowledge Graph files
