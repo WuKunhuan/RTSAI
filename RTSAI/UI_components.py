@@ -44,10 +44,9 @@ editor_item_operations = dict() # key: editor_item; value: list of operations do
 # Editor window components
 current_editor_id = -1 # The current selected editor; id of the editor_states
 current_editor = None # The previous loaded window
-editor_windows = dict() # Key: Type + Value; Value: Right_Panel_Main_Window object
+editor_windows = dict() # Key: Type + Value; Value: [Right_Panel_Main_Window object, all elements to render]
 editor_updated = False
     # Key Value part of different tabs: 
     # -     Chat: path to environment
     # -     Knowledge Graph: path to knowledge graph
     # -     Web Crawl: crawl/new_ID()
-dialog_box_icon_size = 20

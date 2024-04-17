@@ -1,12 +1,11 @@
 
 import tkinter, math
-from tkinter.font import Font
-import RTSAI.config as config
 import RTSAI.UI_config as UI_config
 import RTSAI.UI_components as UI_components
 from RTSAI.counter import new_ID
 from RTSAI.tool_funcs import color_tuple_to_rgb
-from RTSAI.UI_Icons import draw_chat_icon, draw_crawl_icon
+from RTSAI.UI_Art import draw_chat_icon, draw_crawl_icon
+from RTSAI.UI_funcs import measure_label_width
 from RTSAI.UI_Right_Panel import Right_Panel_Main_Window
 
 debug = 1
@@ -88,13 +87,6 @@ class Editor_Tab(tkinter.Frame):
             UI_components.tabbar_shown = False; show_editor_tabbar(tabbar_width = UI_config.right_panel_width)
         else: hide_editor_tabbar()
 
-    def measure_tab_label_width(self, label): 
-        label_text = label.cget("text")
-        font = Font(font=label.cget("font"))
-        label_width = font.measure(label_text)
-        if (debug == 0): print (f"Label width measuring: '{label_text}' [{label_width}]")
-        return (label_width)
-
     def __init__(self, id, master, tab_type, tab_value, tab_display_name, tab_status): 
         super().__init__(master, bg = color_tuple_to_rgb(UI_config.left_panel_color), 
                             highlightbackground=color_tuple_to_rgb(UI_config.grey_color_43), 
@@ -125,7 +117,7 @@ class Editor_Tab(tkinter.Frame):
         '''
         Configure the width of items
         '''
-        tab_label_width = math.ceil(self.measure_tab_label_width(self.tab_label) / UI_config.label_width_ratio)
+        tab_label_width = math.ceil(measure_label_width(self.tab_label) / UI_config.label_width_ratio)
         self.tab_label.configure(width = tab_label_width)
         tab_icon_width = UI_config.right_panel_tabbar_height - self.active_bar_thickness
         tab_status_width = UI_config.right_panel_tabbar_height - self.active_bar_thickness
@@ -205,7 +197,7 @@ def show_editor_tabbar(tabbar_width = None):
 
     UI_components.right_panel_tabbar = tkinter.Canvas(UI_components.right_panel, height=UI_config.right_panel_tabbar_height, 
                                                 bg=color_tuple_to_rgb(UI_config.left_panel_color), highlightbackground=color_tuple_to_rgb(UI_config.grey_color_43), highlightthickness=UI_config.boundary_width)
-    if (debug == 1): print (f"right panel tabbar pack back ... {new_ID()}")
+    if (debug == 0): print (f"right panel tabbar pack back ... {new_ID()}")
     UI_components.right_panel_tabbar.pack(side='top', fill='x')
     total_width = 0; 
     tab_frame = tkinter.Frame(UI_components.right_panel_tabbar); 

@@ -35,9 +35,12 @@ VSCode_font_grey_color = (204, 204, 204)
 
 standard_font_family = "Consolas"
 standard_font_size = 12
+standard_row_height_constant = 15
 h1_font_size = 24
 h2_font_size = 20
 h3_font_size = 16
+dialog_box_font_size = 16
+message_callout_radius = 20
 
 label_width_ratio = 8
 label_width_ratio_wrap = 6
@@ -62,3 +65,22 @@ random_color_list = [
 random.shuffle(random_color_list)
 chat_icon_color = random_color_list[0]
 crawl_icon_color = random_color_list[1]
+
+avatar_message_box_color_list = {
+    "female_avatar_1.png": (255, 208, 200), 
+    "female_avatar_2.png": (220, 246, 249), 
+    "female_avatar_3.png": (225, 215, 213), 
+    "female_avatar_4.png": (247, 247, 187), 
+    "female_avatar_5.png": (246, 226, 217), 
+    "female_avatar_6.png": (235, 219, 222), 
+    "male_avatar_1.png": (249, 229, 192), 
+    "male_avatar_2.png": (255, 218, 210), 
+    "male_avatar_3.png": (247, 231, 196), 
+    "male_avatar_4.png": (230, 247, 233), 
+    "male_avatar_5.png": (248, 214, 206), 
+    "male_avatar_6.png": (199, 241, 255), 
+    "RTSAI_avatar.png": (197, 266, 255), 
+}
+
+dialog_box_icon_size = 20
+message_sender_icon_size = 36

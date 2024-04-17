@@ -26,6 +26,7 @@ setuptools.setup (
     python_requires=">=3.10.0", 
     install_requires = [
         "pyautogui", 
+        "validators", 
     ], 
     package_data={
         PACKAGE_NAME: recursive(DATA_PATH) + recursive(ASSETS_PATH)

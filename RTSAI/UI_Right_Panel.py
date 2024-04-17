@@ -22,26 +22,39 @@ class Right_Panel_Main_Window(tkinter.Frame):
     
     class Window_Element: 
         '''
-        Encapsulate the window elements
+        Represent different window (major) elements in the main panel
         '''
-        def __init__ (self, element, wrap_text = False, relwidth = None): 
+        def __init__ (self, element, side = tkinter.TOP, anchor = 'center', padx = 0, pady = 0, 
+                      relwidth = None, text_based_element = False, text_relwidth = None): 
             self.element = element
-            self.wrap_text = wrap_text
-            self.relwidth = relwidth
+            self.side = side
+            self.anchor = anchor
+            self.relwidth = relwidth # will be used in main window configure event
+            self.text_based_element = text_based_element # will be used in main window configure event
+            self.text_relwidth = text_relwidth # will be used in main window configure event
+            if (self.relwidth != None): 
+                self.element.pack(side = side, anchor = anchor, padx = padx, pady = pady)
+            else: 
+                self.element.pack(side = side, anchor = anchor, padx = padx, pady = pady, fill = 'x')
 
     def window_element_wrap_text(self, window_element, expected_width = None): 
         from RTSAI.UI_funcs import wrap_label_text
         if (expected_width == None): 
             right_panel_width = math.floor(config.window_width - UI_config.left_panel_width)
-            if (window_element.relwidth != None): 
-                expected_width = math.floor(right_panel_width * window_element.relwidth)
+            if (window_element.text_relwidth != None): 
+                expected_width = math.floor(right_panel_width * window_element.text_relwidth)
             else: 
                 expected_width = math.floor(right_panel_width * 0.95)
         wrap_label_text(window_element.element, expected_width)
 
-    def create_dialog_box(self, parent_frame, hint_text, button_text, web_crawl_function, upload_file_function = None): 
+    def new_window_image_id(self): 
+        self.window_image_id += 1
+        return (self.window_image_id)
+        
+    def create_dialog_box(self, parent_frame, button_text, button_function, upload_file_function = None): 
         '''
         Create the dialog box and pack it to the parent frame. 
+        The dialogue box is associated with an optional file upload option. 
         '''
         
         def dialog_box_upload_configure(dialog_box_upload): 
@@ -81,18 +94,21 @@ class Right_Panel_Main_Window(tkinter.Frame):
             dialogue_box_height = dialogue_box.tk.call((dialogue_box._w, "count", "-update", "-displaylines", "1.0", "end"))
             dialogue_box.configure(height = dialogue_box_height)
 
-        def dialog_box_restore_hint_text(dialogue_box):
+        def dialog_box_restore_hint_text(dialogue_box): 
+            '''
+            Restore the dialog box hint text
+            '''
             if dialogue_box.get("1.0", "end-1c") == "":
-                dialogue_box.delete("1.0", "end")  # Clear the hint text
-                dialogue_box.insert("1.0", hint_text)  # Restore the hint text
-                dialogue_box.config(fg="gray")  # Change text color to gray
+                dialogue_box.delete("1.0", "end")
+                dialogue_box.insert("1.0", self.dialogue_box_hint_text)
+                dialogue_box.config(fg="gray")
 
         def upload_hover_leave(parent_canvas, parent_elements, fill_color = UI_config.VSCode_new_color): 
             for element in parent_elements: 
                 parent_canvas.itemconfigure(element, fill=color_tuple_to_rgb(fill_color))
 
         def upload_focus_in(dialogue_box):
-            if dialogue_box.get("1.0", "end-1c") == hint_text:
+            if dialogue_box.get("1.0", "end-1c") == self.dialogue_box_hint_text or dialogue_box.get("1.0", "end-1c") == self.dialogue_box_error_text:
                 dialogue_box.delete("1.0", "end")  # Clear the hint text
                 dialogue_box.config(fg="black")  # Restore black text color
 
@@ -107,10 +123,11 @@ class Right_Panel_Main_Window(tkinter.Frame):
             crawl_canvas.configure(fg = color_tuple_to_rgb(UI_config.VSCode_font_grey_color), bg = color_tuple_to_rgb(UI_config.grey_color_64))
 
         '''
-        Create the dialog box
+        Create the dialog box main body
         '''
-        dialogue_box = tkinter.Text(parent_frame, height=1, wrap="word", fg="gray", highlightthickness=0, relief='ridge')
-        dialogue_box.insert("1.0", hint_text)
+        dialogue_box = tkinter.Text(parent_frame, height=1, wrap="word", fg="gray", highlightthickness=0, relief='ridge', 
+                                    font = (UI_config.standard_font_family, UI_config.dialog_box_font_size))
+        dialogue_box.insert("1.0", self.dialogue_box_hint_text)
         dialogue_box.bind("<FocusIn>", lambda event: upload_focus_in(dialogue_box))
         dialogue_box.bind("<FocusOut>", lambda event: upload_focus_out(dialogue_box))
         dialogue_box.bind("<KeyRelease>", lambda event: dialog_box_text_change(dialogue_box))
@@ -124,13 +141,14 @@ class Right_Panel_Main_Window(tkinter.Frame):
         dialog_box_button.pack(side="right", padx=5, pady=5)
         dialog_box_button.bind("<Enter>", lambda event: crawl_hover(dialog_box_button))
         dialog_box_button.bind("<Leave>", lambda event: crawl_leave(dialog_box_button))
-        dialog_box_button.bind("<Button-1>", lambda event: web_crawl_function(dialogue_box))
+        # button_function retrieves value from the dialogue box, and call the create_message function
+        dialog_box_button.bind("<Button-1>", lambda event: button_function(dialogue_box))
 
         '''
         Create the dialog box upload button (if applicable)
         '''
         if (upload_file_function): 
-            dialog_box_upload = tkinter.Canvas(parent_frame, width = UI_components.dialog_box_icon_size, height = UI_components.dialog_box_icon_size, 
+            dialog_box_upload = tkinter.Canvas(parent_frame, width = UI_config.dialog_box_icon_size, height = UI_config.dialog_box_icon_size, 
                                                 bg = color_tuple_to_rgb(UI_config.grey_color_43), highlightthickness=0, relief='ridge')
             dialog_box_upload.bind("<Enter>", lambda event: upload_hover_leave(dialog_box_upload, ["box", "arrow"], UI_config.VSCode_new_color))
             dialog_box_upload.bind("<Leave>", lambda event: upload_hover_leave(dialog_box_upload, ["box", "arrow"], UI_config.VSCode_font_grey_color))
@@ -140,62 +158,194 @@ class Right_Panel_Main_Window(tkinter.Frame):
             
         dialogue_box.pack(side="left", fill='both', expand=True, pady=5)
 
-    def create_window_elements(self): 
+    def create_main_window_entry(self, sender, content_type, content): 
+        '''
+        Add the component as an entry in the window. 
+        '''
 
-        if (debug == 0): print (f"Configure right panel main window ... {new_ID()}")
+        # contents can be various types: 
+        # Text, Codes, Knowledge graphs, etc. now, we only consider natural language texts
+        if (content_type == "TITLE"): 
+            if (debug == 1): print (f"Right panel window add TITLE: {content}")
+            window_title = tkinter.Label(self.main_editor_window_frame, text=content, font = [UI_config.standard_font_family, UI_config.h1_font_size, "bold"], 
+                                            bg = color_tuple_to_rgb(UI_config.right_panel_color), fg = color_tuple_to_rgb(UI_config.VSCode_font_grey_color))
+            window_title.pack (side = 'top', fill = 'x') # pack
+            self.window_elements.append(self.Window_Element(window_title, text_based_element = True, text_relwidth = 0.9)) # update self.window_elements list
+        elif (content_type == "INFORMATION"): 
+            if (debug == 1): print (f"Right panel window add INFORMATION: {content}")
+            window_info = tkinter.Label(self.main_editor_window_frame, text=content, 
+                                            font = [UI_config.standard_font_family, UI_config.standard_font_size, "bold"], 
+                                            bg = color_tuple_to_rgb(UI_config.right_panel_color), fg = color_tuple_to_rgb(UI_config.VSCode_font_grey_color))
+            self.window_elements.append(self.Window_Element(window_info, text_based_element = True, text_relwidth = 0.9))
+        elif (content_type == "MESSAGE"): 
+            from RTSAI.UI_funcs import measure_label_width, wrap_label_text
+            from RTSAI.UI_Art import draw_message_callout
+            from PIL import Image, ImageTk
+            message_frame_width = 0.8 * self.winfo_width()
+            message_frame = tkinter.Frame(self.main_editor_window_frame, bg = color_tuple_to_rgb(UI_config.right_panel_color), width = message_frame_width)
+            avatars_directory = f"{config.PACKAGE_PATH}/assets/images/avatars"
+            if (sender == "USER"): 
+                '''
+                Draw the user icon and keep some space between it and the message
+                '''
+                if (debug == 1): print (f"Right panel window add USER MESSAGE: {content}")
+                image_id = self.new_window_image_id()
+                self.window_images[f"{self.winkey}|{image_id}:canvas"] = tkinter.Canvas(message_frame, width=UI_config.message_sender_icon_size + 6, height=UI_config.message_sender_icon_size + 6, 
+                                                                                        bg=color_tuple_to_rgb(UI_config.right_panel_color), highlightthickness=0)
+                user_avatar_image = Image.open(f"{avatars_directory}/{self.user_avatar}")
+                user_avatar_image_resized = user_avatar_image.resize((UI_config.message_sender_icon_size, UI_config.message_sender_icon_size))
+                self.window_images[f"{self.winkey}|{image_id}:image"] = ImageTk.PhotoImage(user_avatar_image_resized)
+                self.window_images[f"{self.winkey}|{image_id}:item"] = self.window_images[f"{self.winkey}|{image_id}:canvas"].create_image(3, 3, image=self.window_images[f"{self.winkey}|{image_id}:image"], anchor='nw')
+                self.window_images[f"{self.winkey}|{image_id}:canvas"].pack(side = 'right')
+                space_between_avatar_and_message = tkinter.Frame(message_frame, width = 10, bg = color_tuple_to_rgb(UI_config.right_panel_color))
+                space_between_avatar_and_message.pack(side = 'right', fill = 'y')
 
+                '''
+                Draw the user message
+                '''
+                message_body_width_max = int(message_frame_width - (UI_config.message_sender_icon_size + 6) - 10)
+                message_body_canvas = tkinter.Canvas(message_frame, bg = color_tuple_to_rgb(UI_config.right_panel_color), width = 400, highlightthickness = 0) # message_body_width
+                message_body_label = tkinter.Label(message_body_canvas, text = content, bg = color_tuple_to_rgb(UI_config.avatar_message_box_color_list[self.user_avatar]), 
+                                                   font = (UI_config.standard_font_family, UI_config.standard_font_size), padx = 5)
+
+                def adjust_message_label(): 
+                    '''
+                    Change the display label upon rendering
+                    '''
+
+                    # figure out how many rows the label should take
+                    label_width_shrink = 2 * UI_config.message_callout_radius
+                    message_body_label.configure(text = content)
+                    label_width = measure_label_width(message_body_label)
+                    if (debug == 1): print (f"message label width: {label_width} (max. {message_body_width_max - label_width_shrink})")
+                    if (label_width < message_body_width_max - label_width_shrink): num_rows = 1; 
+                    else: num_rows = math.ceil(label_width / (message_body_width_max - label_width_shrink)); 
+                    message_body_label.configure(height = num_rows)
+                    wrap_label_text(message_body_label, expected_width = message_body_width_max - label_width_shrink, text_align = tkinter.LEFT) # assign the maximum width even for single row
+
+                    # find out the new width and new number of rows
+                    # if num_rows is 1, force removing any newlines caused by wrapping
+                    # otherwise, update num_rows based on the number of newline characters
+                    message_body_label_text = message_body_label.cget("text")
+                    if (num_rows == 1): message_body_label_text = message_body_label_text.replace('\n', '')
+                    else: num_rows = message_body_label_text.count('\n') + 1
+                    message_body_label_textlines = message_body_label_text.split('\n')
+                    max_label_row_width = 0
+                    for line in message_body_label_textlines: 
+                        message_body_label.configure(text = line)
+                        max_label_row_width = max(max_label_row_width, measure_label_width(message_body_label))
+                    final_label_width = math.ceil(max_label_row_width / UI_config.label_width_ratio) + 0
+                    final_label_rows = max(2, num_rows)
+                    message_body_label.configure(text = message_body_label_text, width = final_label_width, height = final_label_rows)
+                    return (max_label_row_width, int(UI_config.standard_row_height_constant * final_label_rows + 10))
+
+                message_body_width, message_body_height = adjust_message_label()
+                message_body_canvas.configure(width = message_body_width + 40, height = message_body_height); message_body_canvas.pack_propagate(False)
+                draw_message_callout(message_body_canvas, message_body_width + 40, message_body_height, 20, fill = color_tuple_to_rgb(UI_config.avatar_message_box_color_list[self.user_avatar])) # radius: 20
+                message_body_canvas.pack(side = 'right')
+
+                ## TO BE COMPLETED: STILL NEED TO UPDATE THE LABEL WIDTH
+                message_body_label.bind("<Configure>", lambda event: adjust_message_label())
+                message_body_label.pack(anchor = 'center')
+
+            self.window_elements.append(self.Window_Element(message_frame, anchor = 'ne', relwidth = 0.8, padx = 10, pady = 10)) # update self.window_elements list
+
+    def create_initial_window_elements(self): 
         '''
         Create the window components based on the window type
         '''
+
+        if (debug == 0): print (f"Configure right panel main window ... {new_ID()}")
+
+        self.window_elements = []
+        self.main_editor_window = tkinter.Canvas(self, bg=color_tuple_to_rgb(UI_config.right_panel_color), highlightthickness=0, relief='ridge')
+        self.main_editor_window.pack(side = 'top', fill = 'both', expand = True)
+        self.main_editor_window_frame = tkinter.Frame(self.main_editor_window, bg=color_tuple_to_rgb(UI_config.right_panel_color))
+        self.main_editor_window_frame.pack (side = 'top', fill = 'x')
+        
         if (self.wintype == "CRAWL"): 
 
-            def web_crawl(dialogue_box): 
-                dialog_box_value = dialogue_box.get("1.0", "end-1c")
-                print (dialog_box_value)
+            self.dialogue_box_hint_text = "Enter web URL ..."
+            self.dialogue_box_error_text = "URL is not valid. Please enter the URL again ..."
 
+            def web_crawl(dialogue_box): 
+                '''
+                Clear the crawl text box content
+                '''
+                request_url = dialogue_box.get("1.0", "end-1c")
+                if (debug == 1): print (f"User request to crawl: {request_url}")
+
+                '''
+                Display the crawl request
+                '''
+                import validators
+                def verify_url(url):
+                    if validators.url(url): return url
+                    elif validators.url('https://www.' + url): return ('https://www.' + url)
+                    elif validators.url('https://' + url): return ('https://' + url)
+                    elif validators.url('http://www.' + url): return ('http://www.' + url)
+                    elif validators.url('http://' + url): return ('http://' + url)
+                    else: return None
+                expanded_url = verify_url(request_url)
+                if expanded_url: 
+                    if (debug == 1): print (f"Valid URL: {expanded_url}")
+                    dialogue_box.delete("1.0", "end"); dialogue_box.master.focus_set() # lose dialogue box focus
+                    dialogue_box.insert("1.0", self.dialogue_box_hint_text); dialogue_box.config(fg="gray") # fill the hint text
+                else:
+                    if (debug == 1): print (f"Invalid URL: {expanded_url}")
+                    dialogue_box.delete("1.0", "end"); dialogue_box.master.focus_set() # lose dialogue box focus
+                    dialogue_box.insert("1.0", self.dialogue_box_error_text); dialogue_box.config(fg="gray") # fill the error text
+
+                '''
+                Add the corresponding message to the web_crawl_main_panel_frame
+                '''
+                if (expanded_url != None): 
+                    self.create_main_window_entry("USER", "MESSAGE", f"I want to crawl {expanded_url}")
+                    
             def file_upload(dialogue_box): 
-                '''
-                Retrieve the URL in the box
-                '''
-                self.uploaded_files
-                
-            web_crawl_main_panel = tkinter.Canvas(self, bg=color_tuple_to_rgb(UI_config.right_panel_color), highlightthickness=0, relief='ridge')
-            web_crawl_main_panel.pack(side = 'top', fill = 'both', expand = True)
-            temp_frame = tkinter.Frame(web_crawl_main_panel, bg=color_tuple_to_rgb(UI_config.VSCode_highlight_color))
-            temp_frame.pack (side = 'top', fill = 'x')
+                pass # TO BE COMPLETED
+                # self.uploaded_files
 
             '''
-            Generate the dialog box (including the upload and the crawl buttons) on the botton
+            Generate the dialog box (including the upload and the crawl buttons) at the bottom
+            The dialogue box is separated from the main_editor_window, staying at the bottom
             '''
             dialogue_box_panel = tkinter.Frame(self, bg=color_tuple_to_rgb(UI_config.grey_color_43))
-            self.create_dialog_box(dialogue_box_panel, "Enter web URL ...", "Crawl", web_crawl, file_upload)
+            self.create_dialog_box(dialogue_box_panel, "Crawl", web_crawl, file_upload)
             dialogue_box_panel.pack(side='bottom', fill='x')
 
             '''
-            Generate the main AI panel
-            -  The title
-            -  The introduction
-            -  The existing chats
+            Generate the main AI panel: The title, The introduction
+            Note that more window entries (e.g., chats) will be generated with the same function self.create_main_window_entry, throughout the process
             '''
-            web_crawl_title = tkinter.Label(temp_frame, text="Web Crawl", font = [UI_config.standard_font_family, UI_config.h1_font_size, "bold"], 
-                                            bg = color_tuple_to_rgb(UI_config.right_panel_color), fg = color_tuple_to_rgb(UI_config.VSCode_font_grey_color))
-            web_crawl_title.pack (side = 'top', fill = 'x')
-            self.window_elements.append(self.Window_Element(web_crawl_title, wrap_text = True, relwidth = 0.9))
+            self.create_main_window_entry(None, "TITLE", "Web Crawl")
+            self.create_main_window_entry(None, "INFORMATION", "The web crawl function is designed to gather valuable data and construct a knowledge graph from the web, enabling the retrieval of useful information. ")
 
-            web_crawl_intro = tkinter.Label(temp_frame, text="The web crawl function is designed to gather valuable data and construct a knowledge graph from the web, enabling the retrieval of useful information. ", 
-                                            font = [UI_config.standard_font_family, UI_config.standard_font_size, "bold"], 
-                                            bg = color_tuple_to_rgb(UI_config.right_panel_color), fg = color_tuple_to_rgb(UI_config.VSCode_font_grey_color))
-            web_crawl_intro.pack(side = 'top', fill = 'x')
-            self.window_elements.append(self.Window_Element(web_crawl_intro, wrap_text = True, relwidth = 0.9))
 
         elif (self.wintype == "TEXT"): 
             pass
 
     def configure_main_window(self): 
+        '''
+        Right_Panel_Main window configuration. 
+        '''
 
-        for element in self.window_elements: 
-            if (element.wrap_text == True): 
-                self.window_element_wrap_text(element)
+        '''
+        Update the element width
+        Render every element in the self.window_elements list
+        '''
+        
+        self.width = self.winfo_width()
+        if (debug == 1): print (f"Right panel window width: {self.width}")
+
+        for window_element in self.window_elements: 
+            if (window_element.relwidth != None): 
+                # fill = 'x' option does not specify; so need to render the width again
+                if (self.width > 100): 
+                    window_element.element.configure(width = int(self.width * window_element.relwidth))
+            if (window_element.text_based_element == True): 
+                # Wrap the text again for text-based elements
+                self.window_element_wrap_text(window_element)
 
     def __init__(self, winkey, wintype): 
 
@@ -204,12 +354,7 @@ class Right_Panel_Main_Window(tkinter.Frame):
                                             bg=color_tuple_to_rgb(UI_config.right_panel_color), highlightthickness = 0, relief='ridge')
         right_panel_main_bottom_arrow_area.pack(side="bottom", fill="x")
         self.winkey = winkey; self.wintype = wintype; self.status = "SAVED"
-
-        '''
-        Save the window elements for dynamic rendering (especially considering the width)
-        '''
-        self.window_elements = []  # A sequence of Window_Element. Order matters. Elements will be packed. 
-        self.uploaded_files = []  # uploaded files from the system
+        self.width = 0; self.user_avatar = UI_config.user_avatar
 
         '''
         Save window operations. Allow restoration. 
@@ -218,10 +363,19 @@ class Right_Panel_Main_Window(tkinter.Frame):
         self.current_operation = -1
 
         '''
-        Create window elements, and bind with configuration event
+        Store window elements, and uploaded files (when applicable) 
+        Bind the window with configuration event
         '''
-        self.create_window_elements()
+        self.window_elements = []
+        self.uploaded_files = []
+        self.create_initial_window_elements() # pack them to the window & update self.window_elements list 
         self.bind("<Configure>", lambda event: self.configure_main_window())
+
+        '''
+        Store window images used
+        '''
+        self.window_image_id = 0; 
+        self.window_images = dict()  # key: self.winkey|window_image_id
 
         '''
         No need to pack the window into the right panel

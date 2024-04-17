@@ -5,7 +5,7 @@ import RTSAI.config as config
 import RTSAI.UI_config as UI_config
 import RTSAI.UI_components as UI_components
 from RTSAI.tool_funcs import color_tuple_to_rgb
-from RTSAI.UI_Icons import draw_chat_icon, draw_crawl_icon
+from RTSAI.UI_Art import draw_chat_icon, draw_crawl_icon
 
 debug = 1
 

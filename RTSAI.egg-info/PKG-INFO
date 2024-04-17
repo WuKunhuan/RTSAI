@@ -9,5 +9,6 @@ Project-URL: Source, https://github.com/WuKunhuan/RTSAI
 Requires-Python: >=3.10.0
 Description-Content-Type: text/x-rst
 Requires-Dist: pyautogui
+Requires-Dist: validators
 
 The recreated RTSAI package with pip install. 

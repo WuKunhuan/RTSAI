@@ -1,5 +1,6 @@
 
 import tkinter
+from tkinter.font import Font
 import RTSAI.UI_config as UI_config
 import textwrap
 
@@ -21,3 +22,10 @@ def wrap_label_text(parent_label, expected_width = None, label_text = None, text
     if (debug == 0): print (f"textwrap width: {textwrap_width}")
     new_text = textwrap.fill(label_text, textwrap_width)
     parent_label.configure(text = new_text, justify=text_align)
+
+def measure_label_width(label): 
+    label_text = label.cget("text")
+    font = Font(font=label.cget("font"))
+    label_width = font.measure(label_text)
+    if (debug == 0): print (f"Label width measuring: '{label_text}' [{label_width}]")
+    return (label_width)
