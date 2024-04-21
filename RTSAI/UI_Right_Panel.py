@@ -44,7 +44,7 @@ class Right_Panel_Main_Window(tkinter.Frame):
     def window_element_wrap_text(self, window_element, expected_width = None): 
         from RTSAI.UI_funcs import wrap_label_text
         if (expected_width == None): 
-            right_panel_width = math.floor(config.window_width - UI_config.left_panel_width)
+            right_panel_width = math.floor(UI_config.window_width - UI_config.left_panel_width)
             if (window_element.text_relwidth != None): 
                 expected_width = math.floor(right_panel_width * window_element.text_relwidth)
             else: 

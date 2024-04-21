@@ -42,21 +42,21 @@ def main():
             if (debug == 0): print (f"Configure window ... {new_ID()}")
 
             window_geometry = list(map(int, config.window.geometry().replace('x', ' ').replace('+', ' ').split(' ')))
-            config.window_width = window_geometry[0]
-            config.window_height = window_geometry[1]
+            UI_config.window_width = window_geometry[0]
+            UI_config.window_height = window_geometry[1]
 
-            left_panel_width = int(UI_config.left_panel_relwidth * config.window_width)
-            if (config.window_width >= UI_config.window_width_min and left_panel_width < UI_config.left_panel_width_min): 
+            left_panel_width = int(UI_config.left_panel_relwidth * UI_config.window_width)
+            if (UI_config.window_width >= UI_config.window_width_min and left_panel_width < UI_config.left_panel_width_min): 
                 left_panel_width = UI_config.left_panel_width_min; 
-                UI_config.left_panel_relwidth = math.ceil(left_panel_width * 100 / config.window_width) / 100
-                left_panel_width = int(UI_config.left_panel_relwidth * config.window_width)
+                UI_config.left_panel_relwidth = math.ceil(left_panel_width * 100 / UI_config.window_width) / 100
+                left_panel_width = int(UI_config.left_panel_relwidth * UI_config.window_width)
 
             UI_config.left_panel_width = left_panel_width
-            UI_config.right_panel_width = config.window_width - UI_config.left_panel_width - 4 * UI_config.boundary_width
+            UI_config.right_panel_width = UI_config.window_width - UI_config.left_panel_width - 4 * UI_config.boundary_width
             try: 
                 UI_components.toggle_list.configure (width = UI_config.left_panel_width - UI_config.left_panel_sidebar_width)
-                UI_components.left_panel_change_arrow.place(x = UI_config.left_panel_width - 3 * UI_config.boundary_width, y = config.window_height - 4 * UI_config.boundary_width, anchor = tkinter.SE)
-                UI_components.right_panel_change_arrow.place(x = 1 * UI_config.boundary_width, y = config.window_height - 4 * UI_config.boundary_width, anchor = tkinter.SW)
+                UI_components.left_panel_change_arrow.place(x = UI_config.left_panel_width - 3 * UI_config.boundary_width, y = UI_config.window_height - 4 * UI_config.boundary_width, anchor = tkinter.SE)
+                UI_components.right_panel_change_arrow.place(x = 1 * UI_config.boundary_width, y = UI_config.window_height - 4 * UI_config.boundary_width, anchor = tkinter.SW)
             except: pass  # window already closed
 
         def create_left_panel(window):
@@ -95,10 +95,10 @@ def main():
                 UI_config.left_panel_relwidth += 0.05
                 if UI_config.left_panel_relwidth > UI_config.left_panel_relwidth_max:
                     UI_config.left_panel_relwidth = UI_config.left_panel_relwidth_max
-                UI_config.left_panel_width = int(UI_config.left_panel_relwidth * config.window_width)
+                UI_config.left_panel_width = int(UI_config.left_panel_relwidth * UI_config.window_width)
                 UI_components.left_panel.configure(width=UI_config.left_panel_width)
                 if (UI_components.editor_states): 
-                    UI_components.tabbar_shown = False; show_editor_tabbar(tabbar_width = config.window_width - UI_config.left_panel_width - 4 * UI_config.boundary_width)
+                    UI_components.tabbar_shown = False; show_editor_tabbar(tabbar_width = UI_config.window_width - UI_config.left_panel_width - 4 * UI_config.boundary_width)
 
             def hover_left_panel_arrow(event):
                 UI_components.left_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(UI_config.VSCode_highlight_color))
@@ -154,15 +154,15 @@ def main():
 
             def resize_right_panel(event): 
                 UI_config.left_panel_relwidth -= 0.05
-                left_panel_width = int(UI_config.left_panel_relwidth * config.window_width)
+                left_panel_width = int(UI_config.left_panel_relwidth * UI_config.window_width)
                 if (left_panel_width < UI_config.left_panel_width_min): 
                     left_panel_width = UI_config.left_panel_width_min; 
-                    UI_config.left_panel_relwidth = math.ceil(left_panel_width * 100 / config.window_width) / 100
-                    left_panel_width = int(UI_config.left_panel_relwidth * config.window_width)
+                    UI_config.left_panel_relwidth = math.ceil(left_panel_width * 100 / UI_config.window_width) / 100
+                    left_panel_width = int(UI_config.left_panel_relwidth * UI_config.window_width)
                 UI_config.left_panel_width = left_panel_width
                 UI_components.left_panel.configure(width = UI_config.left_panel_width)
                 if (UI_components.editor_states): 
-                    UI_components.tabbar_shown = False; show_editor_tabbar(tabbar_width = config.window_width - UI_config.left_panel_width - 4 * UI_config.boundary_width)
+                    UI_components.tabbar_shown = False; show_editor_tabbar(tabbar_width = UI_config.window_width - UI_config.left_panel_width - 4 * UI_config.boundary_width)
 
             def arrow_hover(event):
                 UI_components.right_panel_change_arrow.itemconfigure("arrow", fill=color_tuple_to_rgb(UI_config.VSCode_highlight_color))

@@ -40,6 +40,7 @@ class Left_Panel_Toggle_Item(tkinter.Frame):
     def configure_canvas_modify(self, event): 
         '''
         Generates the modify sign. 
+        The sign represents the knowledge graph status (e.g., saved, edited, etc. )
         '''
         canvas_width = UI_config.toggle_modify_width
         canvas_height = UI_config.toggle_modify_height
@@ -435,6 +436,27 @@ def create_toggle_list_recursive(master, toggle_level, toggle_info):
     entry_frame.configure (height = UI_config.toggle_item_height)
     return total_height
 
+def toggle_list_configure(toggle_list_canvas, total_height): 
+    '''
+    Configure the toggle list upon panel resizing
+    '''
+
+    toggle_list_canvas.configure(scrollregion=toggle_list_canvas.bbox("all"))
+    if (UI_components.left_panel.winfo_height() != 1 and total_height > UI_config.window_height - UI_config.size_increase_arrow_height): 
+        toggle_list_canvas.itemconfigure("temp_frame", width=toggle_list_canvas.winfo_width() - UI_config.left_panel_main_scrollbar_width)
+    else: toggle_list_canvas.itemconfigure("temp_frame", width=toggle_list_canvas.winfo_width())
+
+    tabbar_height_new = UI_config.window_height - UI_config.size_increase_arrow_height
+
+    if (total_height <= tabbar_height_new and UI_components.left_panel_main_scrollbar): 
+        UI_components.left_panel_main_scrollbar.pack_forget(); 
+        UI_components.left_panel_main_scrollbar = None
+        UI_components.toggle_list_scrollbar_created = False
+        UI_components.left_panel_main_scrollbar_position = None
+    elif (total_height > tabbar_height_new and not UI_components.toggle_list_scrollbar_created): 
+        UI_components.toggle_list_scrollbar_created = True
+        UI_components.toggle_list_created = False; create_toggle_list()
+
 def create_toggle_list(): 
     '''
     Create the toggle list under the left panel
@@ -510,51 +532,38 @@ def create_toggle_list():
     left_panel_main_bottom_arrow_area = tkinter.Canvas(UI_components.toggle_list, height = UI_config.size_increase_arrow_height + 8 * UI_config.boundary_width, 
                                         bg=color_tuple_to_rgb(UI_config.left_panel_color), highlightthickness = 0, relief='ridge')
     left_panel_main_bottom_arrow_area.pack(side="bottom", fill="x")
-    temp_canvas = tkinter.Canvas(UI_components.toggle_list, bg = color_tuple_to_rgb(UI_config.left_panel_color), highlightthickness=0, relief='ridge'); 
-    temp_canvas.pack(side="top", fill="both", expand=True)
-    temp_frame = tkinter.Frame(temp_canvas, highlightthickness=0, relief='ridge')
-    temp_canvas.create_window((0, 0), window=temp_frame, anchor="nw", tags="temp_frame")
+    toggle_list_canvas = tkinter.Canvas(UI_components.toggle_list, bg = color_tuple_to_rgb(UI_config.left_panel_color), highlightthickness=0, relief='ridge'); 
+    toggle_list_canvas.pack(side="top", fill="both", expand=True)
+    toggle_list_frame = tkinter.Frame(toggle_list_canvas, highlightthickness=0, relief='ridge')
+    toggle_list_canvas.create_window((0, 0), window=toggle_list_frame, anchor="nw", tags="temp_frame")
     total_height = 0
     if (debug == 0): print (UI_components.toggle_list_states) 
     for name, value in UI_components.toggle_list_states.items(): 
-        total_height += create_toggle_list_recursive(temp_frame, 0, value)
-        division_bar = tkinter.Frame (temp_frame, height = UI_config.boundary_width, bg = color_tuple_to_rgb(UI_config.grey_color_43))
+        total_height += create_toggle_list_recursive(toggle_list_frame, 0, value)
+        division_bar = tkinter.Frame (toggle_list_frame, height = UI_config.boundary_width, bg = color_tuple_to_rgb(UI_config.grey_color_43))
         division_bar.pack(anchor = 'n', fill = 'x')
         total_height += UI_config.boundary_width
 
     '''
-    Create the scrollbar, when applicable
+    Create the scrollbar, when the total heigth exceeds
     '''
-    if (UI_components.left_panel.winfo_height() != 1 and total_height > config.window_height - UI_config.size_increase_arrow_height): 
+
+    if (total_height > UI_config.window_height - UI_config.size_increase_arrow_height): 
         if (UI_components.left_panel_main_scrollbar): 
             UI_components.left_panel_main_scrollbar.pack_forget()
-        UI_components.left_panel_main_scrollbar = tkinter.Scrollbar(temp_canvas, orient="vertical", command=temp_canvas.yview, width = UI_config.left_panel_main_scrollbar_width)
-        temp_canvas.configure(yscrollcommand = UI_components.left_panel_main_scrollbar.set)
+        UI_components.left_panel_main_scrollbar = tkinter.Scrollbar(toggle_list_canvas, orient="vertical", command=toggle_list_canvas.yview, width = UI_config.left_panel_main_scrollbar_width)
+        toggle_list_canvas.configure(yscrollcommand = UI_components.left_panel_main_scrollbar.set)
         UI_components.left_panel_main_scrollbar.pack(side='right', fill='y')
         UI_components.toggle_list_scrollbar_created = True
 
         if (UI_components.left_panel_main_scrollbar_position): 
             position = UI_components.left_panel_main_scrollbar_position
-            temp_canvas.after(100, lambda: temp_canvas.yview_moveto(position[0]))
+            toggle_list_canvas.after(100, lambda: toggle_list_canvas.yview_moveto(position[0]))
         def left_panel_main_scrollbar_save_scroll_position(): 
             UI_components.left_panel_main_scrollbar_position = UI_components.left_panel_main_scrollbar.get()
         UI_components.left_panel_main_scrollbar.bind("<Motion>", lambda event: left_panel_main_scrollbar_save_scroll_position())
 
-    def toggle_list_configure(event): 
-        temp_canvas.configure(scrollregion=temp_canvas.bbox("all"))
-        if (UI_components.left_panel.winfo_height() != 1 and total_height > config.window_height - UI_config.size_increase_arrow_height): 
-            temp_canvas.itemconfigure("temp_frame", width=temp_canvas.winfo_width() - UI_config.left_panel_main_scrollbar_width)
-        else: temp_canvas.itemconfigure("temp_frame", width=temp_canvas.winfo_width())
-        
-        tabbar_height_new = config.window_height - UI_config.size_increase_arrow_height
-        if (total_height <= tabbar_height_new and UI_components.left_panel_main_scrollbar): 
-            UI_components.left_panel_main_scrollbar.pack_forget(); 
-            UI_components.left_panel_main_scrollbar = None
-            UI_components.toggle_list_scrollbar_created = False
-            UI_components.left_panel_main_scrollbar_position = None
-        elif (total_height > tabbar_height_new and not UI_components.toggle_list_scrollbar_created): 
-            UI_components.toggle_list_scrollbar_created = True
-            UI_components.toggle_list_created = False; create_toggle_list()
+    toggle_list_frame.bind("<Configure>", lambda event: toggle_list_configure(toggle_list_canvas, total_height))
 
-    temp_frame.bind("<Configure>", toggle_list_configure)
     UI_components.toggle_list_created = True
+    UI_components.toggle_list_scrollbar_created = True
