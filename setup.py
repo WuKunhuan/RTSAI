@@ -9,8 +9,8 @@ def recursive(directory):
 setuptools.setup (
     name = PACKAGE_NAME, 
     version = PACKAGE_VERSION, 
-    description = 'The recreated RTSAI package with pip install. ', 
-    long_description = 'The recreated RTSAI package with pip install. ', 
+    description = 'The RTSAI package with its terminal and GUI implemented. ', 
+    long_description = 'The RTSAI package with its terminal and GUI implemented. ', 
     long_description_content_type = 'text/x-rst', 
     author = 'wukunhuan', 
     author_email = 'u3577163@connect.hku.hk', 

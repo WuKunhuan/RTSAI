@@ -76,7 +76,7 @@ def draw_message_callout(parent_canvas, canvas_width, canvas_height, radius = 0,
 
     if (not canvas_width): canvas_width = parent_canvas.winfo_width()
     if (not canvas_height): canvas_height = parent_canvas.winfo_height()
-    if (debug == 1): print (f"Message callout canvas size: ({canvas_width}, {canvas_height})")
+    if (debug == 0): print (f"Message callout canvas size: ({canvas_width}, {canvas_height})")
     parent_canvas.delete("item_1_message_callout")
     item_1_message_callout_coords = round_rectangle_points(0, 0, canvas_width, canvas_height, radius)
     parent_canvas.create_polygon(item_1_message_callout_coords, fill = fill, tags="item_1_message_callout", smooth=True, outline = "")

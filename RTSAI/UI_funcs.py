@@ -2,12 +2,15 @@
 import tkinter
 from tkinter.font import Font
 import RTSAI.UI_config as UI_config
+import RTSAI.UI_components as UI_components
 import textwrap
 
 debug = 1
 
 def show_popup_message(message, title = "Message", parent_item = None):
     import tkinter
+    if parent_item is None:
+        parent_item = UI_components.window
     tkinter.messagebox.showinfo(title, message, parent = parent_item)
 
 def wrap_label_text(parent_label, expected_width = None, label_text = None, text_align = tkinter.CENTER): 

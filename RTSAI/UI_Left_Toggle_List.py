@@ -10,6 +10,28 @@ from RTSAI.knowledge_graph import create_knowledge_graph, copy_knowledge_graph
 
 debug = 1
 
+'''
+Knowledge Graph menu operations
+'''
+def create_knowledge_graph_menu(graph_name = None, query = "Enter the name of the Knowledge Graph: ", parent = UI_components.window): 
+    '''
+    Create a knowledge graph from the menu. 
+    '''
+    if (not graph_name): 
+        graph_name = simpledialog.askstring("Create Knowledge Graph", query, parent = parent)
+    if graph_name:
+        graph_path = os.path.join(config.DATA_PATH, "knowledge_graphs")
+        if (new_name_check(graph_name, graph_path, showinfo="messagebox", keyword="Knowledge Graph", parent_item = parent) == 0): 
+            create_knowledge_graph(graph_name)
+            UI_components.toggle_list_created = False; create_toggle_list()
+            show_popup_message(f"Knowledge Graph '{graph_name}' successfully created.", parent_item = parent)
+
+def import_knowledge_graph_menu(parent = UI_components.window): 
+    '''
+    '''
+    pass
+
+
 class Left_Panel_Toggle_Item(tkinter.Frame): 
     '''
     Toggle Item class objects in the left panel main
@@ -25,10 +47,11 @@ class Left_Panel_Toggle_Item(tkinter.Frame):
         self.toggle_item_modify.config(width=canvas_width, height=canvas_height)
         self.toggle_item_modify.create_oval(canvas_width * 0.25, canvas_height * 0.25, canvas_height * 0.75, canvas_height * 0.75, fill=color_tuple_to_rgb(UI_config.grey_color_64), tags="modify", outline = color_tuple_to_rgb(UI_config.left_panel_color))
 
-    def modify_toggle_item(self, event, key_pressed = None): 
+    def operate_toggle_item(self, event, key_pressed = None): 
         '''
         Display the menu when right clicking the toggle item. 
         '''
+
         if (key_pressed == "<BackSpace>" and ((self.toggle_info[1] != UI_components.toggle_item_on_focus) or ('/' not in self.toggle_info[1]))): return
 
         self.menu_open = True
@@ -263,26 +286,10 @@ class Left_Panel_Toggle_Item(tkinter.Frame):
             '''
             Knowledge graph folder toggle item
             '''
-            def create_knowledge_graph_menu(): 
-                '''
-                Create a knowledge graph from the menu. 
-                '''
-                graph_name = simpledialog.askstring("Create Knowledge Graph", "Enter the name of the Knowledge Graph: ", parent = self)
-                if graph_name:
-                    graph_path = os.path.join(config.DATA_PATH, "knowledge_graphs")
-                    if (new_name_check(graph_name, graph_path, showinfo="messagebox", keyword="Knowledge Graph", parent_item = self) == 0): 
-                        create_knowledge_graph(graph_name)
-                        UI_components.toggle_list_created = False; create_toggle_list()
-                        show_popup_message(f"Knowledge Graph '{graph_name}' successfully created.", parent_item = self)
-            
-            def import_knowledge_graph(): 
-                '''
-                '''
-                pass
 
             modify_menu_list = tkinter.Menu(self.toggle_item_modify, tearoff=0)
-            modify_menu_list.add_command(label="Create a Knowledge Graph", command = create_knowledge_graph_menu)
-            modify_menu_list.add_command(label="Import a Knowledge Graph (to be completed)", command = import_knowledge_graph)
+            modify_menu_list.add_command(label="Create a Knowledge Graph", command = create_knowledge_graph_menu(self))
+            modify_menu_list.add_command(label="Import a Knowledge Graph (to be completed)", command = import_knowledge_graph_menu(self))
             modify_menu_list.post(event.x_root, event.y_root)
         
         elif (self.toggle_info[1].startswith("knowledge_graphs") and self.toggle_info[1].count('/') == 1): 
@@ -357,14 +364,14 @@ class Left_Panel_Toggle_Item(tkinter.Frame):
         Bind Command + Z (MAC SYSTEM) to revert; Bind Command + Shift + Z
         TO BE COMPLETED
         '''
-        self.bind("<BackSpace>", lambda event: self.modify_toggle_item(event, key_pressed = "<BackSpace>"))
+        self.bind("<BackSpace>", lambda event: self.operate_toggle_item(event, key_pressed = "<BackSpace>"))
         '''
         Set the current focus to Toggle List -> Current Item
         '''
         self.focus_set()
         if (UI_components.toggle_item_on_focus == self.toggle_info[1]): 
             UI_components.toggle_list_created = False; create_toggle_list()
-            self.modify_toggle_item(event)
+            self.operate_toggle_item(event)
         else: 
             UI_components.toggle_item_on_focus = self.toggle_info[1]
             UI_components.toggle_list_created = False; create_toggle_list()
@@ -384,7 +391,7 @@ class Left_Panel_Toggle_Item(tkinter.Frame):
                                         bg=color_tuple_to_rgb(UI_config.left_panel_color), highlightthickness=0, relief='ridge')
             self.toggle_item_modify.pack (side = 'right', padx = 0, pady = 0)
             self.toggle_item_modify.bind('<Configure>', self.configure_canvas_modify)
-            self.toggle_item_modify.bind("<Button-1>", self.modify_toggle_item)
+            self.toggle_item_modify.bind("<Button-1>", self.operate_toggle_item)
 
         self.label.pack (side = "top", fill = "x")
         if (UI_components.toggle_item_on_focus == self.toggle_info[1]): 
@@ -402,9 +409,9 @@ class Left_Panel_Toggle_Item(tkinter.Frame):
         TO BE COMPLETED / VERIFIED
         '''
         if (True): 
-            self.bind("<Button-2>", self.modify_toggle_item)
-            self.label.bind("<Button-2>", self.modify_toggle_item)
-            self.toggle_item_modify.bind("<Button-2>", self.modify_toggle_item)
+            self.bind("<Button-2>", self.operate_toggle_item)
+            self.label.bind("<Button-2>", self.operate_toggle_item)
+            self.toggle_item_modify.bind("<Button-2>", self.operate_toggle_item)
 
 def create_toggle_list_recursive(master, toggle_level, toggle_info): 
     '''
@@ -432,6 +439,7 @@ def create_toggle_list():
     '''
     Create the toggle list under the left panel
     '''
+
     if (UI_components.toggle_list_created): return
     if (UI_components.toggle_list): UI_components.toggle_list.pack_forget()
 

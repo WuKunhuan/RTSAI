@@ -79,8 +79,9 @@ avatar_message_box_color_list = {
     "male_avatar_4.png": (230, 247, 233), 
     "male_avatar_5.png": (248, 214, 206), 
     "male_avatar_6.png": (199, 241, 255), 
-    "RTSAI_avatar.png": (197, 266, 255), 
+    "RTSAI_avatar.png": (197, 249, 255), 
 }
 
 dialog_box_icon_size = 20
 message_sender_icon_size = 36
+message_pady = 5

@@ -6,7 +6,6 @@ Tasks:
 4. Change the modify status area (remove it; replace it to the editor)
 '''
 
-
 import sys, os, math
 import RTSAI.config as config
 import RTSAI.UI_config as UI_config

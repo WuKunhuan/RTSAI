@@ -25,13 +25,17 @@ class Right_Panel_Main_Window(tkinter.Frame):
         Represent different window (major) elements in the main panel
         '''
         def __init__ (self, element, side = tkinter.TOP, anchor = 'center', padx = 0, pady = 0, 
-                      relwidth = None, text_based_element = False, text_relwidth = None): 
+                      relwidth = None, text_based_element = False, text_relwidth = None, 
+                      element_name = None): 
             self.element = element
             self.side = side
             self.anchor = anchor
             self.relwidth = relwidth # will be used in main window configure event
             self.text_based_element = text_based_element # will be used in main window configure event
             self.text_relwidth = text_relwidth # will be used in main window configure event
+            if (not element_name): 
+                element_name = f"window element (type: {element})"
+            self.element_name = element_name
             if (self.relwidth != None): 
                 self.element.pack(side = side, anchor = anchor, padx = padx, pady = pady)
             else: 
@@ -169,59 +173,70 @@ class Right_Panel_Main_Window(tkinter.Frame):
             if (debug == 1): print (f"Right panel window add TITLE: {content}")
             window_title = tkinter.Label(self.main_editor_window_frame, text=content, font = [UI_config.standard_font_family, UI_config.h1_font_size, "bold"], 
                                             bg = color_tuple_to_rgb(UI_config.right_panel_color), fg = color_tuple_to_rgb(UI_config.VSCode_font_grey_color))
-            window_title.pack (side = 'top', fill = 'x') # pack
-            self.window_elements.append(self.Window_Element(window_title, text_based_element = True, text_relwidth = 0.9)) # update self.window_elements list
+            window_title.pack (side = 'top', fill = 'x')
+            self.window_elements.append(self.Window_Element(window_title, text_based_element = True, text_relwidth = 0.9, element_name = "Window Title"))
         elif (content_type == "INFORMATION"): 
             if (debug == 1): print (f"Right panel window add INFORMATION: {content}")
             window_info = tkinter.Label(self.main_editor_window_frame, text=content, 
                                             font = [UI_config.standard_font_family, UI_config.standard_font_size, "bold"], 
                                             bg = color_tuple_to_rgb(UI_config.right_panel_color), fg = color_tuple_to_rgb(UI_config.VSCode_font_grey_color))
-            self.window_elements.append(self.Window_Element(window_info, text_based_element = True, text_relwidth = 0.9))
+            self.window_elements.append(self.Window_Element(window_info, text_based_element = True, text_relwidth = 0.9, element_name = "Window Info"))
         elif (content_type == "MESSAGE"): 
             from RTSAI.UI_funcs import measure_label_width, wrap_label_text
             from RTSAI.UI_Art import draw_message_callout
             from PIL import Image, ImageTk
             message_frame_width = 0.8 * self.winfo_width()
-            message_frame = tkinter.Frame(self.main_editor_window_frame, bg = color_tuple_to_rgb(UI_config.right_panel_color), width = message_frame_width)
+            message_frame = tkinter.Frame(self.main_editor_window_frame, bg = color_tuple_to_rgb(UI_config.right_panel_color))
             avatars_directory = f"{config.PACKAGE_PATH}/assets/images/avatars"
-            if (sender == "USER"): 
-                '''
-                Draw the user icon and keep some space between it and the message
-                '''
-                if (debug == 1): print (f"Right panel window add USER MESSAGE: {content}")
-                image_id = self.new_window_image_id()
-                self.window_images[f"{self.winkey}|{image_id}:canvas"] = tkinter.Canvas(message_frame, width=UI_config.message_sender_icon_size + 6, height=UI_config.message_sender_icon_size + 6, 
-                                                                                        bg=color_tuple_to_rgb(UI_config.right_panel_color), highlightthickness=0)
-                user_avatar_image = Image.open(f"{avatars_directory}/{self.user_avatar}")
-                user_avatar_image_resized = user_avatar_image.resize((UI_config.message_sender_icon_size, UI_config.message_sender_icon_size))
-                self.window_images[f"{self.winkey}|{image_id}:image"] = ImageTk.PhotoImage(user_avatar_image_resized)
-                self.window_images[f"{self.winkey}|{image_id}:item"] = self.window_images[f"{self.winkey}|{image_id}:canvas"].create_image(3, 3, image=self.window_images[f"{self.winkey}|{image_id}:image"], anchor='nw')
-                self.window_images[f"{self.winkey}|{image_id}:canvas"].pack(side = 'right')
-                space_between_avatar_and_message = tkinter.Frame(message_frame, width = 10, bg = color_tuple_to_rgb(UI_config.right_panel_color))
-                space_between_avatar_and_message.pack(side = 'right', fill = 'y')
 
-                '''
-                Draw the user message
-                '''
-                message_body_width_max = int(message_frame_width - (UI_config.message_sender_icon_size + 6) - 10)
-                message_body_canvas = tkinter.Canvas(message_frame, bg = color_tuple_to_rgb(UI_config.right_panel_color), width = 400, highlightthickness = 0) # message_body_width
-                message_body_label = tkinter.Label(message_body_canvas, text = content, bg = color_tuple_to_rgb(UI_config.avatar_message_box_color_list[self.user_avatar]), 
-                                                   font = (UI_config.standard_font_family, UI_config.standard_font_size), padx = 5)
+            '''
+            Draw the avatar and keep some space between it and the message
+            '''
+            if (debug == 1): 
+                if (sender == "USER"): print (f"Right panel window add USER MESSAGE: {content}")
+                elif (sender == "RTSAI"): print (f"Right panel window add RTSAI MESSAGE: {content}")
+            message_id = self.new_window_image_id()
+            self.window_images[f"{self.winkey}|{message_id}:canvas"] = tkinter.Canvas(message_frame, width=UI_config.message_sender_icon_size + 6, height=UI_config.message_sender_icon_size + 6, 
+                                                                                    bg=color_tuple_to_rgb(UI_config.right_panel_color), highlightthickness=0)
+            if (sender == "USER"): avatar_image = Image.open(f"{avatars_directory}/{self.user_avatar}")
+            elif (sender == "RTSAI"): avatar_image = Image.open(f"{avatars_directory}/RTSAI_avatar.png")
+            avatar_image_resized = avatar_image.resize((UI_config.message_sender_icon_size, UI_config.message_sender_icon_size))
+            self.window_images[f"{self.winkey}|{message_id}:image"] = ImageTk.PhotoImage(avatar_image_resized)
+            self.window_images[f"{self.winkey}|{message_id}:item"] = self.window_images[f"{self.winkey}|{message_id}:canvas"].create_image(3, 3, image=self.window_images[f"{self.winkey}|{message_id}:image"], anchor='nw')
+            if (sender == "USER"): self.window_images[f"{self.winkey}|{message_id}:canvas"].pack(side = 'right')
+            elif (sender == "RTSAI"): self.window_images[f"{self.winkey}|{message_id}:canvas"].pack(side = 'left')
+            avatar_message_space_width = 10
+            space_between_avatar_and_message = tkinter.Frame(message_frame, width = avatar_message_space_width, bg = color_tuple_to_rgb(UI_config.right_panel_color))
+            if (sender == "USER"): space_between_avatar_and_message.pack(side = 'right', fill = 'y')
+            elif (sender == "RTSAI"): space_between_avatar_and_message.pack(side = 'left', fill = 'y')
 
-                def adjust_message_label(): 
-                    '''
-                    Change the display label upon rendering
-                    '''
+            '''
+            Draw the message main body
+            '''
+            max_message_body_width = int(message_frame_width - (UI_config.message_sender_icon_size + 6) - avatar_message_space_width)
+            message_body_canvas = tkinter.Canvas(message_frame, bg = color_tuple_to_rgb(UI_config.right_panel_color), width = max_message_body_width, highlightthickness = 0) # message_body_width
+            if (sender == "USER"): message_body_label = tkinter.Label(message_body_canvas, text = content, bg = color_tuple_to_rgb(UI_config.avatar_message_box_color_list[self.user_avatar]), 
+                                                font = (UI_config.standard_font_family, UI_config.standard_font_size), padx = 5)
+            elif (sender == "RTSAI"): message_body_label = tkinter.Label(message_body_canvas, text = content, bg = color_tuple_to_rgb(UI_config.avatar_message_box_color_list["RTSAI_avatar.png"]), 
+                                                font = (UI_config.standard_font_family, UI_config.standard_font_size), padx = 5)
 
-                    # figure out how many rows the label should take
-                    label_width_shrink = 2 * UI_config.message_callout_radius
+            def adjust_message_label(message_sender): 
+                '''
+                Change the display label upon rendering
+                '''
+
+                message_frame_width = 0.8 * self.winfo_width()
+                max_message_body_width = int(message_frame_width - (UI_config.message_sender_icon_size + 6) - avatar_message_space_width)
+
+                # figure out how many rows the label should take
+                def wrap_label_text_attempt(label_width_shrink = 2 * UI_config.message_callout_radius): 
                     message_body_label.configure(text = content)
                     label_width = measure_label_width(message_body_label)
-                    if (debug == 1): print (f"message label width: {label_width} (max. {message_body_width_max - label_width_shrink})")
-                    if (label_width < message_body_width_max - label_width_shrink): num_rows = 1; 
-                    else: num_rows = math.ceil(label_width / (message_body_width_max - label_width_shrink)); 
+                    if (debug == 0): print (f"message label width: {label_width} (max. {max_message_body_width - label_width_shrink})")
+                    if (label_width < max_message_body_width - label_width_shrink): num_rows = 1; 
+                    else: num_rows = math.ceil(label_width / (max_message_body_width - label_width_shrink)); 
                     message_body_label.configure(height = num_rows)
-                    wrap_label_text(message_body_label, expected_width = message_body_width_max - label_width_shrink, text_align = tkinter.LEFT) # assign the maximum width even for single row
+                    wrap_label_text(message_body_label, expected_width = max_message_body_width - label_width_shrink, text_align = tkinter.LEFT)
 
                     # find out the new width and new number of rows
                     # if num_rows is 1, force removing any newlines caused by wrapping
@@ -236,19 +251,39 @@ class Right_Panel_Main_Window(tkinter.Frame):
                         max_label_row_width = max(max_label_row_width, measure_label_width(message_body_label))
                     final_label_width = math.ceil(max_label_row_width / UI_config.label_width_ratio) + 0
                     final_label_rows = max(2, num_rows)
-                    message_body_label.configure(text = message_body_label_text, width = final_label_width, height = final_label_rows)
-                    return (max_label_row_width, int(UI_config.standard_row_height_constant * final_label_rows + 10))
+                    if (max_label_row_width <= max_message_body_width - 2 * UI_config.message_callout_radius): 
+                        return (message_body_label_text, max_label_row_width, final_label_width, final_label_rows)
+                    else: 
+                        return (wrap_label_text_attempt(label_width_shrink + 20))
 
-                message_body_width, message_body_height = adjust_message_label()
-                message_body_canvas.configure(width = message_body_width + 40, height = message_body_height); message_body_canvas.pack_propagate(False)
-                draw_message_callout(message_body_canvas, message_body_width + 40, message_body_height, 20, fill = color_tuple_to_rgb(UI_config.avatar_message_box_color_list[self.user_avatar])) # radius: 20
-                message_body_canvas.pack(side = 'right')
+                message_body_label_text, max_label_row_width, final_label_width, final_label_rows = wrap_label_text_attempt()
+                message_body_label.configure(text = message_body_label_text, width = final_label_width, height = final_label_rows)
 
-                ## TO BE COMPLETED: STILL NEED TO UPDATE THE LABEL WIDTH
-                message_body_label.bind("<Configure>", lambda event: adjust_message_label())
-                message_body_label.pack(anchor = 'center')
+                '''
+                Lock the current frame and label size
+                Draw the callout box
+                '''
+                message_body_width = max_label_row_width
+                message_body_height = int(UI_config.standard_row_height_constant * final_label_rows + 10)
+                message_body_canvas.configure(width = message_body_width + 2 * UI_config.message_callout_radius, height = message_body_height); 
+                message_body_canvas.pack_propagate(False)
+                message_frame.configure(width = message_frame_width, height = message_body_height)
+                message_frame.pack_propagate(False)
 
-            self.window_elements.append(self.Window_Element(message_frame, anchor = 'ne', relwidth = 0.8, padx = 10, pady = 10)) # update self.window_elements list
+                if (message_sender == "USER"): draw_message_callout(message_body_canvas, message_body_width + 2 * UI_config.message_callout_radius, 
+                                    message_body_height, UI_config.message_callout_radius, fill = color_tuple_to_rgb(UI_config.avatar_message_box_color_list[self.user_avatar]))
+                elif (message_sender == "RTSAI"): draw_message_callout(message_body_canvas, message_body_width + 2 * UI_config.message_callout_radius, 
+                                    message_body_height, UI_config.message_callout_radius, fill = color_tuple_to_rgb(UI_config.avatar_message_box_color_list["RTSAI_avatar.png"]))
+       
+            if (sender == "USER"): message_body_canvas.pack(side = 'right')
+            elif (sender == "RTSAI"): message_body_canvas.pack(side = 'left')
+
+            ## TO BE COMPLETED: STILL NEED TO UPDATE THE LABEL WIDTH UPON WINDOW RESIZING
+            message_frame.bind("<Configure>", lambda event: adjust_message_label(message_sender = sender))
+            message_body_label.pack(anchor = 'center')
+
+            if (sender == "USER"): self.window_elements.append(self.Window_Element(message_frame, anchor = 'ne', relwidth = 0.8, padx = 10, pady = UI_config.message_pady, element_name = f"User Message {message_id}"))
+            elif (sender == "RTSAI"): self.window_elements.append(self.Window_Element(message_frame, anchor = 'nw', relwidth = 0.8, padx = 10, pady = UI_config.message_pady, element_name = f"RTSAI Message {message_id}"))
 
     def create_initial_window_elements(self): 
         '''
@@ -270,8 +305,11 @@ class Right_Panel_Main_Window(tkinter.Frame):
 
             def web_crawl(dialogue_box): 
                 '''
-                Clear the crawl text box content
+                Clear the crawl text box content, and get the URL from the box
+                Crawl the URL, and create a knowledge graph with the crawl result
                 '''
+
+                import os
                 request_url = dialogue_box.get("1.0", "end-1c")
                 if (debug == 1): print (f"User request to crawl: {request_url}")
 
@@ -281,9 +319,7 @@ class Right_Panel_Main_Window(tkinter.Frame):
                 import validators
                 def verify_url(url):
                     if validators.url(url): return url
-                    elif validators.url('https://www.' + url): return ('https://www.' + url)
                     elif validators.url('https://' + url): return ('https://' + url)
-                    elif validators.url('http://www.' + url): return ('http://www.' + url)
                     elif validators.url('http://' + url): return ('http://' + url)
                     else: return None
                 expanded_url = verify_url(request_url)
@@ -295,12 +331,44 @@ class Right_Panel_Main_Window(tkinter.Frame):
                     if (debug == 1): print (f"Invalid URL: {expanded_url}")
                     dialogue_box.delete("1.0", "end"); dialogue_box.master.focus_set() # lose dialogue box focus
                     dialogue_box.insert("1.0", self.dialogue_box_error_text); dialogue_box.config(fg="gray") # fill the error text
+                dialogue_box_height = dialogue_box.tk.call((dialogue_box._w, "count", "-update", "-displaylines", "1.0", "end"))
+                dialogue_box.configure(height = dialogue_box_height)
 
                 '''
-                Add the corresponding message to the web_crawl_main_panel_frame
+                Initialize a crawl request, and wait for the result
                 '''
                 if (expanded_url != None): 
+
+                    '''
+                    Add the corresponding message from USER to the web_crawl_main_panel_frame
+                    '''
                     self.create_main_window_entry("USER", "MESSAGE", f"I want to crawl {expanded_url}")
+
+                    
+
+                    '''
+                    Store the crawl result inside "web_crawl_{web_crawl_ID()}" knowledge graph
+                    '''
+                    from RTSAI.counter import web_crawl_ID
+                    from RTSAI.UI_Left_Toggle_List import create_knowledge_graph_menu
+                    from RTSAI.config import DATA_PATH
+                    web_crawl_knowledge_graph_name = f"web_crawl_{web_crawl_ID()}"
+                    while (os.path.exists(os.path.join(DATA_PATH, "Knowledge_graphs", web_crawl_knowledge_graph_name))): 
+                        web_crawl_knowledge_graph_name = f"web_crawl_{web_crawl_ID()}"
+                    create_knowledge_graph_menu(web_crawl_knowledge_graph_name, query = "Enter the name of the Knowledge Graph to store the crawl result: ")
+
+                    '''
+                    Add the corresponding message from RTSAI, saying that a knowledge graph has been created to store the result
+                    '''
+                
+                else: 
+
+                    '''
+                    Add the corresponding message from RTSAI to the web_crawl_main_panel_frame
+                    '''
+                    self.create_main_window_entry("RTSAI", "MESSAGE", f"The URL {request_url} is not valid. Please enter the URL again. ")
+
+                    pass
                     
             def file_upload(dialogue_box): 
                 pass # TO BE COMPLETED
@@ -321,18 +389,13 @@ class Right_Panel_Main_Window(tkinter.Frame):
             self.create_main_window_entry(None, "TITLE", "Web Crawl")
             self.create_main_window_entry(None, "INFORMATION", "The web crawl function is designed to gather valuable data and construct a knowledge graph from the web, enabling the retrieval of useful information. ")
 
-
         elif (self.wintype == "TEXT"): 
             pass
 
     def configure_main_window(self): 
         '''
         Right_Panel_Main window configuration. 
-        '''
-
-        '''
-        Update the element width
-        Render every element in the self.window_elements list
+        Update the element width, and render every element in the self.window_elements list
         '''
         
         self.width = self.winfo_width()
@@ -340,11 +403,11 @@ class Right_Panel_Main_Window(tkinter.Frame):
 
         for window_element in self.window_elements: 
             if (window_element.relwidth != None): 
-                # fill = 'x' option does not specify; so need to render the width again
                 if (self.width > 100): 
-                    window_element.element.configure(width = int(self.width * window_element.relwidth))
+                    new_width = int(self.width * window_element.relwidth)
+                    window_element.element.configure(width = new_width)
+                    if (debug == 1): print (f"Configure Right Main Window: {window_element.element_name}'s new width: {new_width}")
             if (window_element.text_based_element == True): 
-                # Wrap the text again for text-based elements
                 self.window_element_wrap_text(window_element)
 
     def __init__(self, winkey, wintype): 
