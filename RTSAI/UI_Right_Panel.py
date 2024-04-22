@@ -56,7 +56,8 @@ class Right_Panel_Main_Window(tkinter.Frame):
         return (self.window_image_id)
         
     def create_dialog_box(self, parent_frame, button_text, button_function, upload_file_function = None, 
-                          hint_text = "Enter something ..."): 
+                          hint_text_default = "Enter something ...", 
+                          hint_text_others = []): 
         '''
         Create the dialog box and pack it to the parent frame. 
         The dialogue box is associated with an optional file upload option. 
@@ -105,19 +106,19 @@ class Right_Panel_Main_Window(tkinter.Frame):
             '''
             if dialogue_box.get("1.0", "end-1c") == "":
                 dialogue_box.delete("1.0", "end")
-                dialogue_box.insert("1.0", hint_text)
+                dialogue_box.insert("1.0", hint_text_default)
                 dialogue_box.config(fg="gray")
 
         def upload_hover_leave(parent_canvas, parent_elements, fill_color = UI_config.VSCode_new_color): 
             for element in parent_elements: 
                 parent_canvas.itemconfigure(element, fill=color_tuple_to_rgb(fill_color))
 
-        def upload_focus_in(dialogue_box):
-            if dialogue_box.get("1.0", "end-1c") == self.dialogue_box_hint_text or dialogue_box.get("1.0", "end-1c") == self.dialogue_box_error_text:
+        def dialog_box_focus_in(dialogue_box):
+            if dialogue_box.get("1.0", "end-1c") == self.dialogue_box_hint_text or dialogue_box.get("1.0", "end-1c") in hint_text_others:
                 dialogue_box.delete("1.0", "end")  # Clear the hint text
                 dialogue_box.config(fg="black")  # Restore black text color
 
-        def upload_focus_out(dialogue_box):
+        def dialog_box_focus_out(dialogue_box):
             if dialogue_box.get("1.0", "end-1c") == "":
                 dialogue_box.after(10, lambda: dialog_box_restore_hint_text(dialogue_box))
 
@@ -133,8 +134,8 @@ class Right_Panel_Main_Window(tkinter.Frame):
         dialogue_box = tkinter.Text(parent_frame, height=1, wrap="word", fg="gray", highlightthickness=0, relief='ridge', 
                                     font = (UI_config.standard_font_family, UI_config.dialog_box_font_size))
         dialogue_box.insert("1.0", self.dialogue_box_hint_text)
-        dialogue_box.bind("<FocusIn>", lambda event: upload_focus_in(dialogue_box))
-        dialogue_box.bind("<FocusOut>", lambda event: upload_focus_out(dialogue_box))
+        dialogue_box.bind("<FocusIn>", lambda event: dialog_box_focus_in(dialogue_box))
+        dialogue_box.bind("<FocusOut>", lambda event: dialog_box_focus_out(dialogue_box))
         dialogue_box.bind("<KeyRelease>", lambda event: dialog_box_text_change(dialogue_box))
 
         '''
@@ -146,7 +147,7 @@ class Right_Panel_Main_Window(tkinter.Frame):
             dialogue_box.delete("1.0", "end"); dialogue_box.master.focus_set() # lose dialogue box focus
             dialogue_box.config(fg="gray") # fill the hint text / error text (returned as execution result)
             if (execution_result): dialogue_box.insert("1.0", execution_result)
-            else: dialogue_box.insert("1.0", hint_text)
+            else: dialogue_box.insert("1.0", hint_text_default)
             dialogue_box_height = dialogue_box.tk.call((dialogue_box._w, "count", "-update", "-displaylines", "1.0", "end")) # one line
             dialogue_box.configure(height = dialogue_box_height)
 
@@ -352,29 +353,45 @@ class Right_Panel_Main_Window(tkinter.Frame):
             else: return None
 
         expanded_url = verify_url(request_url)   
+
         if (expanded_url): 
 
-            if (debug == 1): print (f"Valid URL: {expanded_url}")
+            def crawl_execution(): 
+                '''
+                Initialize a crawl request, and wait for the result
+                -   Call the web crawl API and obtain the response from web_crawl.py
+                -   Create a knowledge graph to store the web crawl result
+                -   Add the corresponding message from RTSAI: A knowledge graph has been created
+                '''
 
-            '''
-            Initialize a crawl request, and wait for the result
-            -   Call the web crawl API and obtain the response from web_crawl.py
-            -   Create a knowledge graph to store the web crawl result
-            -   Add the corresponding message from RTSAI: A knowledge graph has been created
-            '''
-
-            '''
-            Store the crawl result inside "web_crawl_{web_crawl_ID()}" knowledge graph
-            '''
-            from RTSAI.counter import web_crawl_ID
-            from RTSAI.UI_Left_Toggle_List import create_knowledge_graph_menu
-            from RTSAI.config import DATA_PATH
-            web_crawl_knowledge_graph_name = f"web_crawl_{web_crawl_ID()}"
-            while (os.path.exists(os.path.join(DATA_PATH, "Knowledge_graphs", web_crawl_knowledge_graph_name))): 
+                '''
+                Store the crawl result inside "web_crawl_{web_crawl_ID()}" knowledge graph
+                If any result html files returned, then inform user that the web crawl is successful
+                '''
+                from RTSAI.counter import web_crawl_ID
+                from RTSAI.web_crawl import crawl_URL
+                from RTSAI.config import DATA_PATH
+                from RTSAI.UI_Left_Toggle_List import create_toggle_list
                 web_crawl_knowledge_graph_name = f"web_crawl_{web_crawl_ID()}"
+                while (os.path.exists(os.path.join(DATA_PATH, "Knowledge_graphs", web_crawl_knowledge_graph_name))): 
+                    web_crawl_knowledge_graph_name = f"web_crawl_{web_crawl_ID()}"
+                # TO BE COMPLETED: Bind the current knowledge graph item with the folder under data/scrapy_spiders, 
+                # so it will not be affected when the knowledge graph is renamed
 
+                web_crawl_result = crawl_URL(expanded_url, web_crawl_knowledge_graph_name)
+                web_crawl_error_message = 200
+                if (type(web_crawl_result) != type(list())): 
+                    web_crawl_error_message = web_crawl_result
+                else: 
+                    num_of_html_files = len([filename for filename in web_crawl_result if filename.endswith(".html")])
+                if (web_crawl_error_message == 200): 
+                    self.create_window_entry("RTSAI", "MESSAGE", f"Crawling {expanded_url} successful. {num_of_html_files} html file(s) obtained. You may find the result in the knowledge graph '{web_crawl_knowledge_graph_name}' in the left panel. ")
+                    UI_components.toggle_list_created = False; create_toggle_list()
+                else: 
+                    self.create_window_entry("RTSAI", "MESSAGE", f"Crawling {expanded_url} failed. {web_crawl_error_message}")
 
-            # create_knowledge_graph_menu(web_crawl_knowledge_graph_name, query = "Enter the name of the Knowledge Graph to store the crawl result: ")
+            if (debug == 1): print (f"Valid URL: {expanded_url}")
+            self.after(100, lambda: crawl_execution())
 
         else: 
             '''
@@ -425,7 +442,8 @@ class Right_Panel_Main_Window(tkinter.Frame):
             '''
             dialogue_box_panel = tkinter.Frame(self, bg=color_tuple_to_rgb(UI_config.grey_color_43))
             self.create_dialog_box(dialogue_box_panel, "Crawl", self.crawl_from_dialog_box, self.file_upload, 
-                                   hint_text=self.dialogue_box_hint_text)
+                                   hint_text_default=self.dialogue_box_hint_text, 
+                                   hint_text_others=["Enter the URL again ..."])
             dialogue_box_panel.pack(side='bottom', fill='x')
 
             '''
@@ -445,16 +463,26 @@ class Right_Panel_Main_Window(tkinter.Frame):
             '''
             dialogue_box_panel = tkinter.Frame(self, bg=color_tuple_to_rgb(UI_config.grey_color_43))
             self.create_dialog_box(dialogue_box_panel, "Send", self.chat_from_dialog_box, self.file_upload, 
-                                   hint_text=self.dialogue_box_hint_text)
+                                   hint_text_default=self.dialogue_box_hint_text, 
+                                   hint_text_others=[])
             dialogue_box_panel.pack(side='bottom', fill='x')
+
+            '''
+            Allow the knowledge graphs to be extended
+            '''
+            self.knowledge_graph_extension_allowed = False
+            def allow_extension(): 
+                self.knowledge_graph_extension_allowed = True
+            def disallow_extension(): 
+                self.knowledge_graph_extension_allowed = False
 
             '''
             Generate the main AI panel: The title, The introduction, The learn option
             More window entries (e.g., chats) will be generated with the same function self.create_main_window_entry, throughout the process
             '''
             self.create_window_entry(None, "TITLE", "RTSAI Chat")
-            self.create_window_entry(None, "INFORMATION", f"Ask RTSAI anything. RTSAI will answer with the knowledge graphs under the '{self.winvalue}' environment. ")
-            self.create_window_entry(None, "CHECKBOX", [f"Allow RTSAI to modify the knowledge graphs during the conversation. ", None, None])
+            self.create_window_entry(None, "INFORMATION", f"Ask RTSAI anything. RTSAI will answer with information from knowledge graphs under the '{self.winvalue}' environment. ")
+            self.create_window_entry(None, "CHECKBOX", [f"Allow RTSAI to modify the knowledge graphs during the conversation. ", lambda: allow_extension(), lambda: disallow_extension()])
 
     def configure_main_window(self): 
         '''

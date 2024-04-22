@@ -31,7 +31,6 @@ def import_knowledge_graph_menu(parent = UI_components.window):
     '''
     pass
 
-
 class Left_Panel_Toggle_Item(tkinter.Frame): 
     '''
     Toggle Item class objects in the left panel main
