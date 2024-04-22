@@ -334,6 +334,7 @@ class Right_Panel_Main_Window(tkinter.Frame):
         '''
         Clear the crawl text box content, and get the URL from the box
         Crawl the URL, and create a knowledge graph with the crawl result
+        Add the corresponding message from USER: The target web URL to crawl
         '''
 
         request_url = dialogue_box.get("1.0", "end-1c")
@@ -342,7 +343,6 @@ class Right_Panel_Main_Window(tkinter.Frame):
         self.create_window_entry("USER", "MESSAGE", f"I want to crawl {request_url}")
 
         '''
-        Add the corresponding message from USER: The target web URL to crawl
         Verify whether the entered URL is valid
         '''
         def verify_url(url):
