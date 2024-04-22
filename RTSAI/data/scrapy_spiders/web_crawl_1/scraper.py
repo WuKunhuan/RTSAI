@@ -8,7 +8,7 @@ def web_crawl_ID():
 
 class web_crawl_1_Spider(scrapy.Spider):
     name = 'web_crawl_1'
-    start_urls = ['http://example.com/livechat/index.php']
+    start_urls = ['https://wukunhuan.github.io/Web_Crawl_Tests/hku_vision_mission.html']
 
     def parse(self, response):
         if response.status == 200: 
