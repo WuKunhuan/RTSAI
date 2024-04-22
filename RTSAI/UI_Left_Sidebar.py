@@ -9,7 +9,7 @@ from RTSAI.UI_Art import draw_chat_icon, draw_crawl_icon
 
 debug = 1
 
-avatars_directory = f"{config.PACKAGE_PATH}/assets/images/avatars"
+avatars_directory = os.path.join(config.PACKAGE_PATH, "assets", "images", "avatars")
 
 class Left_Sidebar_Icon(tkinter.Canvas):
     '''

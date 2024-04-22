@@ -38,7 +38,7 @@ toggle_list_operation_current = 0  # The operation corresponding to the current 
 # Tabbar components
 tabbar_shown = False
 tab_total_width = 0
-editor_states = [] # Sequential order of opened editors: [type, value, display] ## status can be obtained within the Main
+editor_states = [] # Sequential order of opened editors: [type, value, display]
 editor_item_operations = dict() # key: editor_item; value: list of operations done on this item (max. 100 operations); operation_current]
 
 # Editor window components

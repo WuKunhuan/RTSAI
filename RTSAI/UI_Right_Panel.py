@@ -1,5 +1,5 @@
 
-import tkinter, math
+import tkinter, math, os
 import RTSAI.config as config
 import RTSAI.UI_config as UI_config
 import RTSAI.UI_components as UI_components
@@ -41,7 +41,7 @@ class Right_Panel_Main_Window(tkinter.Frame):
             else: 
                 self.element.pack(side = side, anchor = anchor, padx = padx, pady = pady, fill = 'x')
 
-    def window_element_wrap_text(self, window_element, expected_width = None): 
+    def wrap_window_element_text(self, window_element, expected_width = None): 
         from RTSAI.UI_funcs import wrap_label_text
         if (expected_width == None): 
             right_panel_width = math.floor(UI_config.window_width - UI_config.left_panel_width)
@@ -55,7 +55,8 @@ class Right_Panel_Main_Window(tkinter.Frame):
         self.window_image_id += 1
         return (self.window_image_id)
         
-    def create_dialog_box(self, parent_frame, button_text, button_function, upload_file_function = None): 
+    def create_dialog_box(self, parent_frame, button_text, button_function, upload_file_function = None, 
+                          hint_text = "Enter something ..."): 
         '''
         Create the dialog box and pack it to the parent frame. 
         The dialogue box is associated with an optional file upload option. 
@@ -104,7 +105,7 @@ class Right_Panel_Main_Window(tkinter.Frame):
             '''
             if dialogue_box.get("1.0", "end-1c") == "":
                 dialogue_box.delete("1.0", "end")
-                dialogue_box.insert("1.0", self.dialogue_box_hint_text)
+                dialogue_box.insert("1.0", hint_text)
                 dialogue_box.config(fg="gray")
 
         def upload_hover_leave(parent_canvas, parent_elements, fill_color = UI_config.VSCode_new_color): 
@@ -140,13 +141,21 @@ class Right_Panel_Main_Window(tkinter.Frame):
         Create the dialog box button
         bind it to the web_crawl_function
         '''
+        def execute_button_function(button_function): 
+            execution_result = button_function(dialogue_box)
+            dialogue_box.delete("1.0", "end"); dialogue_box.master.focus_set() # lose dialogue box focus
+            dialogue_box.config(fg="gray") # fill the hint text / error text (returned as execution result)
+            if (execution_result): dialogue_box.insert("1.0", execution_result)
+            else: dialogue_box.insert("1.0", hint_text)
+            dialogue_box_height = dialogue_box.tk.call((dialogue_box._w, "count", "-update", "-displaylines", "1.0", "end")) # one line
+            dialogue_box.configure(height = dialogue_box_height)
+
         dialog_box_button = tkinter.Label(parent_frame, text = button_text, font = [UI_config.standard_font_family, UI_config.standard_font_size], 
                                             bg = color_tuple_to_rgb(UI_config.grey_color_64), fg = color_tuple_to_rgb(UI_config.VSCode_font_grey_color))
         dialog_box_button.pack(side="right", padx=5, pady=5)
         dialog_box_button.bind("<Enter>", lambda event: crawl_hover(dialog_box_button))
         dialog_box_button.bind("<Leave>", lambda event: crawl_leave(dialog_box_button))
-        # button_function retrieves value from the dialogue box, and call the create_message function
-        dialog_box_button.bind("<Button-1>", lambda event: button_function(dialogue_box))
+        dialog_box_button.bind("<Button-1>", lambda event: execute_button_function(button_function))
 
         '''
         Create the dialog box upload button (if applicable)
@@ -162,7 +171,7 @@ class Right_Panel_Main_Window(tkinter.Frame):
             
         dialogue_box.pack(side="left", fill='both', expand=True, pady=5)
 
-    def create_main_window_entry(self, sender, content_type, content): 
+    def create_window_entry(self, sender, content_type, content): 
         '''
         Add the component as an entry in the window. 
         '''
@@ -175,19 +184,21 @@ class Right_Panel_Main_Window(tkinter.Frame):
                                             bg = color_tuple_to_rgb(UI_config.right_panel_color), fg = color_tuple_to_rgb(UI_config.VSCode_font_grey_color))
             window_title.pack (side = 'top', fill = 'x')
             self.window_elements.append(self.Window_Element(window_title, text_based_element = True, text_relwidth = 0.9, element_name = "Window Title"))
+        
         elif (content_type == "INFORMATION"): 
             if (debug == 1): print (f"Right panel window add INFORMATION: {content}")
             window_info = tkinter.Label(self.main_editor_window_frame, text=content, 
                                             font = [UI_config.standard_font_family, UI_config.standard_font_size, "bold"], 
                                             bg = color_tuple_to_rgb(UI_config.right_panel_color), fg = color_tuple_to_rgb(UI_config.VSCode_font_grey_color))
             self.window_elements.append(self.Window_Element(window_info, text_based_element = True, text_relwidth = 0.9, element_name = "Window Info"))
+        
         elif (content_type == "MESSAGE"): 
             from RTSAI.UI_funcs import measure_label_width, wrap_label_text
             from RTSAI.UI_Art import draw_message_callout
             from PIL import Image, ImageTk
             message_frame_width = 0.8 * self.winfo_width()
             message_frame = tkinter.Frame(self.main_editor_window_frame, bg = color_tuple_to_rgb(UI_config.right_panel_color))
-            avatars_directory = f"{config.PACKAGE_PATH}/assets/images/avatars"
+            avatars_directory = avatars_directory = os.path.join(config.PACKAGE_PATH, "assets", "images", "avatars")
 
             '''
             Draw the avatar and keep some space between it and the message
@@ -284,6 +295,111 @@ class Right_Panel_Main_Window(tkinter.Frame):
 
             if (sender == "USER"): self.window_elements.append(self.Window_Element(message_frame, anchor = 'ne', relwidth = 0.8, padx = 10, pady = UI_config.message_pady, element_name = f"User Message {message_id}"))
             elif (sender == "RTSAI"): self.window_elements.append(self.Window_Element(message_frame, anchor = 'nw', relwidth = 0.8, padx = 10, pady = UI_config.message_pady, element_name = f"RTSAI Message {message_id}"))
+        
+        elif (content_type == "CHECKBOX"): 
+            '''
+            Create a checkbox with some info, and the corresponding function upon checking
+            content[0]: the text displayed with the checkbox
+            content[1]: the function called when the box is checked
+            content[2]: the function called when the box is unchecked
+            '''
+            if (debug == 1): print (f"Right panel window add CHECKBOX: {content[0]}")
+
+            def checkbox_activate(window_checkbox_text, activate_color = color_tuple_to_rgb(UI_config.VSCode_highlight_color), 
+                                  deactivate_color = color_tuple_to_rgb(UI_config.VSCode_font_grey_color)): 
+                if (window_checkbox_value.get() == 1): 
+                    if (activate_color): window_checkbox_text.configure(fg = activate_color)
+                    if (content[1]): content[1]()
+                else: 
+                    if (deactivate_color): window_checkbox_text.configure(fg = deactivate_color)
+                    if (content[2]): content[0]()
+
+            from RTSAI.counter import KG_element_ID
+            window_checkbox_frame = tkinter.Frame(self.main_editor_window_frame, bg = color_tuple_to_rgb(UI_config.right_panel_color))
+            window_checkbox_value = tkinter.IntVar()
+            window_checkbox_text = tkinter.Label(window_checkbox_frame, text=content[0], 
+                                            font = [UI_config.standard_font_family, UI_config.standard_font_size], 
+                                            bg = color_tuple_to_rgb(UI_config.right_panel_color), fg = color_tuple_to_rgb(UI_config.VSCode_font_grey_color))
+            window_checkbox = tkinter.Checkbutton(window_checkbox_frame, variable = window_checkbox_value, command=lambda: checkbox_activate(window_checkbox_text), 
+                                              bg = color_tuple_to_rgb(UI_config.right_panel_color))
+            window_checkbox.pack(side = "left")
+            space_between_checkbox_and_text = tkinter.Frame(window_checkbox_frame, width = 5, bg = color_tuple_to_rgb(UI_config.right_panel_color))
+            space_between_checkbox_and_text.pack(side = "left")
+            window_checkbox_text.pack(side = "left")
+            self.window_elements.append(self.Window_Element(window_checkbox_text, text_based_element = True, text_relwidth = 0.8, element_name = f"Window Checkbox Text {KG_element_ID()}", anchor = 'w'))
+            self.window_elements.append(self.Window_Element(window_checkbox_frame, anchor = 'center', relwidth = 0.9, element_name = f"Window Checkbox Frame {KG_element_ID()}"))
+
+    def crawl_from_dialog_box(self, dialogue_box): 
+        '''
+        Clear the crawl text box content, and get the URL from the box
+        Crawl the URL, and create a knowledge graph with the crawl result
+        '''
+
+        request_url = dialogue_box.get("1.0", "end-1c")
+        dialog_box_result = None
+        if (debug == 1): print (f"User request to crawl: {request_url}")
+        self.create_window_entry("USER", "MESSAGE", f"I want to crawl {request_url}")
+
+        '''
+        Add the corresponding message from USER: The target web URL to crawl
+        Verify whether the entered URL is valid
+        '''
+        def verify_url(url):
+            import validators 
+            if validators.url(url): return url
+            elif validators.url('https://' + url): return ('https://' + url)
+            elif validators.url('http://' + url): return ('http://' + url)
+            else: return None
+
+        expanded_url = verify_url(request_url)   
+        if (expanded_url): 
+
+            if (debug == 1): print (f"Valid URL: {expanded_url}")
+
+            '''
+            Initialize a crawl request, and wait for the result
+            -   Call the web crawl API and obtain the response from web_crawl.py
+            -   Create a knowledge graph to store the web crawl result
+            -   Add the corresponding message from RTSAI: A knowledge graph has been created
+            '''
+
+            '''
+            Store the crawl result inside "web_crawl_{web_crawl_ID()}" knowledge graph
+            '''
+            from RTSAI.counter import web_crawl_ID
+            from RTSAI.UI_Left_Toggle_List import create_knowledge_graph_menu
+            from RTSAI.config import DATA_PATH
+            web_crawl_knowledge_graph_name = f"web_crawl_{web_crawl_ID()}"
+            while (os.path.exists(os.path.join(DATA_PATH, "Knowledge_graphs", web_crawl_knowledge_graph_name))): 
+                web_crawl_knowledge_graph_name = f"web_crawl_{web_crawl_ID()}"
+
+
+            # create_knowledge_graph_menu(web_crawl_knowledge_graph_name, query = "Enter the name of the Knowledge Graph to store the crawl result: ")
+
+        else: 
+            '''
+            Add the corresponding message from RTSAI: The URL is not valid
+            '''
+            if (debug == 1): print (f"Invalid URL: {expanded_url}")
+            dialog_box_result = "Enter the URL again ..."
+            self.after(1000, lambda: self.create_window_entry("RTSAI", "MESSAGE", f"The URL {request_url} is not valid. Please enter the URL again. "))
+        
+        return dialog_box_result
+
+    def chat_from_dialog_box(self, dialogue_box): 
+        '''
+        Clear the chat text box content, and get the URL from the box
+        RTSAI agent answer based on the knowledge graphs in the environment
+        '''
+
+        request_query = dialogue_box.get("1.0", "end-1c")
+        dialog_box_result = None
+        if (debug == 1): print (f"User asks RTSAI (in the {self.winvalue} environment): {request_query}")
+        self.create_window_entry("USER", "MESSAGE", request_query)
+
+    def file_upload(dialogue_box): 
+        pass # TO BE COMPLETED
+        # self.uploaded_files
 
     def create_initial_window_elements(self): 
         '''
@@ -303,94 +419,42 @@ class Right_Panel_Main_Window(tkinter.Frame):
             self.dialogue_box_hint_text = "Enter web URL ..."
             self.dialogue_box_error_text = "URL is not valid. Please enter the URL again ..."
 
-            def web_crawl(dialogue_box): 
-                '''
-                Clear the crawl text box content, and get the URL from the box
-                Crawl the URL, and create a knowledge graph with the crawl result
-                '''
-
-                import os
-                request_url = dialogue_box.get("1.0", "end-1c")
-                if (debug == 1): print (f"User request to crawl: {request_url}")
-
-                '''
-                Display the crawl request
-                '''
-                import validators
-                def verify_url(url):
-                    if validators.url(url): return url
-                    elif validators.url('https://' + url): return ('https://' + url)
-                    elif validators.url('http://' + url): return ('http://' + url)
-                    else: return None
-                expanded_url = verify_url(request_url)
-                if expanded_url: 
-                    if (debug == 1): print (f"Valid URL: {expanded_url}")
-                    dialogue_box.delete("1.0", "end"); dialogue_box.master.focus_set() # lose dialogue box focus
-                    dialogue_box.insert("1.0", self.dialogue_box_hint_text); dialogue_box.config(fg="gray") # fill the hint text
-                else:
-                    if (debug == 1): print (f"Invalid URL: {expanded_url}")
-                    dialogue_box.delete("1.0", "end"); dialogue_box.master.focus_set() # lose dialogue box focus
-                    dialogue_box.insert("1.0", self.dialogue_box_error_text); dialogue_box.config(fg="gray") # fill the error text
-                dialogue_box_height = dialogue_box.tk.call((dialogue_box._w, "count", "-update", "-displaylines", "1.0", "end"))
-                dialogue_box.configure(height = dialogue_box_height)
-
-                '''
-                Initialize a crawl request, and wait for the result
-                '''
-                if (expanded_url != None): 
-
-                    '''
-                    Add the corresponding message from USER to the web_crawl_main_panel_frame
-                    '''
-                    self.create_main_window_entry("USER", "MESSAGE", f"I want to crawl {expanded_url}")
-
-                    
-
-                    '''
-                    Store the crawl result inside "web_crawl_{web_crawl_ID()}" knowledge graph
-                    '''
-                    from RTSAI.counter import web_crawl_ID
-                    from RTSAI.UI_Left_Toggle_List import create_knowledge_graph_menu
-                    from RTSAI.config import DATA_PATH
-                    web_crawl_knowledge_graph_name = f"web_crawl_{web_crawl_ID()}"
-                    while (os.path.exists(os.path.join(DATA_PATH, "Knowledge_graphs", web_crawl_knowledge_graph_name))): 
-                        web_crawl_knowledge_graph_name = f"web_crawl_{web_crawl_ID()}"
-                    create_knowledge_graph_menu(web_crawl_knowledge_graph_name, query = "Enter the name of the Knowledge Graph to store the crawl result: ")
-
-                    '''
-                    Add the corresponding message from RTSAI, saying that a knowledge graph has been created to store the result
-                    '''
-                
-                else: 
-
-                    '''
-                    Add the corresponding message from RTSAI to the web_crawl_main_panel_frame
-                    '''
-                    self.create_main_window_entry("RTSAI", "MESSAGE", f"The URL {request_url} is not valid. Please enter the URL again. ")
-
-                    pass
-                    
-            def file_upload(dialogue_box): 
-                pass # TO BE COMPLETED
-                # self.uploaded_files
-
             '''
             Generate the dialog box (including the upload and the crawl buttons) at the bottom
             The dialogue box is separated from the main_editor_window, staying at the bottom
             '''
             dialogue_box_panel = tkinter.Frame(self, bg=color_tuple_to_rgb(UI_config.grey_color_43))
-            self.create_dialog_box(dialogue_box_panel, "Crawl", web_crawl, file_upload)
+            self.create_dialog_box(dialogue_box_panel, "Crawl", self.crawl_from_dialog_box, self.file_upload, 
+                                   hint_text=self.dialogue_box_hint_text)
             dialogue_box_panel.pack(side='bottom', fill='x')
 
             '''
             Generate the main AI panel: The title, The introduction
-            Note that more window entries (e.g., chats) will be generated with the same function self.create_main_window_entry, throughout the process
+            More window entries (e.g., chats) will be generated with the same function self.create_main_window_entry, throughout the process
             '''
-            self.create_main_window_entry(None, "TITLE", "Web Crawl")
-            self.create_main_window_entry(None, "INFORMATION", "The web crawl function is designed to gather valuable data and construct a knowledge graph from the web, enabling the retrieval of useful information. ")
+            self.create_window_entry(None, "TITLE", "Web Crawl")
+            self.create_window_entry(None, "INFORMATION", "The web crawl function is designed to gather valuable data and construct a knowledge graph from the web, enabling the retrieval of useful information. ")
 
-        elif (self.wintype == "TEXT"): 
-            pass
+        elif (self.wintype == "CHAT"): 
+
+            self.dialogue_box_hint_text = "Ask anything ..."
+
+            '''
+            Generate the dialog box (including the upload and the send buttons) at the bottom
+            The dialogue box is separated from the main_editor_window, staying at the bottom
+            '''
+            dialogue_box_panel = tkinter.Frame(self, bg=color_tuple_to_rgb(UI_config.grey_color_43))
+            self.create_dialog_box(dialogue_box_panel, "Send", self.chat_from_dialog_box, self.file_upload, 
+                                   hint_text=self.dialogue_box_hint_text)
+            dialogue_box_panel.pack(side='bottom', fill='x')
+
+            '''
+            Generate the main AI panel: The title, The introduction, The learn option
+            More window entries (e.g., chats) will be generated with the same function self.create_main_window_entry, throughout the process
+            '''
+            self.create_window_entry(None, "TITLE", "RTSAI Chat")
+            self.create_window_entry(None, "INFORMATION", f"Ask RTSAI anything. RTSAI will answer with the knowledge graphs under the '{self.winvalue}' environment. ")
+            self.create_window_entry(None, "CHECKBOX", [f"Allow RTSAI to modify the knowledge graphs during the conversation. ", None, None])
 
     def configure_main_window(self): 
         '''
@@ -399,25 +463,26 @@ class Right_Panel_Main_Window(tkinter.Frame):
         '''
         
         self.width = self.winfo_width()
-        if (debug == 1): print (f"Right panel window width: {self.width}")
+        if (debug == 0): print (f"Right panel window width: {self.width}")
 
         for window_element in self.window_elements: 
             if (window_element.relwidth != None): 
                 if (self.width > 100): 
                     new_width = int(self.width * window_element.relwidth)
                     window_element.element.configure(width = new_width)
-                    if (debug == 1): print (f"Configure Right Main Window: {window_element.element_name}'s new width: {new_width}")
+                    if (debug == 0): print (f"Configure Right Main Window: {window_element.element_name}'s new width: {new_width}")
             if (window_element.text_based_element == True): 
-                self.window_element_wrap_text(window_element)
+                self.wrap_window_element_text(window_element)
 
-    def __init__(self, winkey, wintype): 
+    def __init__(self, winkey, wintype, winvalue): 
 
         super().__init__(master=UI_components.right_panel_main, bg=color_tuple_to_rgb(UI_config.right_panel_color))  # right_panel_main
         right_panel_main_bottom_arrow_area = tkinter.Canvas(self, height = UI_config.size_increase_arrow_height + 8 * UI_config.boundary_width, 
                                             bg=color_tuple_to_rgb(UI_config.right_panel_color), highlightthickness = 0, relief='ridge')
         right_panel_main_bottom_arrow_area.pack(side="bottom", fill="x")
-        self.winkey = winkey; self.wintype = wintype; self.status = "SAVED"
-        self.width = 0; self.user_avatar = UI_config.user_avatar
+        self.winkey = winkey; self.wintype = wintype; self.winvalue = winvalue
+        self.status = "SAVED"; self.user_avatar = UI_config.user_avatar
+        self.width = 0; 
 
         '''
         Save window operations. Allow restoration. 

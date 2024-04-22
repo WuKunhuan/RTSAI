@@ -158,11 +158,13 @@ def configure_editor():
         UI_components.editor_updated = True
 
     if (UI_components.current_editor_id != -1): 
+        # UI_components.editor_states: Sequential order of opened editors: [type, value, display]
         state = UI_components.editor_states[UI_components.current_editor_id]
+
         if (f"{state[0]}|{state[1]}" in UI_components.editor_windows.keys()): 
             UI_components.current_editor = UI_components.editor_windows[f"{state[0]}|{state[1]}"]
         else: 
-            UI_components.current_editor = Right_Panel_Main_Window(f"{state[0]}|{state[1]}", state[0])
+            UI_components.current_editor = Right_Panel_Main_Window(f"{state[0]}|{state[1]}", state[0], state[1])
     else: 
         UI_components.current_editor = tkinter.Frame(UI_components.right_panel_main, bg = color_tuple_to_rgb(UI_config.right_panel_color))
     UI_components.current_editor.pack(side = 'top', fill = 'both', expand = True)

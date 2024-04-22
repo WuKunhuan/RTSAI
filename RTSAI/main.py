@@ -188,10 +188,12 @@ def main():
         config.window.title("RTSAI")
         
         if (config.operating_system() == "MacOS"): 
-            config.window.iconphoto(False, ImageTk.PhotoImage(Image.open(f"{config.PACKAGE_PATH}/assets/images/avatars/RTSAI_avatar.png")))
+            config.window.iconphoto(False, ImageTk.PhotoImage(Image.open(
+                os.path.join(config.PACKAGE_PATH, "assets", "images", "avatars", "RTSAI_avatar.png"))))
         else: 
             ### TO BE COMPLETED (Tested)
-            config.window.iconbitmap(False, ImageTk.PhotoImage(Image.open(f"{config.PACKAGE_PATH}/assets/images/avatars/RTSAI_avatar.png")))
+            config.window.iconbitmap(False, ImageTk.PhotoImage(Image.open(
+                os.path.join(config.PACKAGE_PATH, "assets", "images", "avatars", "RTSAI_avatar.png"))))
         config.window.geometry(f"{UI_config.window_width}x{UI_config.window_height}")
         config.window.maxsize(UI_config.window_width_max, UI_config.window_height_max)
         config.window.minsize(UI_config.window_width_min, UI_config.window_height_min)
