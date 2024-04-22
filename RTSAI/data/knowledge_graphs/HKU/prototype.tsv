@@ -2,3 +2,4 @@ is_abbreviation	is_a	$RELATIONSHIP	https://en.wikipedia.org/wiki/University_of_H
 The University of Hong Kong	is_a	$OBJECT	https://en.wikipedia.org/wiki/University_of_Hong_Kong
 is_a	is_a	$RELATIONSHIP	None
 University	is_a	$OBJECT	https://en.wikipedia.org/wiki/University_of_Hong_Kong
+
