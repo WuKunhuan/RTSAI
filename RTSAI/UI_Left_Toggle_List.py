@@ -7,6 +7,7 @@ import RTSAI.UI_components as UI_components
 from RTSAI.tool_funcs import show_popup_message, new_name_check, color_tuple_to_rgb
 from RTSAI.environment import create_environment, copy_environment, environment_add_knowledge_graphs, environment_rename_knowledge_graph
 from RTSAI.knowledge_graph import create_knowledge_graph, copy_knowledge_graph
+from RTSAI.UI_Editor_tabs import show_editor_tabbar, configure_editor
 
 debug = 1
 
@@ -353,10 +354,18 @@ class Left_Panel_Toggle_Item(tkinter.Frame):
         
         self.menu_open = False
 
+    def open_editor(self, tab_type, tab_value, tab_display_name): 
+        UI_components.editor_states.append([tab_type, tab_value, tab_display_name])
+        if (debug == 0): print (f"Tab '{tab_value}' ({tab_type}) opened. ")
+        UI_components.current_editor_id = len(UI_components.editor_states) - 1
+        UI_components.tabbar_shown = False; show_editor_tabbar()
+        UI_components.editor_updated = False; configure_editor()
+
     def click_toggle_item(self, event): 
         '''
         Click the item and change the focus
         '''
+
 
         self.toggle_info[2][0] = not self.toggle_info[2][0]
         '''
@@ -371,7 +380,12 @@ class Left_Panel_Toggle_Item(tkinter.Frame):
         self.focus_set()
         if (UI_components.toggle_item_on_focus == self.toggle_info[1]): 
             UI_components.toggle_list_created = False; create_toggle_list()
-            self.operate_toggle_item(event)
+            if ((   self.toggle_info[1].startswith("environments") and self.toggle_info[1].count('/') == 2 or 
+                    self.toggle_info[1].startswith("knowledge_graphs") and self.toggle_info[1].count('/') == 1)): 
+                # open knowledge graph editor if it is a knowledge graph, and not opened
+                self.open_editor("KNOWLEDGE_GRAPH", self.toggle_info[1], f"Knowledge Graph: {self.toggle_info[1].split('/')[-1]}")
+            else: 
+                self.operate_toggle_item(event)
         else: 
             UI_components.toggle_item_on_focus = self.toggle_info[1]
             UI_components.toggle_list_created = False; create_toggle_list()

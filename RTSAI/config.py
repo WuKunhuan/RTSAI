@@ -20,10 +20,12 @@ if (debug == 0):
     print (PACKAGE_PATH)
 if (operating_system() == "MacOS"):
     EXECUTABLE_PATH = sys.executable[::-1][sys.executable[::-1].index('/')+1:][::-1]
+    PATH_SEPARATOR = '/'
     if (debug == 1): 
         print (f"Executable path: {EXECUTABLE_PATH}")
 else: 
     EXECUTABLE_PATH = sys.executable[::-1]
+    PATH_SEPARATOR = '\\'
 
 ASSETS_PATH = os.path.join(PACKAGE_PATH, 'assets')
 DATA_PATH = os.path.join(PACKAGE_PATH, 'data')

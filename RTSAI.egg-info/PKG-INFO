@@ -1,7 +1,7 @@
 Metadata-Version: 2.1
 Name: RTSAI
 Version: 0.1.8
-Summary: The recreated RTSAI package with pip install. 
+Summary: The RTSAI package with its terminal and GUI implemented. 
 Home-page: https://github.com/WuKunhuan/RTSAI
 Author: wukunhuan
 Author-email: u3577163@connect.hku.hk
@@ -11,4 +11,4 @@ Description-Content-Type: text/x-rst
 Requires-Dist: pyautogui
 Requires-Dist: validators
 
-The recreated RTSAI package with pip install. 
+The RTSAI package with its terminal and GUI implemented. 

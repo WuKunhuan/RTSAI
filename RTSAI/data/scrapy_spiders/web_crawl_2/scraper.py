@@ -8,19 +8,15 @@ def web_crawl_ID():
 
 class web_crawl_2_Spider(scrapy.Spider):
     name = 'web_crawl_2'
-    start_urls = ['https://hku.hk']
+    start_urls = ['https://wukunhuan.github.io/Web_Crawl_Tests/hku_vision_mission.html']
 
     def parse(self, response):
         if response.status == 200: 
-            print  ("web crawl successful")
-            with open(os.path.join("/Users/abc/Desktop/RTSAI/RTSAI/data/scrapy_spiders/web_crawl_2", f"response_{web_crawl_ID()}.html"), 'w', encoding='utf-8') as response_file:
+            with open(os.path.join("/Users/abc/Desktop/[HOLD]/RTSAI/RTSAI/data/scrapy_spiders/web_crawl_2", f"response_{web_crawl_ID()}.html"), 'w', encoding='utf-8') as response_file:
                 response_file.write(response.text)
         else: 
-            print  ("web crawl failed")
-            html_status_filename = os.path.join("/Users/abc/Desktop/RTSAI/RTSAI/data/scrapy_spiders/web_crawl_2", "html_status_code.txt")
-            if (not os.path.exists(html_status_filename)): 
-                with open(html_status_filename, 'w') as html_status_file: 
-                    html_status_file.write(str(response.status))
+            with open(os.path.join("/Users/abc/Desktop/[HOLD]/RTSAI/RTSAI/data/scrapy_spiders/web_crawl_2", "html_status_code.txt"), 'r+') as html_status_file: 
+                html_status_file.write(str(response.status))
             self.log(f"Request to {response.url} failed with status code {response.status}")
 
         # TO BE COMPLETED
